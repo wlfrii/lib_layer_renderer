@@ -8,7 +8,7 @@
 LayerGripper::LayerGripper(uint16_t width, uint16_t height, LayerType type,
                            LayerRenderMode mode, glm::vec3 color,
                            GripperType gtype)
-    : LayerModel(width, height, type, mode, color)
+    : LayerModelBase(width, height, type, mode, color)
     , gripper_type(gtype)
     , _vavbo_active(nullptr)
     , _vert_num_active(0)
@@ -74,11 +74,17 @@ void LayerGripper::draw(bool is_right)
 }
 
 
+void LayerGripper::setAngle(float angle)
+{
+    _active_part.angle = angle;
+}
+
+
 bool LayerGripper::loadModel()
 {
     Vertices data[2];
     uint8_t part_num = 0;
-    CylinderProperty prop;
+    LayerCylinderProperty prop;
     switch (gripper_type) {
     case GRIPPER_NEEDLE_HOLDER_SIMPLIFIED:
         if(!STLReader::getInstance()->read(STL_NH_0_SIMPLIFIED, data[0]))
@@ -90,7 +96,7 @@ bool LayerGripper::loadModel()
         part_num = 3;
         // Lengthen cylinder as tool body
         //prop = {3.05, 2.85, glm::vec3(0.f,0.f,-1.9f)};
-        prop = {3.7, 8, glm::vec3(0.f, 0.f, -1.9+1.42 - 4.0)};
+        prop = { glm::vec3(0.f, 0.f, -1.9+1.42 - 4.0), 8, 3.7 };
         break;
     case GRIPPER_NEEDLE_HOLDER:
         if(!STLReader::getInstance()->read(STL_NH_0, data[0]))
@@ -101,7 +107,7 @@ bool LayerGripper::loadModel()
         _active_part.axis = glm::vec3(1.f, 0.f, 0.f);
         part_num = 3;
         // Lengthen cylinder as tool body
-        prop = {3.05, 3.0, glm::vec3(0.f,0.f,-1.5f)};
+        prop = { glm::vec3(0.f,0.f,-3.1f), 3.05, 3.0 };
         break;
     default:
         return false;
@@ -130,7 +136,7 @@ bool LayerGripper::loadModel()
     // Bind the ignored part
     if(part_num >= 3){
         int num = (int)prop.radius*3.1415926*2 / 1.f;
-        CylinderGenerator cg(num, prop.radius, prop.len, prop.origin);
+        CylinderGenerator cg(num, prop.origin, prop.length, prop.radius);
         auto data = cg.result();
 
         _vavbo_ignore = new gl_util::VAVBEBO();

@@ -5,12 +5,12 @@
 
 LayerCylinder::LayerCylinder(uint16_t width, uint16_t height, LayerType type,
                              LayerRenderMode mode, glm::vec3 color,
-                             const CylinderProperty& prop)
-    : LayerModel(width, height, type, mode, color)
+                             const LayerCylinderProperty &prop)
+    : LayerModelBase(width, height, type, mode, color)
 {
     // Initlize vavbebo
-    int num = (int)prop.radius*3.1415926*2 / 1.f;
-    CylinderGenerator cg(num, prop.radius, prop.len, prop.origin);
+    int num = (int)prop.radius*3.1415926*2 / 0.5f;
+    CylinderGenerator cg(num, prop.origin, prop.length, prop.radius);
     auto data = cg.result();
 
     _vavbebo = new gl_util::VAVBEBO();

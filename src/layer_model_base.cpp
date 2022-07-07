@@ -1,8 +1,12 @@
-#include "layer_model.h"
+#include "layer_model_base.h"
 #include <gl_util.h>
 #include <global.h>
 
-LayerModel::LayerModel(uint16_t width, uint16_t height, LayerType type,
+glm::mat4 LayerModelBase::_projection = glm::mat4(1.0);
+glm::mat4 LayerModelBase::_view[LAYER_RENDER_3D] = { glm::mat4(1.0), glm::mat4(1.0) };
+
+
+LayerModelBase::LayerModelBase(uint16_t width, uint16_t height, LayerType type,
                        LayerRenderMode mode, glm::vec3 color)
     : Layer(width, height, type, mode)
     , _object_color(color)
@@ -20,13 +24,13 @@ LayerModel::LayerModel(uint16_t width, uint16_t height, LayerType type,
 }
 
 
-LayerModel::~LayerModel()
+LayerModelBase::~LayerModelBase()
 {
 
 }
 
 
-void LayerModel::draw(bool is_right)
+void LayerModelBase::draw(bool is_right)
 {
     _shader->use();
     _shader->setMat4f("projection", _projection);
@@ -40,19 +44,19 @@ void LayerModel::draw(bool is_right)
 }
 
 
-void LayerModel::setView(const glm::mat4& view, bool is_right)
-{
-    _view[is_right] = view;
-}
-
-
-void LayerModel::setModel(const glm::mat4& model)
+void LayerModelBase::setModel(const glm::mat4& model)
 {
     _model = model;
 }
 
 
-void LayerModel::setProjection(const glm::mat4& proj)
+void LayerModelBase::setView(const glm::mat4& view, bool is_right)
+{
+    _view[is_right] = view;
+}
+
+
+void LayerModelBase::setProjection(const glm::mat4& proj)
 {
     _projection = proj;
 }

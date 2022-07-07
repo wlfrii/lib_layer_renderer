@@ -27,6 +27,8 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${PATH_3RDPARTY}/glad/include>
         $<BUILD_INTERFACE:${PATH_3RDPARTY}/stb_image>
         $<BUILD_INTERFACE:${GL_UTIL_PATH}>
+        $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${lib_math_INCLUDE_DIRS}>
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
@@ -34,6 +36,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     glfw
     ${OpenCV_LIBS}
+    ${lib_math_LIBRARIES}
 )
 
 file(GLOB MODEL_STL ${CMAKE_CURRENT_SOURCE_DIR}/models/*.STL)

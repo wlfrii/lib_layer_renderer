@@ -1,6 +1,6 @@
 #ifndef LAYER_GRIPPER_H_LF
 #define LAYER_GRIPPER_H_LF
-#include "layer_model.h"
+#include "layer_model_base.h"
 
 class LayerCylinder;
 
@@ -14,14 +14,14 @@ enum GripperType
 };
 
 
-class LayerGripper : public LayerModel
+class LayerGripper : public LayerModelBase
 {
 public:
     LayerGripper(uint16_t width, uint16_t height, LayerType type,
                  LayerRenderMode mode, glm::vec3 color, GripperType gtype);
     ~LayerGripper();
 
-    inline void setAngle(float angle);
+    void setAngle(float angle);
 
 protected:
     void draw(bool is_right) override;
@@ -47,12 +47,6 @@ private:
     gl_util::VAVBEBO* _vavbo_ignore;
     size_t            _vert_num_ignore;
 };
-
-
-inline void LayerGripper::setAngle(float angle)
-{
-    _active_part.angle = angle;
-}
 
 
 #endif // LAYER_GRIPPER_H_LF

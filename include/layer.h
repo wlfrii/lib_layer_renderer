@@ -28,7 +28,8 @@ enum LayerType
 {
     LAYER_BACKGROUND = 0,
     LAYER_CYLINDER,
-    LAYER_GRIPPER_NH        // Needle holder
+    LAYER_GRIPPER_NH,        // Needle holder
+    LAYER_SEGMENT
 };
 
 
