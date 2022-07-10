@@ -8,6 +8,7 @@ glm::mat4 model = glm::mat4(1.000000,0.000000,0.000000,0.000000,
                   0.000000,-0.241922,-0.970296,0.000000,
                   0.000000,0.970296,-0.241922,0.000000,
                   0.000000,0.000000,57.500000,1.000000);
+float theta = 0.7;
 
 void keyboardControlModel(GLFWwindow* window);
 
@@ -30,7 +31,6 @@ int main()
 #elif IDX == 2
     printf("Test layerSegment and layerCylinder\n");
     float len = 10;
-    float theta = 0.7;
     float delta = 0.2;
     float radius = 2;
     LayerSegment layer_obj(width, height, LAYER_SEGMENT, LAYER_RENDER_2D,
@@ -45,7 +45,6 @@ int main()
     LayerModelBase::setView(view, 0);
     view[3][0] -= 4.f;
     LayerModelBase::setView(view, 1);
-
     gl_util::Projection gl_proj(1120, 960, 540, width, height, 0.2, 150);
     LayerModelBase::setProjection(gl_proj.mat4());
 
@@ -54,13 +53,14 @@ int main()
         window.clear();
         glClearDepth(1.0);
 
+        layer_obj.setProperty({len, theta, delta, radius});
         layer_obj.setModel(model);
         layer_obj.render(LAYER_RENDER_2D);
+        pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
         layer_obj2.setModel(model*cvt2GlmMat4(pose));
         layer_obj2.render(LAYER_RENDER_2D);
         window.refresh();
     }
-
     window.release();
 
     return 0;
@@ -69,7 +69,6 @@ int main()
 
 void keyboardControlModel(GLFWwindow* window)
 {
-    static float angle = 0;
     float step = 0.5;
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
@@ -112,13 +111,13 @@ void keyboardControlModel(GLFWwindow* window)
         model = glm::rotate(model, glm::radians(2.f), glm::vec3(0.f, 0.f, 1.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_EQUAL) == GLFW_PRESS){
-        angle += 0.05;
+        theta += 0.02;
     }
     else if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS){
-        angle -= 0.05;
+        theta -= 0.02;
     }
     else if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
         gl_util::print("Model", model);
     }
-    angle = std::fminf(std::fmaxf(angle, 0), M_PI/4.f);
+    theta = std::fminf(std::fmaxf(theta, 0), M_PI/2.f);
 }

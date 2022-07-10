@@ -17,6 +17,8 @@ public:
                  LayerRenderMode mode, glm::vec3 color,
                  const LayerSegmentProperty& prop);
     ~LayerSegment();
+
+    void setProperty(const LayerSegmentProperty& prop);
 };
 
 #endif // LAYER_CYLINDER_H_LF

@@ -4,6 +4,7 @@
 #include <memory>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
+#include "layer_util.h"
 
 namespace gl_util{
     class Shader;
