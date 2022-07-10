@@ -5,10 +5,10 @@
 #include <gl_util.h>
 #include <global.h>
 
-LayerGripper::LayerGripper(uint16_t width, uint16_t height, LayerType type,
+LayerGripper::LayerGripper(uint16_t width, uint16_t height,
                            LayerRenderMode mode, glm::vec3 color,
                            GripperType gtype)
-    : LayerModelBase(width, height, type, mode, color)
+    : LayerModel(width, height, mode, color)
     , gripper_type(gtype)
     , _vavbo_active(nullptr)
     , _vert_num_active(0)

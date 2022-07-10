@@ -1,8 +1,7 @@
 #ifndef LAYER_CYLINDER_H_LF
 #define LAYER_CYLINDER_H_LF
-#include "layer_model_base.h"
+#include "layer_model.h"
 
-class LayerGripper;
 
 struct LayerCylinderProperty
 {
@@ -19,14 +18,14 @@ struct LayerCylinderProperty
 };
 
 
-class LayerCylinder : public LayerModelBase
+class LayerCylinder : public LayerModel
 {
-    friend LayerGripper;
 public:
-    LayerCylinder(uint16_t width, uint16_t height, LayerType type,
-                  LayerRenderMode mode, glm::vec3 color,
-                  const LayerCylinderProperty& prop);
+    LayerCylinder(uint16_t width, uint16_t height, LayerRenderMode mode,
+                  glm::vec3 color, const LayerCylinderProperty& prop);
     ~LayerCylinder();
+
+    void setProperty(const LayerCylinderProperty& prop);
 };
 
 #endif // LAYER_CYLINDER_H_LF

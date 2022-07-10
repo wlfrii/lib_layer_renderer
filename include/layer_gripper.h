@@ -1,6 +1,6 @@
 #ifndef LAYER_GRIPPER_H_LF
 #define LAYER_GRIPPER_H_LF
-#include "layer_model_base.h"
+#include "layer_model.h"
 
 class LayerCylinder;
 
@@ -14,11 +14,11 @@ enum GripperType
 };
 
 
-class LayerGripper : public LayerModelBase
+class LayerGripper : public LayerModel
 {
 public:
-    LayerGripper(uint16_t width, uint16_t height, LayerType type,
-                 LayerRenderMode mode, glm::vec3 color, GripperType gtype);
+    LayerGripper(uint16_t width, uint16_t height, LayerRenderMode mode,
+                 glm::vec3 color, GripperType gtype);
     ~LayerGripper();
 
     void setAngle(float angle);
@@ -35,9 +35,9 @@ public:
 
 private:
     struct {
-        float angle;
-        glm::vec3 p;
-        glm::vec3 axis;
+        float angle;        //!< The opening angle
+        glm::vec3 p;        //!< The position of rotation axis
+        glm::vec3 axis;     //!< The rotation axis
     }_active_part;
 
     gl_util::VAVBEBO* _vavbo_active;

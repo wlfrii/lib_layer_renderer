@@ -29,7 +29,7 @@ public:
 class LayerBackground : public Layer
 {
 public:
-    LayerBackground(uint16_t width, uint16_t height, LayerType type, LayerRenderMode mode);
+    LayerBackground(uint16_t width, uint16_t height, LayerRenderMode mode);
     ~LayerBackground();
 
     void updateData(const LayerBackgroundData *data);

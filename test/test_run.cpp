@@ -33,20 +33,20 @@ int main()
     float len = 10;
     float delta = 0.2;
     float radius = 2;
-    LayerSegment layer_obj(width, height, LAYER_SEGMENT, LAYER_RENDER_2D,
+    LayerSegment layer_obj(width, height, LAYER_RENDER_2D,
                            glm::vec3(1.0, 1.0, 0.0), {len, theta, delta, radius});
     mmath::Pose pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
-    LayerCylinder layer_obj2(width, height, LAYER_CYLINDER, LAYER_RENDER_2D,
+    LayerCylinder layer_obj2(width, height, LAYER_RENDER_2D,
                             glm::vec3(1.0, 0.0, 1.0), {glm::vec3(0,0,0), 10, 2});
 #endif
 
     glm::mat4 view = glm::rotate(glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
     view[3][0] += 2.f;
-    LayerModelBase::setView(view, 0);
+    LayerModel::setView(view, 0);
     view[3][0] -= 4.f;
-    LayerModelBase::setView(view, 1);
+    LayerModel::setView(view, 1);
     gl_util::Projection gl_proj(1120, 960, 540, width, height, 0.2, 150);
-    LayerModelBase::setProjection(gl_proj.mat4());
+    LayerModel::setProjection(gl_proj.mat4());
 
     while (!window.shouldClose()) {
         window.activate();

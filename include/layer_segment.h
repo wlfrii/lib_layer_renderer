@@ -1,6 +1,6 @@
 #ifndef LAYER_SEGMENT_H_LF
 #define LAYER_SEGMENT_H_LF
-#include "layer_model_base.h"
+#include "layer_model.h"
 
 struct LayerSegmentProperty
 {
@@ -10,12 +10,11 @@ struct LayerSegmentProperty
     float     radius;
 };
 
-class LayerSegment : public LayerModelBase
+class LayerSegment : public LayerModel
 {
 public:
-    LayerSegment(uint16_t width, uint16_t height, LayerType type,
-                 LayerRenderMode mode, glm::vec3 color,
-                 const LayerSegmentProperty& prop);
+    LayerSegment(uint16_t width, uint16_t height, LayerRenderMode mode,
+                 glm::vec3 color, const LayerSegmentProperty& prop);
     ~LayerSegment();
 
     void setProperty(const LayerSegmentProperty& prop);

@@ -61,6 +61,10 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
         }
         _vertices.insert(_vertices.end(), vertices.begin(), vertices.end());
     }
+    auto& c1 = circles[0];
+    auto& c2 = circles[circles.size() - 1];
+    _vertices.insert(_vertices.end(), c1.result().begin(), c1.result().end());
+    _vertices.insert(_vertices.end(), c2.result().begin(), c2.result().end());
 }
 
 

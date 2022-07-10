@@ -2,10 +2,9 @@
 #include <gl_util.h>
 
 
-Layer::Layer(uint16_t width, uint16_t height, LayerType type, LayerRenderMode mode)
+Layer::Layer(uint16_t width, uint16_t height, LayerRenderMode mode)
     : width(width)
     , height(height)
-    , type(type)
     , mode(mode)
     , _shader(nullptr)
     , _vavbebo(nullptr)
@@ -30,13 +29,13 @@ Layer::~Layer()
 }
 
 
-void Layer::render(LayerRenderMode mode)
+void Layer::render(LayerRenderID id)
 {
-    if(mode == LAYER_RENDER_LEFT){
+    if(id == LAYER_RENDER_LEFT){
         glViewport(0, 0, width, height);
         draw(LAYER_RENDER_LEFT);
     }
-    else if(mode == LAYER_RENDER_RIGHT){
+    else if(id == LAYER_RENDER_RIGHT){
         glViewport(0, 0, width, height);
         draw(LAYER_RENDER_RIGHT);
     }

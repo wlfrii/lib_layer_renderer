@@ -3,8 +3,8 @@
 #include <global.h>
 
 
-LayerBackground::LayerBackground(uint16_t width, uint16_t height, LayerType type, LayerRenderMode mode)
-    : Layer(width, height, type, mode)
+LayerBackground::LayerBackground(uint16_t width, uint16_t height, LayerRenderMode mode)
+    : Layer(width, height, mode)
     , _has_texture(false)
     , _has_texture_mask(false)
 {
@@ -49,7 +49,7 @@ void LayerBackground::updateData(const LayerBackgroundData* data)
     bindTexture(data->data[0], data->width, data->height,
             data->channels, 0);
 
-    if(data->mode == LAYER_RENDER_3D){
+    if(data->mode == LAYER_RENDER_STEREO){
         assert(data->data[1]);
         bindTexture(data->data[1], data->width, data->height, data->channels, 1);
     }
@@ -64,7 +64,7 @@ void LayerBackground::updateMask(const LayerBackgroundData* data)
     assert(data->data[0]);
     bindTextureMask(data->data[0], data->width, data->height, 0);
 
-    if(data->mode == LAYER_RENDER_3D){
+    if(data->mode == LAYER_RENDER_STEREO){
         assert(data->data[1]);
         bindTextureMask(data->data[1], data->width, data->height, 1);
     }
