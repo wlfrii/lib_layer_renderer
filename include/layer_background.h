@@ -7,19 +7,12 @@
 /**
  * @brief The LayerBackground Data
  */
-class LayerBackgroundData
+struct LayerBackgroundData
 {
-public:
-    LayerBackgroundData(LayerRenderMode mode)
-        : mode(mode) {}
-    ~LayerBackgroundData() {}
-
-    const LayerRenderMode mode;
-
-    unsigned char* data[LAYER_RENDER_3D];   //!< The stereo image data
-    uint16_t width;                         //!< The width of the image
-    uint16_t height;                        //!< The height of the image
-    uint8_t  channels;                      //!< The channels of the image
+    unsigned char* data[LAYER_RENDER_STEREO]; //!< The stereo image data
+    uint16_t width;                           //!< The width of the image
+    uint16_t height;                          //!< The height of the image
+    uint8_t  channels;                        //!< The channels of the image
 };
 
 
@@ -29,7 +22,7 @@ public:
 class LayerBackground : public Layer
 {
 public:
-    LayerBackground(LayerRenderMode mode);
+    LayerBackground();
     ~LayerBackground();
 
     void updateData(const LayerBackgroundData *data);
@@ -43,10 +36,8 @@ private:
                      bool is_right);
     void bindTextureMask(uint8_t *data, uint16_t w, uint16_t h, bool is_right);
 
-    bool   _has_texture;
-    GLuint _texture[LAYER_RENDER_3D];
-    bool   _has_texture_mask;
-    GLuint _texture_mask[LAYER_RENDER_3D];
+    GLuint _texture[LAYER_RENDER_STEREO];
+    GLuint _texture_mask[LAYER_RENDER_STEREO];
 };
 
 #endif // LAYER_BACKGROUND_H_LF

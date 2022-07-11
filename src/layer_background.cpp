@@ -3,10 +3,8 @@
 #include <global.h>
 
 
-LayerBackground::LayerBackground(LayerRenderMode mode)
-    : Layer(mode, LAYER_BACKGROUND)
-    , _has_texture(false)
-    , _has_texture_mask(false)
+LayerBackground::LayerBackground()
+    : Layer(LAYER_BACKGROUND)
 {
     _shader = new gl_util::Shader();
     bool flag = _shader->load("./shaders/texture.vs", "./shaders/texture.fs");
@@ -32,6 +30,11 @@ LayerBackground::LayerBackground(LayerRenderMode mode)
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    for(int i = 0; i < LAYER_RENDER_STEREO; i++){
+        glGenTextures(1, &_texture[i]);
+        glGenTextures(1, &_texture_mask[i]);
+    }
 }
 
 
@@ -43,39 +46,29 @@ LayerBackground::~LayerBackground()
 
 void LayerBackground::updateData(const LayerBackgroundData* data)
 {
-    assert(data->mode >= this->mode);
-
-    assert(data->data[0]);
-    bindTexture(data->data[0], data->width, data->height,
-            data->channels, 0);
-
-    if(data->mode == LAYER_RENDER_3D){
-        assert(data->data[1]);
-        bindTexture(data->data[1], data->width, data->height, data->channels, 1);
+    for(int i = 0; i < LAYER_RENDER_STEREO; i++){
+        if(data->data[i]){
+            bindTexture(data->data[i], data->width, data->height,
+                    data->channels, i);
+        }
     }
-    _has_texture = true;
 }
 
 
 void LayerBackground::updateMask(const LayerBackgroundData* data)
 {
-    assert(data->mode >= this->mode && data->channels == 1);
+    if(data->channels != 1) std::abort();
 
-    if (!data->data[0]) std::abort();
-    bindTextureMask(data->data[0], data->width, data->height, 0);
-
-    if(data->mode == LAYER_RENDER_3D){
-        assert(data->data[1]);
-        bindTextureMask(data->data[1], data->width, data->height, 1);
+    for(int i = 0; i < LAYER_RENDER_STEREO; i++){
+        if(data->data[i]){
+            bindTextureMask(data->data[i], data->width, data->height, i);
+        }
     }
-    _has_texture_mask = true;
 }
 
 
 void LayerBackground::draw(bool is_right)
 {
-    if(!_has_texture) return;
-
     _shader->use();
     _vavbebo->bindVertexArray();
     glActiveTexture(GL_TEXTURE0);
@@ -89,9 +82,6 @@ void LayerBackground::draw(bool is_right)
 void LayerBackground::bindTexture(const uint8_t *data, uint16_t w, uint16_t h,
                                   uint8_t c, bool is_right)
 {
-    if(!_has_texture){
-        glGenTextures(1, &_texture[is_right]);
-    }
     glBindTexture(GL_TEXTURE_2D, _texture[is_right]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
@@ -109,9 +99,6 @@ void LayerBackground::bindTexture(const uint8_t *data, uint16_t w, uint16_t h,
 void LayerBackground::bindTextureMask(uint8_t *data, uint16_t w, uint16_t h,
                                   bool is_right)
 {
-    if(!_has_texture_mask){
-        glGenTextures(1, &_texture_mask[is_right]);
-    }
     glBindTexture(GL_TEXTURE_2D, _texture_mask[is_right]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
