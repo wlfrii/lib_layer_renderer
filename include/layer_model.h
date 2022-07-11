@@ -5,8 +5,7 @@
 class LayerModel : public Layer
 {
 protected:
-    LayerModel(uint16_t width, uint16_t height, LayerRenderMode mode,
-               LayerType type, glm::vec3 color);
+    LayerModel(LayerRenderMode mode, LayerType type, glm::vec3 color);
 
 public:
     virtual ~LayerModel();

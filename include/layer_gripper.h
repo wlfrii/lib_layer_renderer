@@ -17,8 +17,7 @@ enum GripperType
 class LayerGripper : public LayerModel
 {
 public:
-    LayerGripper(uint16_t width, uint16_t height, LayerRenderMode mode,
-                 glm::vec3 color, GripperType gtype);
+    LayerGripper(LayerRenderMode mode, glm::vec3 color, GripperType gtype);
     ~LayerGripper();
 
     void setAngle(float angle);

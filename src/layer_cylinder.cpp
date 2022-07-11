@@ -3,10 +3,9 @@
 #include <gl_util.h>
 #include <global.h>
 
-LayerCylinder::LayerCylinder(uint16_t width, uint16_t height,
-                             LayerRenderMode mode, glm::vec3 color,
+LayerCylinder::LayerCylinder(LayerRenderMode mode, glm::vec3 color,
                              const LayerCylinderProperty &prop)
-    : LayerModel(width, height, mode, LAYER_CYLINDER, color)
+    : LayerModel(mode, LAYER_CYLINDER, color)
 {
     _vavbebo = new gl_util::VAVBEBO();
     setProperty(prop);

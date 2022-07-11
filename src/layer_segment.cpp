@@ -5,10 +5,9 @@
 #include <gl_util.h>
 
 
-LayerSegment::LayerSegment(uint16_t width, uint16_t height,
-                           LayerRenderMode mode, glm::vec3 color,
+LayerSegment::LayerSegment(LayerRenderMode mode, glm::vec3 color,
                            const LayerSegmentProperty &prop)
-    : LayerModel(width, height, mode, LAYER_SEGMENT, color)
+    : LayerModel(mode, LAYER_SEGMENT, color)
 {
     _vavbebo = new gl_util::VAVBEBO();
     setProperty(prop);

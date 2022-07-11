@@ -21,8 +21,8 @@ struct LayerCylinderProperty
 class LayerCylinder : public LayerModel
 {
 public:
-    LayerCylinder(uint16_t width, uint16_t height, LayerRenderMode mode,
-                  glm::vec3 color, const LayerCylinderProperty& prop);
+    LayerCylinder(LayerRenderMode mode, glm::vec3 color,
+                  const LayerCylinderProperty& prop);
     ~LayerCylinder();
 
     void setProperty(const LayerCylinderProperty& prop);

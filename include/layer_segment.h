@@ -13,7 +13,7 @@ struct LayerSegmentProperty
 class LayerSegment : public LayerModel
 {
 public:
-    LayerSegment(uint16_t width, uint16_t height, LayerRenderMode mode,
+    LayerSegment(LayerRenderMode mode,
                  glm::vec3 color, const LayerSegmentProperty& prop);
     ~LayerSegment();
 

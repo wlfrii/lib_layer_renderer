@@ -3,8 +3,8 @@
 #include <global.h>
 
 
-LayerBackground::LayerBackground(uint16_t width, uint16_t height, LayerRenderMode mode)
-    : Layer(width, height, mode, LAYER_BACKGROUND)
+LayerBackground::LayerBackground(LayerRenderMode mode)
+    : Layer(mode, LAYER_BACKGROUND)
     , _has_texture(false)
     , _has_texture_mask(false)
 {

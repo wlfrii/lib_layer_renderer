@@ -11,6 +11,7 @@ namespace gl_util{
     class VAVBEBO;
 }
 
+
 /**
  * @brief Specify the render mode, 2D/3D
  */
@@ -19,6 +20,7 @@ enum LayerRenderMode
     LAYER_RENDER_2D   = 0,
     LAYER_RENDER_3D   = 2
 };
+
 
 /**
  * @brief Specify the render index, Left/Right for 2D mode or Stereo 3D mode.
@@ -29,6 +31,7 @@ enum LayerRenderID
     LAYER_RENDER_RIGHT  = 1,
     LAYER_RENDER_STEREO = 2
 };
+
 
 /**
  * @brief The Layer Type enum
@@ -44,6 +47,23 @@ enum LayerType
 
 
 /**
+ * @brief The LayerViewRect struct
+ */
+struct LayerViewPort
+{
+    explicit LayerViewPort(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+        : x(x), y(y), width(width), height(height) {}
+    explicit LayerViewPort(uint16_t width, uint16_t height)
+        : x(0), y(0), width(width), height(height) {}
+
+    uint16_t x;         //!< Viewport x
+    uint16_t y;         //!< Viewport y
+    uint16_t width;     //!< Viewport width
+    uint16_t height;    //!< Viewport height
+};
+
+
+/**
  * @brief A base class designed for OpenGL rendering
  */
 class Layer
@@ -51,10 +71,11 @@ class Layer
 protected:
     /**
      * @brief Layer base class's constructor
-     * @param width  The width of layer view
-     * @param height  The height of layer view
+     * @param mode  Specify 2D/3D mode
+     * @param type  Store the LayerType
+     *
      */
-    Layer(uint16_t width, uint16_t height, LayerRenderMode mode, LayerType type);
+    Layer(LayerRenderMode mode, LayerType type);
 
 public:
     virtual ~Layer();
@@ -62,10 +83,8 @@ public:
     /**
      * @brief Render current layer
      */
-    virtual void render(LayerRenderID id = LAYER_RENDER_LEFT);
+    virtual void render(const LayerViewPort &port, LayerRenderID id = LAYER_RENDER_LEFT);
 
-    const uint16_t        width;     //!< Viewport width
-    const uint16_t        height;    //!< Viewport height
     const LayerRenderMode mode;
     const LayerType       type;
 
