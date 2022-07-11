@@ -14,16 +14,33 @@ namespace gl_util{
 /**
  * @brief Specify the render mode, 2D/3D
  */
-using LayerRenderMode = unsigned char;
-constexpr LayerRenderMode LAYER_RENDER_2D   = 0;
-constexpr LayerRenderMode LAYER_RENDER_3D   = 0;
+enum LayerRenderMode
+{
+    LAYER_RENDER_2D   = 0,
+    LAYER_RENDER_3D   = 2
+};
+
 /**
  * @brief Specify the render index, Left/Right for 2D mode or Stereo 3D mode.
  */
-using LayerRenderID = unsigned char;
-constexpr LayerRenderID LAYER_RENDER_LEFT   = 0;
-constexpr LayerRenderID LAYER_RENDER_RIGHT  = 1;
-constexpr LayerRenderID LAYER_RENDER_STEREO = 2;
+enum LayerRenderID
+{
+    LAYER_RENDER_LEFT   = 0,
+    LAYER_RENDER_RIGHT  = 1,
+    LAYER_RENDER_STEREO = 2
+};
+
+/**
+ * @brief The Layer Type enum
+ */
+enum LayerType
+{
+    LAYER_BACKGROUND,
+    LAYER_CYLINDER,
+    LAYER_SEGMENT,
+    LAYER_GRIPPER_NH,        // Needle holder
+    LAYER_UNKNOWN
+};
 
 
 /**
@@ -37,7 +54,7 @@ protected:
      * @param width  The width of layer view
      * @param height  The height of layer view
      */
-    Layer(uint16_t width, uint16_t height, LayerRenderMode mode);
+    Layer(uint16_t width, uint16_t height, LayerRenderMode mode, LayerType type);
 
 public:
     virtual ~Layer();
@@ -50,6 +67,7 @@ public:
     const uint16_t        width;     //!< Viewport width
     const uint16_t        height;    //!< Viewport height
     const LayerRenderMode mode;
+    const LayerType       type;
 
 protected:
     /**

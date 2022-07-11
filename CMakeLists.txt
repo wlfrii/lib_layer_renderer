@@ -22,6 +22,7 @@ add_library(${PROJECT_NAME} STATIC
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${PATH_3RDPARTY}>
         $<BUILD_INTERFACE:${PATH_3RDPARTY}/glm>
         $<BUILD_INTERFACE:${PATH_3RDPARTY}/glad/include>
@@ -35,7 +36,6 @@ target_include_directories(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     glfw
-    ${OpenCV_LIBS}
     ${lib_math_LIBRARIES}
 )
 
@@ -49,11 +49,6 @@ file(COPY
     ${SHADERS}
     DESTINATION ${CMAKE_BINARY_DIR}/shaders/
 )
-
-# Build the library firstc
-# add_subdirectory(src)
-# Build the examples
-# add_subdirectory(examples)
 
 
 # Build the test

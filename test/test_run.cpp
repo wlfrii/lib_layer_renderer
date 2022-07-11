@@ -1,8 +1,9 @@
 #include <layer_cylinder.h>
 #include <layer_segment.h>
-#include <layer_util.h>
+#include <layer_background.h>
 #include <gl_util.h>
 #include <lib_math/lib_math.h>
+#include <opencv2/opencv.hpp>
 
 glm::mat4 model = glm::mat4(1.000000,0.000000,0.000000,0.000000,
                   0.000000,-0.241922,-0.970296,0.000000,
@@ -20,6 +21,7 @@ int main()
     gl_util::Window window(width, height);
     window.enableDepthTest();
     window.setKeyboardEventCallBack(keyboardControlModel);
+
 #if IDX == 0
     printf("Test layerCylinder\n");
     LayerCylinder layer_obj(width, height, LAYER_CYLINDER, LAYER_RENDER_2D,
@@ -48,17 +50,37 @@ int main()
     gl_util::Projection gl_proj(1120, 960, 540, width, height, 0.2, 150);
     LayerModel::setProjection(gl_proj.mat4());
 
+    // Add background
+    std::string name = "../data/sequences2/frame_0001.png";
+    cv::Mat image = cv::imread(name);
+    cv::resize(image, image, cv::Size(3840, 1080));
+    cv::Mat left = image.colRange(0, 1920).clone();
+    cv::Mat right = image.colRange(1920, 3840).clone();
+    cv::cvtColor(left, left, cv::COLOR_BGR2RGB);
+    cv::cvtColor(right, right, cv::COLOR_BGR2RGB);
+    LayerBackground layer_bg = LayerBackground(width, height, LAYER_RENDER_2D);
+    LayerBackgroundData layer_bg_data(LAYER_RENDER_2D);
+    layer_bg_data.data[0] = left.data;
+    //layer_bg_data.data[1] = r_temp.data;
+    layer_bg_data.width = left.cols;
+    layer_bg_data.height = left.rows;
+    layer_bg_data.channels = left.channels();
+    layer_bg.updateData(&layer_bg_data);
+
+
     while (!window.shouldClose()) {
         window.activate();
         window.clear();
         glClearDepth(1.0);
 
+        layer_bg.render(LAYER_RENDER_LEFT);
+
         layer_obj.setProperty({len, theta, delta, radius});
         layer_obj.setModel(model);
-        layer_obj.render(LAYER_RENDER_2D);
+        layer_obj.render(LAYER_RENDER_LEFT);
         pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
         layer_obj2.setModel(model*cvt2GlmMat4(pose));
-        layer_obj2.render(LAYER_RENDER_2D);
+        layer_obj2.render(LAYER_RENDER_LEFT);
         window.refresh();
     }
     window.release();

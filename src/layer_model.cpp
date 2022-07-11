@@ -7,8 +7,8 @@ glm::mat4 LayerModel::_view[LAYER_RENDER_STEREO] = { glm::mat4(1.0), glm::mat4(1
 
 
 LayerModel::LayerModel(uint16_t width, uint16_t height, LayerRenderMode mode,
-                       glm::vec3 color)
-    : Layer(width, height, mode)
+                       LayerType type, glm::vec3 color)
+    : Layer(width, height, mode, type)
     , _object_color(color)
     , _light_color(glm::vec3(1.f, 1.f, 1.f))
     , _light_pos(glm::vec3(0.f, -50.f, 0.f))

@@ -19,7 +19,7 @@ public:
     unsigned char* data[LAYER_RENDER_3D];   //!< The stereo image data
     uint16_t width;                         //!< The width of the image
     uint16_t height;                        //!< The height of the image
-    uint16_t channels;                      //!< The channels of the image
+    uint8_t  channels;                      //!< The channels of the image
 };
 
 
@@ -39,7 +39,7 @@ protected:
     void draw(bool is_right) override;
 
 private:
-    void bindTexture(uint8_t *data, uint16_t w, uint16_t h, uint16_t c,
+    void bindTexture(const uint8_t *data, uint16_t w, uint16_t h, uint8_t c,
                      bool is_right);
     void bindTextureMask(uint8_t *data, uint16_t w, uint16_t h, bool is_right);
 

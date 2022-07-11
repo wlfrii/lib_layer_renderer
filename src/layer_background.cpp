@@ -4,7 +4,7 @@
 
 
 LayerBackground::LayerBackground(uint16_t width, uint16_t height, LayerRenderMode mode)
-    : Layer(width, height, mode)
+    : Layer(width, height, mode, LAYER_BACKGROUND)
     , _has_texture(false)
     , _has_texture_mask(false)
 {
@@ -43,13 +43,13 @@ LayerBackground::~LayerBackground()
 
 void LayerBackground::updateData(const LayerBackgroundData* data)
 {
-    assert(data->mode == this->mode);
+    assert(data->mode >= this->mode);
 
     assert(data->data[0]);
     bindTexture(data->data[0], data->width, data->height,
             data->channels, 0);
 
-    if(data->mode == LAYER_RENDER_STEREO){
+    if(data->mode == LAYER_RENDER_3D){
         assert(data->data[1]);
         bindTexture(data->data[1], data->width, data->height, data->channels, 1);
     }
@@ -59,12 +59,12 @@ void LayerBackground::updateData(const LayerBackgroundData* data)
 
 void LayerBackground::updateMask(const LayerBackgroundData* data)
 {
-    assert(data->mode == this->mode && data->channels == 1);
+    assert(data->mode >= this->mode && data->channels == 1);
 
-    assert(data->data[0]);
+    if (!data->data[0]) std::abort();
     bindTextureMask(data->data[0], data->width, data->height, 0);
 
-    if(data->mode == LAYER_RENDER_STEREO){
+    if(data->mode == LAYER_RENDER_3D){
         assert(data->data[1]);
         bindTextureMask(data->data[1], data->width, data->height, 1);
     }
@@ -74,7 +74,7 @@ void LayerBackground::updateMask(const LayerBackgroundData* data)
 
 void LayerBackground::draw(bool is_right)
 {
-    assert(_has_texture);
+    if(!_has_texture) return;
 
     _shader->use();
     _vavbebo->bindVertexArray();
@@ -86,8 +86,8 @@ void LayerBackground::draw(bool is_right)
 }
 
 
-void LayerBackground::bindTexture(uint8_t *data, uint16_t w, uint16_t h,
-                                  uint16_t c, bool is_right)
+void LayerBackground::bindTexture(const uint8_t *data, uint16_t w, uint16_t h,
+                                  uint8_t c, bool is_right)
 {
     if(!_has_texture){
         glGenTextures(1, &_texture[is_right]);
@@ -99,7 +99,7 @@ void LayerBackground::bindTexture(uint8_t *data, uint16_t w, uint16_t h,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     GLenum fmt = GL_RGB;
-    if(c == 4) fmt = GL_RGBA;
+    if(c == 4){ fmt = GL_RGBA; }
 
     glTexImage2D(GL_TEXTURE_2D, 0, fmt, w, h, 0, fmt, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
