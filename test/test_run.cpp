@@ -138,7 +138,7 @@ void keyboardControlModel(GLFWwindow* window)
     else if (glfwGetKey(window, GLFW_KEY_MINUS) == GLFW_PRESS){
         theta -= 0.02;
     }
-    else if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
+    else if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
         gl_util::print("Model", model);
     }
     theta = std::fminf(std::fmaxf(theta, 0), M_PI/2.f);
