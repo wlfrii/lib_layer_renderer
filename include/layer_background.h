@@ -9,6 +9,11 @@
  */
 struct LayerBackgroundData
 {
+    LayerBackgroundData() : width(0), height(0), channels(0)
+    {
+        data[LAYER_RENDER_LEFT] = nullptr;
+        data[LAYER_RENDER_RIGHT] = nullptr;
+    }
     unsigned char* data[LAYER_RENDER_STEREO]; //!< The stereo image data
     uint16_t width;                           //!< The width of the image
     uint16_t height;                          //!< The height of the image

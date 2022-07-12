@@ -22,24 +22,20 @@ int main()
     window.enableDepthTest();
     window.setKeyboardEventCallBack(keyboardControlModel);
 
-#if IDX == 0
-    printf("Test layerCylinder\n");
-    LayerCylinder layer_obj(width, height, LAYER_CYLINDER, LAYER_RENDER_2D,
-                            glm::vec3(1.0, 1.0, 0.0), {glm::vec3(0,0,0), 10, 2});
-#elif IDX == 1
-    printf("Test layerSegment\n");
-    LayerSegment layer_obj(width, height, LAYER_SEGMENT, LAYER_RENDER_2D,
-                           glm::vec3(1.0, 1.0, 0.0), {10, 0.7, 0, 2});
-#elif IDX == 2
-    printf("Test layerSegment and layerCylinder\n");
     float len = 10;
     float delta = 0.2;
     float radius = 2;
-    LayerSegment layer_obj(width, height, LAYER_RENDER_2D,
-                           glm::vec3(1.0, 1.0, 0.0), {len, theta, delta, radius});
+#if IDX == 0
+    printf("Test layerCylinder\n");
+    LayerCylinder layer_obj2(10, 2, glm::vec3(1.0, 0.0, 1.0));
+#elif IDX == 1
+    printf("Test layerSegment\n");
+    LayerSegment layer_obj(len, theta, delta, radius, glm::vec3(1.0, 1.0, 0.0));
+#elif IDX == 2
+    printf("Test layerSegment and layerCylinder\n");
+    LayerSegment layer_obj(len, theta, delta, radius, glm::vec3(1.0, 1.0, 0.0));
     mmath::Pose pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
-    LayerCylinder layer_obj2(width, height, LAYER_RENDER_2D,
-                            glm::vec3(1.0, 0.0, 1.0), {glm::vec3(0,0,0), 10, 2});
+    LayerCylinder layer_obj2(len, radius, glm::vec3(1.0, 0.0, 1.0));
 #endif
 
     glm::mat4 view = glm::rotate(glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
@@ -50,6 +46,8 @@ int main()
     gl_util::Projection gl_proj(1120, 960, 540, width, height, 0.2, 150);
     LayerModel::setProjection(gl_proj.mat4());
 
+    LayerViewPort viewport(width, height);
+
     // Add background
     std::string name = "../data/sequences2/frame_0001.png";
     cv::Mat image = cv::imread(name);
@@ -58,29 +56,31 @@ int main()
     cv::Mat right = image.colRange(1920, 3840).clone();
     cv::cvtColor(left, left, cv::COLOR_BGR2RGB);
     cv::cvtColor(right, right, cv::COLOR_BGR2RGB);
-    LayerBackground layer_bg = LayerBackground(width, height, LAYER_RENDER_2D);
-    LayerBackgroundData layer_bg_data(LAYER_RENDER_2D);
+    LayerBackground layer_bg = LayerBackground();
+    LayerBackgroundData layer_bg_data;
     layer_bg_data.data[0] = left.data;
-    //layer_bg_data.data[1] = r_temp.data;
+    layer_bg_data.data[1] = right.data;
     layer_bg_data.width = left.cols;
     layer_bg_data.height = left.rows;
     layer_bg_data.channels = left.channels();
     layer_bg.updateData(&layer_bg_data);
+    printf("left.data:%p, bg.data:%p\n", left.data, layer_bg_data.data[0]);
+    printf("right.data:%p, bg.data:%p\n", right.data, layer_bg_data.data[1]);
 
-
+    auto mode = LAYER_RENDER_STEREO;
     while (!window.shouldClose()) {
         window.activate();
         window.clear();
         glClearDepth(1.0);
 
-        layer_bg.render(LAYER_RENDER_LEFT);
+        layer_bg.render(viewport, mode);
 
-        layer_obj.setProperty({len, theta, delta, radius});
+        layer_obj.setProperty(len, theta, delta);
         layer_obj.setModel(model);
-        layer_obj.render(LAYER_RENDER_LEFT);
+        layer_obj.render(viewport, mode);
         pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
         layer_obj2.setModel(model*cvt2GlmMat4(pose));
-        layer_obj2.render(LAYER_RENDER_LEFT);
+        layer_obj2.render(viewport, mode);
         window.refresh();
     }
     window.release();

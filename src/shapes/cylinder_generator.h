@@ -7,10 +7,15 @@ class CylinderGenerator : public GeneratorBase
 {
 public:
     CylinderGenerator();
-    CylinderGenerator(int points_num, const glm::vec3& origin, float len,
+    CylinderGenerator(int points_num, const glm::vec3& origin, float length,
                       float radius);
+    CylinderGenerator(int points_num, float length, float radius);
 
     const Vertices& resultWithoutEndFace() const;
+
+private:
+    void createVertices(int points_num, const glm::vec3& origin, float length,
+                        float radius);
 
 private:
     Vertices _vertices_without_end_face;

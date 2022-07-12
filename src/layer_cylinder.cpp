@@ -33,7 +33,7 @@ void LayerCylinder::setProperty(const glm::vec3 &origin, float length, float rad
     _origin = origin;
     _radius = radius;
 
-    int num = (int)radius*3.1415926*2 / 0.5f;
+    int num = (int)radius*3.1415926*2 / 0.7f;
     CylinderGenerator cg(num, origin, length, radius);
     auto data = cg.result();
 

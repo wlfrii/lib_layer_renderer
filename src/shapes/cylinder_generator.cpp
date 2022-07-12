@@ -10,12 +10,31 @@ CylinderGenerator::CylinderGenerator()
 
 
 CylinderGenerator::CylinderGenerator(int points_num, const glm::vec3& origin,
-                                     float len, float radius)
+                                     float length, float radius)
+{
+    createVertices(points_num, origin, length, radius);
+}
+
+
+CylinderGenerator::CylinderGenerator(int points_num, float length, float radius)
+{
+    createVertices(points_num, glm::vec3(0, 0, 0), length, radius);
+}
+
+
+const Vertices &CylinderGenerator::resultWithoutEndFace() const
+{
+    return _vertices_without_end_face;
+}
+
+
+void CylinderGenerator::createVertices(int points_num, const glm::vec3 &origin,
+                                       float length, float radius)
 {
     glm::vec3 o1 = origin;
     CircleGenerator c1(points_num, o1, radius);
     glm::vec3 o2 = origin;
-    o2.z += len;
+    o2.z += length;
     CircleGenerator c2(points_num, o2, radius);
 
     const auto& pos1 = c1.positions();
@@ -46,10 +65,4 @@ CylinderGenerator::CylinderGenerator(int points_num, const glm::vec3& origin,
     _vertices = _vertices_without_end_face;
     _vertices.insert(_vertices.end(), c1.result().begin(), c1.result().end());
     _vertices.insert(_vertices.end(), c2.result().begin(), c2.result().end());
-}
-
-
-const Vertices &CylinderGenerator::resultWithoutEndFace() const
-{
-    return _vertices_without_end_face;
 }
