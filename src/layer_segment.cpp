@@ -5,12 +5,12 @@
 #include <gl_util.h>
 
 
-LayerSegment::LayerSegment(LayerRenderMode mode, glm::vec3 color,
-                           const LayerSegmentProperty &prop)
-    : LayerModel(mode, LAYER_SEGMENT, color)
+LayerSegment::LayerSegment(float length, float theta, float delta, float radius,
+                           const glm::vec3 &color)
+    : LayerModel(LAYER_SEGMENT, color)
+    , _radius(radius)
 {
-    _vavbebo = new gl_util::VAVBEBO();
-    setProperty(prop);
+    setProperty(length, theta, delta, radius);
 }
 
 
@@ -20,12 +20,15 @@ LayerSegment::~LayerSegment()
 }
 
 
-void LayerSegment::setProperty(const LayerSegmentProperty &prop)
+void LayerSegment::setProperty(float length, float theta, float delta,
+                               float radius)
 {
-    int num = (int)prop.radius*3.1415926*2 / 0.5f;
+    _radius = radius;
+
+    int num = (int)radius*3.1415926*2 / 0.5f;
     float len_gap = 1.f;
-    SegmentGenerator sg(num, prop.length, len_gap, prop.theta, prop.delta,
-                        prop.radius);
+    SegmentGenerator sg(num, length, len_gap, theta, delta,
+                        radius);
     //auto data = sg.resultSpacers();
     auto data = sg.result();
 
@@ -35,4 +38,10 @@ void LayerSegment::setProperty(const LayerSegmentProperty &prop)
     glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
     glEnableVertexAttribArray(1);
     _vert_num = data.size();
+}
+
+
+void LayerSegment::setProperty(float length, float theta, float delta)
+{
+    setProperty(_radius, length, theta, delta);
 }

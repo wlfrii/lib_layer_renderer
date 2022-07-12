@@ -13,11 +13,15 @@ struct LayerSegmentProperty
 class LayerSegment : public LayerModel
 {
 public:
-    LayerSegment(LayerRenderMode mode,
-                 glm::vec3 color, const LayerSegmentProperty& prop);
+    LayerSegment(float length, float theta, float delta, float radius,
+                 const glm::vec3 &color);
     ~LayerSegment();
 
-    void setProperty(const LayerSegmentProperty& prop);
+    void setProperty(float length, float theta, float delta, float radius);
+    void setProperty(float length, float theta, float delta);
+
+private:
+    float _radius;
 };
 
 #endif // LAYER_CYLINDER_H_LF

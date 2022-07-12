@@ -3,12 +3,22 @@
 #include <gl_util.h>
 #include <global.h>
 
-LayerCylinder::LayerCylinder(LayerRenderMode mode, glm::vec3 color,
-                             const LayerCylinderProperty &prop)
-    : LayerModel(mode, LAYER_CYLINDER, color)
+LayerCylinder::LayerCylinder(const glm::vec3 &origin, float length,
+                             float radius, const glm::vec3 &color)
+    : LayerModel(LAYER_CYLINDER, color)
+    , _origin(origin)
+    , _radius(radius)
 {
-    _vavbebo = new gl_util::VAVBEBO();
-    setProperty(prop);
+    setProperty(origin, length, radius);
+}
+
+
+LayerCylinder::LayerCylinder(float length, float radius, const glm::vec3 &color)
+    : LayerModel(LAYER_CYLINDER, color)
+    , _origin(glm::vec3(0.f, 0.f, 0.f))
+    , _radius(radius)
+{
+    setProperty(length, radius);
 }
 
 
@@ -18,10 +28,13 @@ LayerCylinder::~LayerCylinder()
 }
 
 
-void LayerCylinder::setProperty(const LayerCylinderProperty &prop)
+void LayerCylinder::setProperty(const glm::vec3 &origin, float length, float radius)
 {
-    int num = (int)prop.radius*3.1415926*2 / 0.5f;
-    CylinderGenerator cg(num, prop.origin, prop.length, prop.radius);
+    _origin = origin;
+    _radius = radius;
+
+    int num = (int)radius*3.1415926*2 / 0.5f;
+    CylinderGenerator cg(num, origin, length, radius);
     auto data = cg.result();
 
     _vavbebo->bind(&data[0].position.x, data.size() * sizeof(Vertex));
@@ -32,3 +45,15 @@ void LayerCylinder::setProperty(const LayerCylinderProperty &prop)
     _vert_num = data.size();
 }
 
+
+void LayerCylinder::setProperty(float length, float radius)
+{
+    _radius = radius;
+    setProperty(_origin, length, radius);
+}
+
+
+void LayerCylinder::setProperty(float length)
+{
+    setProperty(_origin, length, _radius);
+}

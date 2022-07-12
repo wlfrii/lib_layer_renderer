@@ -6,7 +6,7 @@
 LayerBackground::LayerBackground()
     : Layer(LAYER_BACKGROUND)
 {
-    _shader = new gl_util::Shader();
+    // Load shader
     bool flag = _shader->load("./shaders/texture.vs", "./shaders/texture.fs");
     EV_LOG("LayerBackground read shader: %d\n", flag);
     _shader->use();
@@ -24,7 +24,8 @@ LayerBackground::LayerBackground()
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
-    _vavbebo = new gl_util::VAVBEBO();
+
+    // Bind VAVBEBO
     _vavbebo->bind(vertices, sizeof(vertices), indices, sizeof(indices));
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);

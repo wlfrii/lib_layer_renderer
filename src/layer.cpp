@@ -2,11 +2,10 @@
 #include <gl_util.h>
 
 
-Layer::Layer(LayerRenderMode mode, LayerType type)
-    : mode(mode)
-    , type(type)
-    , _shader(nullptr)
-    , _vavbebo(nullptr)
+Layer::Layer(LayerType type)
+    : type(type)
+    , _shader(new gl_util::Shader())
+    , _vavbebo(new gl_util::VAVBEBO())
 {
 
 }
@@ -28,13 +27,13 @@ Layer::~Layer()
 }
 
 
-void Layer::render(const LayerViewPort &port, LayerRenderID id)
+void Layer::render(const LayerViewPort &port, LayerRenderMode mode)
 {
-    if(mode == LAYER_RENDER_2D || id == LAYER_RENDER_LEFT){
+    if(mode == LAYER_RENDER_LEFT){
         glViewport(port.x, port.y, port.width, port.height);
         draw(LAYER_RENDER_LEFT);
     }
-    else if(id == LAYER_RENDER_RIGHT){
+    else if(mode == LAYER_RENDER_RIGHT){
         glViewport(port.x, port.y, port.width, port.height);
         draw(LAYER_RENDER_RIGHT);
     }

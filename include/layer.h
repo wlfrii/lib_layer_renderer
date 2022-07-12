@@ -13,19 +13,9 @@ namespace gl_util{
 
 
 /**
- * @brief Specify the render mode, 2D/3D
- */
-enum LayerRenderMode
-{
-    LAYER_RENDER_2D   = 0,
-    LAYER_RENDER_3D   = 2
-};
-
-
-/**
  * @brief Specify the render index, Left/Right for 2D mode or Stereo 3D mode.
  */
-enum LayerRenderID
+enum LayerRenderMode
 {
     LAYER_RENDER_LEFT   = 0,
     LAYER_RENDER_RIGHT  = 1,
@@ -75,7 +65,7 @@ protected:
      * @param type  Store the LayerType
      *
      */
-    Layer(LayerRenderMode mode, LayerType type);
+    Layer(LayerType type);
 
 public:
     virtual ~Layer();
@@ -83,9 +73,8 @@ public:
     /**
      * @brief Render current layer
      */
-    virtual void render(const LayerViewPort &port, LayerRenderID id = LAYER_RENDER_LEFT);
+    virtual void render(const LayerViewPort &port, LayerRenderMode mode = LAYER_RENDER_LEFT);
 
-    const LayerRenderMode mode;
     const LayerType       type;
 
 protected:

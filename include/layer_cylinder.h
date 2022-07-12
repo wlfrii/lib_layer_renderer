@@ -3,29 +3,21 @@
 #include "layer_model.h"
 
 
-struct LayerCylinderProperty
-{
-    LayerCylinderProperty(const glm::vec3& origin = glm::vec3(0.f, 0.f, 0.f),
-                          float length = 0, float radius = 0)
-        : origin(origin), length(length), radius(radius) {}
-
-    LayerCylinderProperty(float length, float radius)
-        : origin(glm::vec3(0.f, 0.f, 0.f)), length(length), radius(radius) {}
-
-    glm::vec3 origin;
-    float     length;
-    float     radius;
-};
-
-
 class LayerCylinder : public LayerModel
 {
 public:
-    LayerCylinder(LayerRenderMode mode, glm::vec3 color,
-                  const LayerCylinderProperty& prop);
+    LayerCylinder(const glm::vec3 &origin, float length, float radius,
+                  const glm::vec3 &color);
+    LayerCylinder(float length, float radius, const glm::vec3 &color);
     ~LayerCylinder();
 
-    void setProperty(const LayerCylinderProperty& prop);
+    void setProperty(const glm::vec3 &origin, float length, float radius);
+    void setProperty(float length, float radius);
+    void setProperty(float length);
+
+private:
+    glm::vec3 _origin;
+    float     _radius;
 };
 
 #endif // LAYER_CYLINDER_H_LF

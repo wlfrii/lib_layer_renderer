@@ -5,9 +5,8 @@
 #include <gl_util.h>
 #include <global.h>
 
-LayerGripper::LayerGripper(LayerRenderMode mode, glm::vec3 color,
-                           GripperType gtype)
-    : LayerModel(mode, LAYER_GRIPPER_NH, color)
+LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
+    : LayerModel(LAYER_GRIPPER_NH, color)
     , gripper_type(gtype)
     , _vavbo_active(nullptr)
     , _vert_num_active(0)
@@ -83,7 +82,9 @@ bool LayerGripper::loadModel()
 {
     Vertices data[2];
     uint8_t part_num = 0;
-    LayerCylinderProperty prop;
+    glm::vec3 origin(0.f);
+    float length(0), radius(0);
+
     switch (gripper_type) {
     case GRIPPER_NEEDLE_HOLDER_SIMPLIFIED:
         if(!STLReader::getInstance()->read(STL_NH_0_SIMPLIFIED, data[0]))
@@ -95,7 +96,9 @@ bool LayerGripper::loadModel()
         part_num = 3;
         // Lengthen cylinder as tool body
         //prop = {3.05, 2.85, glm::vec3(0.f,0.f,-1.9f)};
-        prop = { glm::vec3(0.f, 0.f, -1.9+1.42 - 4.0), 8, 3.7 };
+        origin = glm::vec3(0.f, 0.f, -1.9+1.42 - 4.0);
+        length = 8;
+        radius = 3.7;
         break;
     case GRIPPER_NEEDLE_HOLDER:
         if(!STLReader::getInstance()->read(STL_NH_0, data[0]))
@@ -106,14 +109,15 @@ bool LayerGripper::loadModel()
         _active_part.axis = glm::vec3(1.f, 0.f, 0.f);
         part_num = 3;
         // Lengthen cylinder as tool body
-        prop = { glm::vec3(0.f,0.f,-3.1f), 3.05, 3.0 };
+        origin = glm::vec3(0.f,0.f,-3.1f);
+        length = 3.05;
+        radius = 3.0;
         break;
     default:
         return false;
     }
 
     // Bind fixed part
-    _vavbebo = new gl_util::VAVBEBO();
     _vavbebo->bind(&data[0][0].position.x, data[0].size() * sizeof(Vertex));
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -134,8 +138,8 @@ bool LayerGripper::loadModel()
 
     // Bind the ignored part
     if(part_num >= 3){
-        int num = (int)prop.radius*3.1415926*2 / 1.f;
-        CylinderGenerator cg(num, prop.origin, prop.length, prop.radius);
+        int num = (int)radius*3.1415926*2 / 1.f;
+        CylinderGenerator cg(num, origin, length, radius);
         auto data = cg.result();
 
         _vavbo_ignore = new gl_util::VAVBEBO();
