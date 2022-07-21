@@ -16,10 +16,10 @@ LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
     _shader_ignore = new gl_util::Shader();
     bool flag = _shader_ignore->load("./shaders/model_ignore.vs",
                                 "./shaders/model_ignore.fs");
-    EV_LOG("LayerGripper read shader ignored: %d\n", flag);
+    if(!flag) EV_LOG("LayerGripper read shader ignored: %d\n", flag);
 
     flag = loadModel();
-    EV_LOG("LayerGripper read gripper model: %d\n", flag);
+    if(!flag) EV_LOG("LayerGripper read gripper model: %d\n", flag);
 }
 
 

@@ -12,8 +12,14 @@ LayerModel::LayerModel(LayerType type, const glm::vec3 &color)
     , _light_color(glm::vec3(1.f, 1.f, 1.f))
     , _light_pos(glm::vec3(0.f, -50.f, 0.f))
 {
-    bool flag = _shader->load("./shaders/model.vs", "./shaders/model.fs");
-    EV_LOG("LayerModel read shader: %d\n", flag);
+    if(type == LAYER_TEXTURE3D){
+        bool flag = _shader->load("./shaders/texture_3d.vs", "./shaders/texture_3d.fs");
+        if(!flag) EV_LOG("LayerTexture3D read shader: %d\n", flag);
+    }
+    else {
+        bool flag = _shader->load("./shaders/model.vs", "./shaders/model.fs");
+        if(!flag) EV_LOG("LayerModel read shader: %d\n", flag);
+    }
 
     _shader->use();
     _shader->setVec3f("object_color", _object_color);

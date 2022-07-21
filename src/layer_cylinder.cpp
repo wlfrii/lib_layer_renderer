@@ -3,6 +3,7 @@
 #include <gl_util.h>
 #include <global.h>
 
+
 LayerCylinder::LayerCylinder(const glm::vec3 &origin, float length,
                              float radius, const glm::vec3 &color)
     : LayerModel(LAYER_CYLINDER, color)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(render_layer
+project(lib_render_layer
     VERSION 1.1.0
     DESCRIPTION "A project for rendering surgical tool and its background"
 )
@@ -30,6 +30,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${GL_UTIL_PATH}>
         $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${lib_math_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
@@ -37,6 +38,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     glfw
     ${lib_math_LIBRARIES}
+    ${OpenCV_LIBS}
 )
 
 file(GLOB MODEL_STL ${CMAKE_CURRENT_SOURCE_DIR}/models/*.STL)

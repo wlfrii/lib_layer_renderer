@@ -16,6 +16,16 @@ struct Vertex
 
 
 /**
+ * @brief A struct designed for vertex
+ */
+struct VertexC
+{
+    glm::vec4 position; //!< Positon of a vertex
+    glm::vec4 color;    //!< Color of a vertex
+};
+
+
+/**
  * @brief Store the vertex data
  */
 using Vertices = std::vector<Vertex>;

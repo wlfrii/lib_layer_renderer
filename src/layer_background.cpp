@@ -8,7 +8,8 @@ LayerBackground::LayerBackground()
 {
     // Load shader
     bool flag = _shader->load("./shaders/texture.vs", "./shaders/texture.fs");
-    EV_LOG("LayerBackground read shader: %d\n", flag);
+    if(!flag) EV_LOG("LayerBackground read shader: %d\n", flag);
+
     _shader->use();
     _shader->setInt("image", 0);
     _shader->setInt("mask", 1);

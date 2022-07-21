@@ -48,7 +48,7 @@ bool STLReader::read(const std::string &filename, Vertices &data)
     int face_num = 0;
     fread(&name, 80, 1, fp);
     fread(&face_num, 4, 1, fp);
-    MTRACE("Read STL file: '%s', [%d] faces.\n", name, face_num);
+    //MTRACE("Read STL file: '%s', [%d] faces.\n", name, face_num);
 
     data.clear();
     data.resize(face_num * 3);

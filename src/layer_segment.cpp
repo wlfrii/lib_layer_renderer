@@ -4,6 +4,7 @@
 #include "shapes/cylinder_generator.h"
 #include <lib_math/lib_math.h>
 #include <gl_util.h>
+#include <global.h>
 
 
 LayerSegment::LayerSegment(float length, float theta, float delta, float radius,

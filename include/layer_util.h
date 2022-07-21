@@ -36,4 +36,24 @@ inline glm::vec3 cvt2GlmVec3(const Eigen::Vector3f &vec)
 }
 
 
+inline mmath::Pose cvt2Pose(const glm::mat4 &mat)
+{
+    mmath::Pose pose;
+    pose.R(0, 0) = mat[0][0];
+    pose.R(0, 1) = mat[1][0];
+    pose.R(0, 2) = mat[2][0];
+    pose.R(1, 0) = mat[0][1];
+    pose.R(1, 1) = mat[1][1];
+    pose.R(1, 2) = mat[2][1];
+    pose.R(2, 0) = mat[0][2];
+    pose.R(2, 1) = mat[1][2];
+    pose.R(2, 2) = mat[2][2];
+
+    pose.t[0] = mat[3][0];
+    pose.t[1] = mat[3][1];
+    pose.t[2] = mat[3][2];
+
+    return pose;
+}
+
 #endif // LAYER_UTIL_H_LF
