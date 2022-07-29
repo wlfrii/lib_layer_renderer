@@ -6,6 +6,40 @@
 #include <lib_math/lib_math.h>
 #include <opencv2/opencv.hpp>
 
+cv::Mat im2uchar(const cv::Mat &image)
+{
+    cv::Mat out;
+    if(image.type() == CV_32FC1 || image.type() == CV_64FC1)
+        out = cv::Mat(image.size(), CV_8UC1);
+    else if(image.type() == CV_32FC3 || image.type() == CV_64FC3)
+        out = cv::Mat(image.size(), CV_8UC3);
+
+    if(image.depth() == CV_32F)
+    {
+        for(int i = 0; i < image.rows; i++){
+            const float* row_data_in = image.ptr<float>(i);
+            uchar* row_data_out = out.ptr<uchar>(i);
+            for(int j = 0; j < image.cols * image.channels(); j++){
+                row_data_out[j] = (uchar)MIN(row_data_in[j] * 255.0, 255);
+            }
+        }
+    }
+    else if(image.depth() == CV_64F)
+    {
+        for(int i = 0; i < image.rows; i++){
+            const double* row_data_in = image.ptr<double>(i);
+            uchar* row_data_out = out.ptr<uchar>(i);
+            for(int j = 0; j < image.cols * image.channels(); j++){
+                row_data_out[j] = (uchar)MIN(row_data_in[j] * 255.0, 255);
+            }
+        }
+    }
+
+    return out;
+}
+
+#define IS_WRITE_IMAGE 0
+
 glm::mat4 model = glm::mat4(0.963560,0.187968,0.190531,0.000000,
                             -0.153469,0.971296,-0.182068,0.000000,
                             -0.219275,0.146184,0.964709,0.000000,
@@ -26,6 +60,7 @@ int main()
     gl_util::Window window(width, height);
     window.enableDepthTest();
     window.setKeyboardEventCallBack(keyboardControlModel);
+    window.setBackgroundColor(255, 255, 255);
 
     float len = 10;
     float delta = 0.2;
@@ -89,20 +124,23 @@ int main()
         return bg;
     };
 
-    int i = 0;
+    int i = 1;
     while(true){
+        char idx[5];
+        sprintf(idx, "%04d", i);
+
         cv::Mat bg = getBackground();
         cv::imshow("Background", bg);
+#if IS_WRITE_IMAGE
+        cv::imwrite("./results_texture3d/frame_"+std::string(idx)+".png", im2uchar(bg));
+#endif
         cv::waitKey(100);
 
         if(++i > 499){
             break;
         }
 
-        char idx[5];
-        sprintf(idx, "%04d", i);
         std::string name = "../data/sequences2/frame_" + std::string(idx) + ".png";
-
         printf("%d. Image %s\n", i, idx);
         cv::Mat image = cv::imread(name);
         cv::resize(image, image, cv::Size(3840, 1080));

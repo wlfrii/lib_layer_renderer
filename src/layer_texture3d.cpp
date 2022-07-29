@@ -90,9 +90,9 @@ void LayerTexture3D::update3DTexture(const cv::Mat &left_tex,
         return;
     }
 
-    static uint16_t count = 0;
-    bool is_print = false;
-    if(++count > 320) is_print = true;
+//    static uint16_t count = 0;
+//    bool is_print = false;
+//    if(++count > 320) is_print = true;
 
     int k_pyrup = pow(2, _pyd_times);
     cv::Mat disp_mat = cv::Mat(_height, _width, CV_32FC1, cv::Scalar(0.f));
@@ -106,7 +106,7 @@ void LayerTexture3D::update3DTexture(const cv::Mat &left_tex,
     }
     double min_disp = _width, max_disp = 0;
     cv::minMaxIdx(disp_mat, &min_disp, &max_disp);
-    if(is_print) printf("Disparity range in [%f, %f].\t", min_disp, max_disp);
+//    if(is_print) printf("Disparity range in [%f, %f].\t", min_disp, max_disp);
 
     std::vector<int> xs = mmath::linspace<int>(floor(min_disp), 1, floor(max_disp));
     std::vector<int> ys(floor(max_disp) - floor(min_disp) + 1);
@@ -119,9 +119,9 @@ void LayerTexture3D::update3DTexture(const cv::Mat &left_tex,
             }
         }
     }
-    if(is_print) printf("xs.size: %zu, ys.size:%zu.\t", xs.size(), ys.size());
+//    if(is_print) printf("xs.size: %zu, ys.size:%zu.\t", xs.size(), ys.size());
     mmath::GaussianCurvef gauss = mmath::fitGuassianCurve<float>(xs, ys);
-    if(is_print) printf("Gauss: mu:%f, sigma:%f, a:%f\n", gauss.mu, gauss.sigma, gauss.a);
+//    if(is_print) printf("Gauss: mu:%f, sigma:%f, a:%f\n", gauss.mu, gauss.sigma, gauss.a);
 
     for(int i = 0; i < _pyd_times; i++){
         cv::pyrUp(disp_mat, disp_mat);
@@ -171,7 +171,7 @@ void LayerTexture3D::update3DTexture(const cv::Mat &left_tex,
             }
         }
     }
-    if(is_print) printf("Filter disp_mat done.\t");
+//    if(is_print) printf("Filter disp_mat done.\t");
     for (int32_t v = 0; v < im3d.rows - 1; v += step) {
         for (int32_t u = 0; u < im3d.cols - 1; u += step) {
             cv::Vec4f drgb = im3d.at<cv::Vec4f>(v, u);
@@ -201,7 +201,7 @@ void LayerTexture3D::update3DTexture(const cv::Mat &left_tex,
             }
         }
     }
-    if(is_print) printf("Vectices.size: %zu\n", vertices.size());
+//    if(is_print) printf("Vectices.size: %zu\n", vertices.size());
 
     _vavbebo->bind(&vertices[0].position.x, vertices.size() * sizeof(VertexC));
     // position attribute
