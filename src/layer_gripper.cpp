@@ -10,6 +10,8 @@ LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
     , gripper_type(gtype)
     , _vavbo_active(nullptr)
     , _vert_num_active(0)
+    , _vavbo_active2(nullptr)
+    , _vert_num_active2(0)
 {
     _active_part = { 0, glm::vec3(0.f,0.f,0.f), glm::vec3(0.f,0.f,1.f) };
 
@@ -29,6 +31,11 @@ LayerGripper::~LayerGripper()
         _vavbo_active->release();
         delete  _vavbo_active;
         _vavbo_active = nullptr;
+    }
+    if(_vavbo_active2){
+        _vavbo_active2->release();
+        delete  _vavbo_active2;
+        _vavbo_active2 = nullptr;
     }
     if(_shader_ignore){
         _shader_ignore->release();
@@ -62,6 +69,16 @@ void LayerGripper::draw(bool is_right)
     _vavbo_active->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num_active);
 
+    if(gripper_type == GRIPPER_TISSUE_GRASPING_FORCEPS){
+        mat = _model;
+        mat = glm::translate(mat, _active_part.p);
+        mat = glm::rotate(mat, -_active_part.angle, _active_part.axis);
+        mat = glm::translate(mat, -_active_part.p);
+        _shader->setMat4f("model", mat);
+        _vavbo_active2->bindVertexArray();
+        glDrawArrays(GL_TRIANGLES, 0, _vert_num_active2);
+    }
+
     // Draw ignored part
     _shader_ignore->use();
     _shader_ignore->setMat4f("projection", _projection);
@@ -74,13 +91,16 @@ void LayerGripper::draw(bool is_right)
 
 void LayerGripper::setAngle(float angle)
 {
+    if(gripper_type == GRIPPER_BIPOLAR_GRASPING_FORCEPS){
+        angle = -angle;
+    }
     _active_part.angle = angle;
 }
 
 
 bool LayerGripper::loadModel()
 {
-    Vertices data[2];
+    Vertices data[3];
     uint8_t part_num = 0;
     glm::vec3 origin(0.f);
     float length(0), radius(0);
@@ -113,6 +133,34 @@ bool LayerGripper::loadModel()
         length = 3.05;
         radius = 3.0;
         break;
+    case GRIPPER_BIPOLAR_GRASPING_FORCEPS:
+        if(!STLReader::getInstance()->read(STL_BGF_0, data[0]))
+            return false;
+        if(!STLReader::getInstance()->read(STL_BGF_1, data[1]))
+            return false;
+        _active_part.p = glm::vec3(-1.899f, 0.f, 5.753f);
+        _active_part.axis = glm::vec3(0.f, 1.f, 0.f);
+        part_num = 3;
+        // Lengthen cylinder as tool body
+        origin = glm::vec3(0.f,0.f,-3.0f);
+        length = 3.05;
+        radius = 3.55;
+        break;
+    case GRIPPER_TISSUE_GRASPING_FORCEPS:
+        if(!STLReader::getInstance()->read(STL_TGF_0, data[0]))
+            return false;
+        if(!STLReader::getInstance()->read(STL_TGF_1, data[1]))
+            return false;
+        if(!STLReader::getInstance()->read(STL_TGF_2, data[2]))
+            return false;
+        _active_part.p = glm::vec3(0.f, 0.f, 8.703f);
+        _active_part.axis = glm::vec3(0.f, 1.f, 0.f);
+        part_num = 3;
+        // Lengthen cylinder as tool body
+        origin = glm::vec3(0.f,0.f,-3.0f);
+        length = 3.05;
+        radius = 3.25;
+        break;
     default:
         return false;
     }
@@ -134,6 +182,16 @@ bool LayerGripper::loadModel()
         glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
         glEnableVertexAttribArray(1);
         _vert_num_active = data[1].size();
+
+        if (!data[2].empty()) {
+            _vavbo_active2 = new gl_util::VAVBEBO();
+            _vavbo_active2->bind(&data[2][0].position.x, data[2].size() * sizeof(Vertex));
+            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+            _vert_num_active2 = data[2].size();
+        }
     }
 
     // Bind the ignored part

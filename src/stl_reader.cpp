@@ -85,29 +85,79 @@ bool STLReader::read(STLModelType type, Vertices &data)
     switch (type)
     {
     case STL_NH_0_SIMPLIFIED:
+    {
         // Assign along colunms
         _rot = glm::mat3(1, 0, 0, 0, cos(M_PI), sin(M_PI), 0, -sin(M_PI), cos(M_PI));
         _t = glm::vec3(-2.636925f, 3.f, 14.68f);
         _is_stl_exist = true;
         return read("./models/nh_0_simplified.STL", data);
+    }
     case STL_NH_1_SIMPLIFIED:
+    {
         _rot = glm::mat3(1, 0, 0, 0, cos(-M_PI/2.f), sin(-M_PI/2.f), 0, -sin(-M_PI/2.f), cos(-M_PI/2.f));
         _t = glm::vec3(-1.8f, -2.534f, 14.68f);
         _is_stl_exist = true;
         return read("./models/nh_1_simplified.STL", data);
+    }
     case STL_NH_0:
+    {
         // Assign along colunms
         _rot = glm::mat3(1, 0, 0, 0, cos(M_PI), sin(M_PI), 0, -sin(M_PI), cos(M_PI));
         _t = glm::vec3(-2.637f, 3.f, 15.08f);
         _is_stl_exist = true;
         return read("./models/nh_0.STL", data);
+    }
     case STL_NH_1:
+    {
         // Assign along colunms
         _rot = glm::mat3(1, 0, 0, 0, cos(-M_PI/2.f), sin(-M_PI/2.f), 0, -sin(-M_PI/2.f), cos(-M_PI/2.f));
         _t = glm::vec3(-1.8f, -2.427f, 15.08f);
         _is_stl_exist = true;
         return read("./models/nh_1.STL", data);
+    }
+    case STL_BGF_0:
+    {
+        // Assign along colunms
+        _rot = glm::mat3(cos(M_PI), 0, sin(M_PI), 0, 1, 0, -sin(M_PI), 0, cos(M_PI));
+        _t = glm::vec3(3.467f, -3.337f, 26.65f);
+        _is_stl_exist = true;
+        return read("./models/bgf_0.STL", data);
+    }
+    case STL_BGF_1:
+    {
+        // Assign along colunms
+        _rot = glm::mat3(cos(M_PI), 0, sin(M_PI), 0, 1, 0, -sin(M_PI), 0, cos(M_PI));
+        _t = glm::vec3(0.973f, -2.2782f, 26.65f);
+        _is_stl_exist = true;
+        return read("./models/bgf_1.STL", data);
+    }
+    case STL_TGF_0:
+    {
+        // Assign along colunms
+        _rot = glm::mat3(cos(-M_PI/2.f), 0, -sin(-M_PI/2.f), 0, 1, 0, sin(-M_PI/2.f), 0, cos(-M_PI/2.f));
+        _t = glm::vec3(3.283f, -3.287f, -3.f);
+        _is_stl_exist = true;
+        return read("./models/tgf_0.STL", data);
+    }
+    case STL_TGF_1:
+    {
+        // Assign along colunms
+        _rot = glm::mat3(cos(-M_PI/2.f), 0, -sin(-M_PI/2.f), 0, 1, 0, sin(-M_PI/2.f), 0, cos(-M_PI/2.f));
+        _t = glm::vec3(1.6275f, -2.7078f, -2.9957f);
+        _is_stl_exist = true;
+        return read("./models/tgf_1.STL", data);
+    }
+    case STL_TGF_2:
+    {
+        // Assign along colunms
+        _rot = glm::mat3(cos(-M_PI/2.f), 0, -sin(-M_PI/2.f), 0, 1, 0, sin(-M_PI/2.f), 0, cos(-M_PI/2.f));
+        _t = glm::vec3(3.0972f, -2.7078f, -2.997f);
+        _is_stl_exist = true;
+        return read("./models/tgf_2.STL", data);
+    }
     default:
+        _is_stl_exist = false;
         break;
     }
+    return false;
 }

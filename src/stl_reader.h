@@ -13,7 +13,12 @@ enum STLModelType
     STL_NH_0_SIMPLIFIED,
     STL_NH_1_SIMPLIFIED,
     STL_NH_0,
-    STL_NH_1
+    STL_NH_1,
+    STL_BGF_0,
+    STL_BGF_1,
+    STL_TGF_0,
+    STL_TGF_1,
+    STL_TGF_2,
 };
 
 

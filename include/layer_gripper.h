@@ -10,7 +10,9 @@ class LayerCylinder;
 enum GripperType
 {
     GRIPPER_NEEDLE_HOLDER_SIMPLIFIED,
-    GRIPPER_NEEDLE_HOLDER
+    GRIPPER_NEEDLE_HOLDER,
+    GRIPPER_BIPOLAR_GRASPING_FORCEPS,
+    GRIPPER_TISSUE_GRASPING_FORCEPS
 };
 
 
@@ -41,6 +43,8 @@ private:
 
     gl_util::VAVBEBO* _vavbo_active;
     size_t            _vert_num_active;
+    gl_util::VAVBEBO* _vavbo_active2;
+    size_t            _vert_num_active2;
 
     gl_util::Shader*  _shader_ignore;
     gl_util::VAVBEBO* _vavbo_ignore;
