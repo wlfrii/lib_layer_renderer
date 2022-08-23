@@ -29,10 +29,9 @@ LAYER_TEXTURE3D     // See <layer_texture3d.h>
 
 Some rendered results based on this library are shown below in the table, which shows (from left to right and top to bottom)
 
- + a yellow __Segment__ connected with a cyan __Cylinder__;
+ + a yellow __Segment__ (with greater _theta_) connected with a cyan __Cylinder__;
  + a yellow __Segment__ (with smaller _theta_) connected with a magenta __Cylinder__
  + a stereo view that includes a yellow __Segment__ connected with a manenta __Cylinder__ and a stereo endoscopic image __Background__;
- + a yellow __Segment__ (with smaller _theta_) connected with a magenta __Cylinder__
  + a __3DTexture__ view with white window background.
 
 <table>
