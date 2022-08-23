@@ -1,3 +1,28 @@
+/**--------------------------------------------------------------------
+ *																		
+ *   				   Mathematics extension library 					
+ *																		
+ * Description:													
+ * This file is a part of lib_render_layer. You can redistribute it or
+ * modify it to construct your own project. It is wellcome to use this 
+ * library in your scientific research work.
+ * 
+ * @file 		layer_backgrounr.h 
+ * 
+ * @brief 		Designed for rendering 2D/3D background
+ * 
+ * @author		Longfei Wang
+ * 
+ * @date		2022/04/01
+ * 
+ * @license		
+ * 
+ * Copyright (C) 2022 Longfei Wang.
+ * 
+ * --------------------------------------------------------------------
+ * Change History:                        
+ * 
+ * -------------------------------------------------------------------*/
 #ifndef LAYER_BACKGROUND_H_LF
 #define LAYER_BACKGROUND_H_LF
 #include "layer.h"
