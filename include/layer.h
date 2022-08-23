@@ -31,14 +31,14 @@ enum LayerType
     LAYER_BACKGROUND,
     LAYER_CYLINDER,
     LAYER_SEGMENT,
-    LAYER_GRIPPER_NH,        // Needle holder
+    LAYER_GRIPPER,        // Needle holder
     LAYER_TEXTURE3D,
     LAYER_UNKNOWN
 };
 
 
 /**
- * @brief The LayerViewRect struct
+ * @brief A struct for specify the viewport to render layers
  */
 struct LayerViewPort
 {
@@ -76,7 +76,7 @@ public:
      */
     virtual void render(const LayerViewPort &port, LayerRenderMode mode = LAYER_RENDER_LEFT);
 
-    const LayerType       type;
+    const LayerType       type;         //!< Type of current layer
 
 protected:
     /**
@@ -85,8 +85,8 @@ protected:
      */
     virtual void draw(bool is_right);
 
-    gl_util::Shader*     _shader;
-    gl_util::VAVBEBO*    _vavbebo;
+    gl_util::Shader*     _shader;       //!< Shader for current layer
+    gl_util::VAVBEBO*    _vavbebo;      //!< VAO,VBO,EBO for current layer
 };
 
 #endif // LAYER_H_LF

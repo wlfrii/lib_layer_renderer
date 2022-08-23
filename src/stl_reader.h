@@ -33,6 +33,11 @@ protected:
 public:
     ~STLReader() {}
 
+
+    /**
+     * @brief Create and return a single instance.
+     * @return
+     */
     static STLReader* getInstance();
 
 

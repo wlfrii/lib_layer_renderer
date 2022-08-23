@@ -35,7 +35,7 @@ int main()
     printf("Test layerSegment and layerCylinder\n");
     LayerSegment layer_obj(len, theta, delta, radius, glm::vec3(1.0, 1.0, 0.0));
     mmath::Pose pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
-    LayerCylinder layer_obj2(len, radius, glm::vec3(1.0, 0.0, 1.0));
+    LayerCylinder layer_obj2(len, radius, glm::vec3(0.0, 1.0, 1.0));
 #endif
 
     glm::mat4 view = glm::rotate(glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
@@ -56,6 +56,8 @@ int main()
     cv::Mat right = image.colRange(1920, 3840).clone();
     cv::cvtColor(left, left, cv::COLOR_BGR2RGB);
     cv::cvtColor(right, right, cv::COLOR_BGR2RGB);
+    cv::flip(left, left, 0);
+    cv::flip(right, right, 0);
     LayerBackground layer_bg = LayerBackground();
     LayerBackgroundData layer_bg_data;
     layer_bg_data.data[0] = left.data;
@@ -67,13 +69,13 @@ int main()
     printf("left.data:%p, bg.data:%p\n", left.data, layer_bg_data.data[0]);
     printf("right.data:%p, bg.data:%p\n", right.data, layer_bg_data.data[1]);
 
-    auto mode = LAYER_RENDER_STEREO;
+    auto mode = LAYER_RENDER_LEFT;
     while (!window.shouldClose()) {
         window.activate();
         window.clear();
         glClearDepth(1.0);
 
-        layer_bg.render(viewport, mode);
+        //layer_bg.render(viewport, mode);
 
         layer_obj.setProperty(len, theta, delta);
         layer_obj.setModel(model);

@@ -16,30 +16,43 @@ enum GripperType
 };
 
 
+/**
+ * @brief A class for rendering surgical gripper.
+ */
 class LayerGripper : public LayerModel
 {
 public:
+    /**
+     * @brief Constructor of class LayerGripper.
+     * @param color  The color of the gripper.
+     * @param gtype  The type the surgical gripper
+     */
     LayerGripper(glm::vec3 color, GripperType gtype);
     ~LayerGripper();
 
+
+    /**
+     * @brief Set gripper open angle for gripper.
+     * @param angle  The gripper open angle, default value is 0.
+     */
     void setAngle(float angle);
 
 protected:
     void draw(bool is_right) override;
 
 private:
+    // Load gripper STL model
     bool loadModel();
 
-
 public:
-    const GripperType gripper_type;
+    const GripperType gripper_type;   //!< Current gripper type
 
 private:
     struct {
         float angle;        //!< The opening angle
         glm::vec3 p;        //!< The position of rotation axis
         glm::vec3 axis;     //!< The rotation axis
-    }_active_part;
+    }_active_part;          //!< The active part of the gripper (if needed)
 
     gl_util::VAVBEBO* _vavbo_active;
     size_t            _vert_num_active;

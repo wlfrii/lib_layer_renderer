@@ -3,6 +3,12 @@
 #include <glm/glm.hpp>
 #include <lib_math/lib_math.h>
 
+
+/**
+ * @brief Convert Eigen::Matrix4f to glm::mat4
+ * @param T
+ * @return
+ */
 inline glm::mat4 cvt2GlmMat4(const Eigen::Matrix4f &T)
 {
     glm::mat4 mat(1.0);
@@ -24,18 +30,33 @@ inline glm::mat4 cvt2GlmMat4(const Eigen::Matrix4f &T)
 }
 
 
+/**
+ * @brief Convert mmath::Pose to glm::mat4
+ * @param pose
+ * @return
+ */
 inline glm::mat4 cvt2GlmMat4(const mmath::Pose &pose)
 {
     return cvt2GlmMat4(pose.T());
 }
 
 
+/**
+ * @brief Convert Eigen::Vector3f to glm::mat4
+ * @param vec
+ * @return
+ */
 inline glm::vec3 cvt2GlmVec3(const Eigen::Vector3f &vec)
 {
     return glm::vec3(vec[0], vec[1], vec[2]);
 }
 
 
+/**
+ * @brief Convert glm::mat4 to mmath::Pose
+ * @param mat
+ * @return
+ */
 inline mmath::Pose cvt2Pose(const glm::mat4 &mat)
 {
     mmath::Pose pose;

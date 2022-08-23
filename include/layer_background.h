@@ -14,6 +14,7 @@ struct LayerBackgroundData
         data[LAYER_RENDER_LEFT] = nullptr;
         data[LAYER_RENDER_RIGHT] = nullptr;
     }
+
     unsigned char* data[LAYER_RENDER_STEREO]; //!< The stereo image data
     uint16_t width;                           //!< The width of the image
     uint16_t height;                          //!< The height of the image
@@ -30,11 +31,22 @@ public:
     LayerBackground();
     ~LayerBackground();
 
+    /**
+     * @brief Update the background image data
+     * @param data  Either monocular or binocular image data.
+     */
     void updateData(const LayerBackgroundData *data);
+
+
+    /**
+     * @brief Update the mask for background
+     * @param data  Should be single channel mask with same size as image data.
+     */
     void updateMask(const LayerBackgroundData *data);
 
 protected:
     void draw(bool is_right) override;
+
 
 private:
     void bindTexture(const uint8_t *data, uint16_t w, uint16_t h, uint8_t c,

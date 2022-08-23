@@ -4,27 +4,53 @@
 #include <lib_math/lib_math.h>
 
 
-struct LayerSegmentProperty
-{
-    float     length;
-    float     theta;
-    float     delta;
-    float     radius;
-};
-
+/**
+ * @brief A class for rendering continuum segment.
+ */
 class LayerSegment : public LayerModel
 {
 public:
+    /**
+     * @brief Constructor of class LayerSegment.
+     * @param length  The length of continuum segment.
+     * @param theta   The bending angle of continuum segment.
+     * @param delta   The bending direction of continuum segment.
+     * @param radius  The radius of continuum segment.
+     * @param color   The color of continuum segment.
+     */
     LayerSegment(float length, float theta, float delta, float radius,
                  const glm::vec3 &color);
     ~LayerSegment();
 
+
+    /**
+     * @brief Change the property of current object.
+     * @param length  The length of continuum segment.
+     * @param theta   The bending angle of continuum segment.
+     * @param delta   The bending direction of continuum segment.
+     * @param radius  The radius of continuum segment.
+     */
     void setProperty(float length, float theta, float delta, float radius);
+
+
+    /**
+     * @brief Change the property of current object.
+     * @param length  The length of continuum segment.
+     * @param theta   The bending angle of continuum segment.
+     * @param delta   The bending direction of continuum segment.
+     */
     void setProperty(float length, float theta, float delta);
+
+
+    /**
+     * @brief Change the property of current object.
+     * @param q  The configuration of a continuum segment. The details could be
+     * found at https://github.com/wlfrii/lib_math/blob/main/export/kine/continuum_configspc.h
+     */
     void setProperty(const mmath::continuum::ConfigSpc &q);
 
 private:
-    float _radius;
+    float _radius;   //!< The radius of the continuum segment.
 };
 
 #endif // LAYER_CYLINDER_H_LF
