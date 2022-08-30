@@ -6,7 +6,7 @@
 #include <global.h>
 
 LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
-    : LayerModel(LAYER_GRIPPER_NH, color)
+    : LayerModel(LAYER_GRIPPER, color)
     , gripper_type(gtype)
     , _vavbo_active(nullptr)
     , _vert_num_active(0)
