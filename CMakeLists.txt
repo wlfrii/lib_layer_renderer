@@ -13,6 +13,18 @@ endif()
 # --------------------------------------------------------------------
 #                   Create target and set properties
 # --------------------------------------------------------------------
+# PCL requires Qt5
+set(CMAKE_PREFIX_PATH /usr/local/Cellar/qt@5/5.15.3/)
+find_package(PCL REQUIRED)
+if(PCL_FOUND)
+    message(STATUS "Found PCL")
+    message(STATUS "  Include: ${PCL_INCLUDE_DIRS}")
+    message(STATUS "  Library path: ${PCL_LIBRARY_DIRS}")
+    message(STATUS "  Libraries: ${PCL_LIBRARIES}")
+    # message(STATUS "  Definitions: ${PCL_DEFINITIONS}")
+endif()
+
+
 file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_library(${PROJECT_NAME} STATIC
     ${SRCS}
@@ -39,6 +51,7 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     ${lib_math_LIBRARIES}
     ${OpenCV_LIBS}
+    ${PCL_LIBRARIES}
 )
 
 file(GLOB MODEL_STL ${CMAKE_CURRENT_SOURCE_DIR}/models/*.STL)

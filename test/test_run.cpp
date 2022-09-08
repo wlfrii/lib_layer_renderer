@@ -49,25 +49,25 @@ int main()
     LayerViewPort viewport(width, height);
 
     // Add background
-    std::string name = "../data/sequences2/frame_0001.png";
-    cv::Mat image = cv::imread(name);
-    cv::resize(image, image, cv::Size(3840, 1080));
-    cv::Mat left = image.colRange(0, 1920).clone();
-    cv::Mat right = image.colRange(1920, 3840).clone();
-    cv::cvtColor(left, left, cv::COLOR_BGR2RGB);
-    cv::cvtColor(right, right, cv::COLOR_BGR2RGB);
-    cv::flip(left, left, 0);
-    cv::flip(right, right, 0);
-    LayerBackground layer_bg = LayerBackground();
-    LayerBackgroundData layer_bg_data;
-    layer_bg_data.data[0] = left.data;
-    layer_bg_data.data[1] = right.data;
-    layer_bg_data.width = left.cols;
-    layer_bg_data.height = left.rows;
-    layer_bg_data.channels = left.channels();
-    layer_bg.updateData(&layer_bg_data);
-    printf("left.data:%p, bg.data:%p\n", left.data, layer_bg_data.data[0]);
-    printf("right.data:%p, bg.data:%p\n", right.data, layer_bg_data.data[1]);
+//    std::string name = "../data/sequences2/frame_0001.png";
+//    cv::Mat image = cv::imread(name);
+//    cv::resize(image, image, cv::Size(3840, 1080));
+//    cv::Mat left = image.colRange(0, 1920).clone();
+//    cv::Mat right = image.colRange(1920, 3840).clone();
+//    cv::cvtColor(left, left, cv::COLOR_BGR2RGB);
+//    cv::cvtColor(right, right, cv::COLOR_BGR2RGB);
+//    cv::flip(left, left, 0);
+//    cv::flip(right, right, 0);
+//    LayerBackground layer_bg = LayerBackground();
+//    LayerBackgroundData layer_bg_data;
+//    layer_bg_data.data[0] = left.data;
+//    layer_bg_data.data[1] = right.data;
+//    layer_bg_data.width = left.cols;
+//    layer_bg_data.height = left.rows;
+//    layer_bg_data.channels = left.channels();
+//    layer_bg.updateData(&layer_bg_data);
+//    printf("left.data:%p, bg.data:%p\n", left.data, layer_bg_data.data[0]);
+//    printf("right.data:%p, bg.data:%p\n", right.data, layer_bg_data.data[1]);
 
     auto mode = LAYER_RENDER_LEFT;
     while (!window.shouldClose()) {
