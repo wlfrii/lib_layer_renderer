@@ -93,7 +93,7 @@ void LayerTexture3D::update3DTexture(const cv::Mat &left_tex,
     // Filter out the valid texture position
     filterVertices(drgb);
 
-    printf("\tVertices.size: %zu\n", vertices.size());
+    //printf("\tVertices.size: %zu\n", vertices.size());
 
     if(_is_seqc) {
         //pclProcess();
