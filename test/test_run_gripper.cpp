@@ -5,10 +5,10 @@
 #include <data_manager.h>
 
 
-DataManager data_mgr(4);
+DataManager data_mgr(7);
 constexpr uint8_t GRIP_IDX = 0;
 glm::mat4 model = cvt2GlmMat4(data_mgr.init_grip_info.pose[GRIP_IDX]);
-float angle = 0.405;
+float angle = 0.0;
 std::string image_name;
 LayerBackground *layer_bg;
 
