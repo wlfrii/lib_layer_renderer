@@ -68,15 +68,14 @@ int main()
 
 bool updateBackground()
 {
-    cv::Mat left, right, left_mask;
-    std::string image_name;
-    bool flag = data_mgr.readImage(left, right, left_mask, image_name);
-    printf("-----------------\n%s\n", image_name.c_str());
-    for(int i = 0; i < left_mask.rows; i++) {
-        for(int j = 0; j < left_mask.cols; j++) {
-            uchar val = left_mask.at<uchar>(i, j);
+    DataManager::FrameData fdata;
+    bool flag = data_mgr.readFrame(fdata);
+    printf("-----------------\n%s\n", fdata.image_name.c_str());
+    for(int i = 0; i < fdata.left_mask.rows; i++) {
+        for(int j = 0; j < fdata.left_mask.cols; j++) {
+            uchar val = fdata.left_mask.at<uchar>(i, j);
             if(val != 0) {
-                left.at<cv::Vec3b>(i, j+160) = cv::Vec3b(0, 0);
+                fdata.left_rgb.at<cv::Vec3b>(i, j+160) = cv::Vec3b(0, 0);
             }
         }
     }
@@ -84,10 +83,11 @@ bool updateBackground()
     if(flag) {
         if(!layer_tex) {
 //            layer_tex = new LayerTexture3D(left, right, data_mgr.fxy, 960, 540, 3, 1);
-            layer_tex = new LayerTexture3D(left, right, data_mgr.fxy, 960, 540, 3, 0);
+            layer_tex = new LayerTexture3D(
+                        fdata.left_rgb, fdata.right_rgb, data_mgr.fxy, 960, 540, 3, 0);
         }
         else{
-            layer_tex->update3DTexture(left, right);
+            layer_tex->update3DTexture(fdata.left_rgb, fdata.right_rgb);
         }
     }
     return flag;

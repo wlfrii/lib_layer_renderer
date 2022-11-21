@@ -5,42 +5,18 @@
 #include <data_manager.h>
 
 
-DataManager data_mgr(4);
+DataManager data_mgr(8);
 constexpr uint8_t GRIP_IDX = 0;
-glm::mat4 model = cvt2GlmMat4(data_mgr.init_grip_info.pose[GRIP_IDX]);
+glm::mat4 model = cvt2GlmMat4(data_mgr.init_grip_info.poses[GRIP_IDX]);
 float angle = 0.0;
-std::string image_name;
 LayerBackground *layer_bg;
 
-std::vector<std::vector<float>> trace_pts;
-void loadTracePts()
-{
-    trace_pts.clear();
-    std::ifstream ifile("../data/sequence_07_trace.dat", std::ios_base::in);
-    if(ifile.is_open()) {
-        std::string linedata;
-        while(std::getline(ifile, linedata)) {
-            std::stringstream ss(linedata);
-            float val;
-            std::vector<float> pt;
-            while(ss >> val){
-                pt.push_back(val);
-            }
-            assert(pt.size() == 7);
-
-            trace_pts.push_back(pt);
-        }
-    }
-    printf("Load track points [%zu]\n", trace_pts.size());
-}
 
 bool updateBackground();
 void keyboardControlModel(GLFWwindow* window);
 
 int main()
 {
-//    loadTracePts();
-
     int height = 1080;
     int width = 1920;
     gl_util::Window window(width, height);
@@ -72,7 +48,7 @@ int main()
     printf("Test TGF\n");
     LayerGripper layer_obj(color, GRIPPER_TISSUE_GRASPING_FORCEPS);
 #else
-    LayerGripper layer_obj(color, data_mgr.init_grip_info.type[GRIP_IDX]);
+    LayerGripper layer_obj(color, data_mgr.init_grip_info.types[GRIP_IDX]);
 #endif
 
     // Update background
@@ -102,36 +78,20 @@ int main()
 
 bool updateBackground()
 {
-    cv::Mat left_rgb, right_rgb;
-    float grip_angle[2];
-    bool flag = data_mgr.readImage(left_rgb, right_rgb, grip_angle, image_name);
-    printf("%s\n", image_name.c_str());
+    DataManager::FrameData fdata;
+    bool flag = data_mgr.readFrame(fdata);
+    printf("%s\n", fdata.image_name.c_str());
     if(flag) {
-        cv::flip(left_rgb, left_rgb, 0);
-        cv::flip(right_rgb, right_rgb, 0);
+        cv::flip(fdata.left_rgb, fdata.left_rgb, 0);
+        cv::flip(fdata.right_rgb, fdata.right_rgb, 0);
         LayerBackgroundData layer_bg_data;
-        layer_bg_data.data[0] = left_rgb.data;
-        layer_bg_data.data[1] = right_rgb.data;
-        layer_bg_data.width = left_rgb.cols;
-        layer_bg_data.height = left_rgb.rows;
-        layer_bg_data.channels = left_rgb.channels();
+        layer_bg_data.data[0] = fdata.left_rgb.data;
+        layer_bg_data.data[1] = fdata.right_rgb.data;
+        layer_bg_data.width = fdata.left_rgb.cols;
+        layer_bg_data.height = fdata.left_rgb.rows;
+        layer_bg_data.channels = fdata.left_rgb.channels();
         layer_bg->updateData(&layer_bg_data);
     }
-
-//    static size_t ccount = data_mgr.current_image_idx;
-//    printf("\tccount:%zu\n", ccount);
-
-//    std::vector<float> pt = trace_pts[ccount++];
-//    pt[2] += 29.5+19.6+5.71;
-//    mmath::Pose T_wrt_trocar(pt[0], pt[1], pt[2]);
-//    Eigen::Matrix4f T_trocar2cam;
-//    T_trocar2cam << -0.136169, 0.009819, 0.990637, -143.750786,
-//                    0.130543, -0.991055, 0.027767, -4.920749,
-//                    0.982052, 0.133100, 0.133668, 12.514195,
-//                    0, 0, 0, 1;
-//    mmath::Pose T_wrt_cam = mmath::Pose(T_trocar2cam) * T_wrt_trocar;
-//    std::cout << T_wrt_cam.T() << std::endl;
-//    model = cvt2GlmMat4(T_wrt_cam);
 
     return flag;
 }
@@ -190,7 +150,11 @@ void keyboardControlModel(GLFWwindow* window)
         printf("Gripper idx: %d angle: %f\n", GRIP_IDX, angle);
     }
     else if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
-        gl_util::print("Model", gl_util::transpose(model));
+        //gl_util::print("Model", gl_util::transpose(model));
+        mmath::Pose pose = cvt2Pose(model);
+        Eigen::Vector3f ypr = pose.R.eulerAngles(2, 1, 0);
+        printf("%f,%f,%f,%f,%f,%f\n", ypr[2], ypr[1], ypr[0],
+                pose.t[0], pose.t[1], pose.t[2]);
     }
     else if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
         updateBackground();
