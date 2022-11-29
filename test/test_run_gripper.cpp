@@ -3,20 +3,29 @@
 #include <gl_util.h>
 #include <lib_math/lib_math.h>
 #include <data_manager.h>
+#include <surgical_tool_manager.h>
 
 
-DataManager data_mgr(8);
+DataManager data_mgr(9);
 constexpr uint8_t GRIP_IDX = 0;
 glm::mat4 model = cvt2GlmMat4(data_mgr.init_grip_info.poses[GRIP_IDX]);
 float angle = 0.0;
 LayerBackground *layer_bg;
 
+SurgicalToolManager *STMgr;
+//Eigen::Matrix4f T_tb_2_cam;
+mmath::Pose T_tb_2_cam(-0.00709592,   0.0762671,    0.997063,    -149.627,
+                       0.998957  , 0.0454939 , 0.00421427 ,   -3.17574,
+                      0.0820322  ,  0.993772 , -0.0754326 ,    48.3279);
 
 bool updateBackground();
 void keyboardControlModel(GLFWwindow* window);
+void findTtb2cam();
 
 int main()
 {
+    STMgr = new SurgicalToolManager();
+
     int height = 1080;
     int width = 1920;
     gl_util::Window window(width, height);
@@ -34,6 +43,9 @@ int main()
 
     LayerViewPort viewport(width, height);
 
+    // Intilize surgical tools
+    SurgicalToolParam tool_param(80, 29.5, 19.6, 5.71, 4); // Lg = 18.9
+    STMgr->initialize(TOOL1, tool_param, SURGICAL_TOOL_TYPE_SP_TOOL, 0);
 
     // Add gripper
     glm::vec3 color(0.f, 0.8f, 0.8f);
@@ -71,6 +83,7 @@ int main()
     }
     window.release();
     delete layer_bg;
+    delete STMgr;
 
     return 0;
 }
@@ -91,6 +104,39 @@ bool updateBackground()
         layer_bg_data.height = fdata.left_rgb.rows;
         layer_bg_data.channels = fdata.left_rgb.channels();
         layer_bg->updateData(&layer_bg_data);
+
+        printf("\t update config.\n");
+        SurgicalToolConfig config(fdata.psi.L + 19.6+29.5, fdata.psi.phi,
+                                  fdata.psi.theta1, fdata.psi.delta1,
+                                  fdata.psi.theta2, fdata.psi.delta2);
+        STMgr->updateConfig(TOOL1, config);
+
+        auto T_tb = STMgr->getBasePose(TOOL1);
+        auto T_t2e = STMgr->getEndPose(TOOL1);
+
+        mmath::Pose T_t2e_2_tb = T_tb.inverse() * T_t2e;
+        auto T_g_2_cam = T_tb_2_cam * T_t2e_2_tb;
+
+        Eigen::Matrix3f R_grip_init;
+        R_grip_init << 0, -1, 0,
+                1, 0, 0,
+                0, 0, 1;
+
+//        Eigen::Vector3f x = T_g_2_cam.R.col(0);
+////        auto y = T_g_2_cam.R.col(1);
+////        T_g_2_cam.R.col(0) = y;
+////        T_g_2_cam.R.col(1) = -1*x;
+        T_g_2_cam.R *= R_grip_init;
+
+        model = cvt2GlmMat4(T_g_2_cam);
+        angle = fdata.psi.angle;
+
+//        printf("config:%s\n", config.info());
+        std::cout << config << "\n";
+        std::cout << T_t2e_2_tb << "\n" << T_g_2_cam << "\n";
+    }
+    else{
+        data_mgr.current_image_idx = data_mgr.min_image_idx;
     }
 
     return flag;
@@ -150,7 +196,7 @@ void keyboardControlModel(GLFWwindow* window)
         printf("Gripper idx: %d angle: %f\n", GRIP_IDX, angle);
     }
     else if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
-        //gl_util::print("Model", gl_util::transpose(model));
+        gl_util::print("Model", gl_util::transpose(model));
         mmath::Pose pose = cvt2Pose(model);
         Eigen::Vector3f ypr = pose.R.eulerAngles(2, 1, 0);
         printf("%f,%f,%f,%f,%f,%f\n", ypr[2], ypr[1], ypr[0],
@@ -160,4 +206,30 @@ void keyboardControlModel(GLFWwindow* window)
         updateBackground();
     }
     angle = std::fminf(std::fmaxf(angle, 0), 2*M_PI/3.f);
+}
+
+
+void findTtb2cam()
+{
+    SurgicalToolParam tool_param(80, 29.5, 19.6, 5.71, 4); // Lg = 18.9
+    SurgicalToolConfig config = SurgicalToolConfig(79.058144 + 29.5 + 19.6,
+                                -0.017924, 0.003210, -0.124690,
+                                0.012064, 3.012736);
+    STMgr->initialize(TOOL1, tool_param, SURGICAL_TOOL_TYPE_SP_TOOL, 0);
+    STMgr->updateConfig(TOOL1, config);
+
+    auto T_b_wrt_trocar = STMgr->getBasePose(TOOL1);
+    auto T_2e_wrt_trocar = STMgr->getEndPose(TOOL1);
+
+    mmath::Pose T_2e_wrt_b = T_b_wrt_trocar.inverse() * T_2e_wrt_trocar;
+
+    // For sequence_09
+    mmath::Pose T_g_wrt_cam(
+                0.000292, 0.074980, 0.997186, -16.154986,
+                0.997980,0.063391,-0.004474, -2.498408,
+                0.063548,0.995169, -0.074848, 38.223778);
+
+    mmath::Pose T_cam2image(mmath::rotByZf(mmath::PI));
+    T_tb_2_cam = T_g_wrt_cam * T_2e_wrt_b.inverse();// * T_cam2image.T();
+    std::cout << T_tb_2_cam << "\n";
 }

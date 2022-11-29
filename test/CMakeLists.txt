@@ -42,4 +42,5 @@ add_executable(${TEST_NAME}
 
 target_link_libraries(${TEST_NAME}
     ${PROJECT_NAME}
+    lib_surgical_tool
 )
