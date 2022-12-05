@@ -130,8 +130,8 @@ bool LayerGripper::loadModel()
         part_num = 3;
         // Lengthen cylinder as tool body
         origin = glm::vec3(0.f,0.f,-3.1f);
-        length = 3.05;
-        radius = 3.0;
+        length = 3.05 + 0.36;
+        radius = 3.0 + 0.2;
         break;
     case GRIPPER_BIPOLAR_GRASPING_FORCEPS:
         if(!STLReader::getInstance()->read(STL_BGF_0, data[0]))

@@ -132,8 +132,9 @@ bool updateBackground()
         angle = fdata.psi.angle;
 
 //        printf("config:%s\n", config.info());
-        std::cout << config << "\n";
-        std::cout << T_t2e_2_tb << "\n" << T_g_2_cam << "\n";
+//        std::cout << config << "\n";
+//        std::cout << T_t2e_2_tb << "\n" << T_g_2_cam << "\n";
+        printf("T_g_2_cam: %s\n", T_g_2_cam.info());
     }
     else{
         data_mgr.current_image_idx = data_mgr.min_image_idx;
