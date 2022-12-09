@@ -6,25 +6,26 @@
 #include <surgical_tool_manager.h>
 
 
-DataManager data_mgr(9);
+DataManager data_mgr(10);
 constexpr uint8_t GRIP_IDX = 0;
-glm::mat4 model = cvt2GlmMat4(data_mgr.init_grip_info.poses[GRIP_IDX]);
+glm::mat4 model;// = cvt2GlmMat4(data_mgr.init_grip_info.poses[GRIP_IDX]);
 float angle = 0.0;
 LayerBackground *layer_bg;
 
 SurgicalToolManager *STMgr;
 //Eigen::Matrix4f T_tb_2_cam;
-mmath::Pose T_tb_2_cam(-0.00709592,   0.0762671,    0.997063,    -149.627,
-                       0.998957  , 0.0454939 , 0.00421427 ,   -3.17574,
-                      0.0820322  ,  0.993772 , -0.0754326 ,    48.3279);
+mmath::Pose T_tb_2_cam;
 
 bool updateBackground();
 void keyboardControlModel(GLFWwindow* window);
-void findTtb2cam();
+//void findTtb2cam();
 
 int main()
 {
     STMgr = new SurgicalToolManager();
+
+    mmath::Pose n_model(-16,-2,38);
+    model = cvt2GlmMat4(n_model);
 
     int height = 1080;
     int width = 1920;
@@ -110,22 +111,29 @@ bool updateBackground()
                                   fdata.psi.theta1, fdata.psi.delta1,
                                   fdata.psi.theta2, fdata.psi.delta2);
         STMgr->updateConfig(TOOL1, config);
-
-        auto T_tb = STMgr->getBasePose(TOOL1);
-        auto T_t2e = STMgr->getEndPose(TOOL1);
-
-        mmath::Pose T_t2e_2_tb = T_tb.inverse() * T_t2e;
-        auto T_g_2_cam = T_tb_2_cam * T_t2e_2_tb;
+        mmath::Pose T_t2e_2_tb = STMgr->getEnd2BasePose(TOOL1);
 
         Eigen::Matrix3f R_grip_init;
         R_grip_init << 0, -1, 0,
                 1, 0, 0,
                 0, 0, 1;
+        if(data_mgr.current_image_idx - 1 == data_mgr.min_image_idx) {
+            mmath::Pose T_g_2_cam(data_mgr.init_grip_info.poses[GRIP_IDX]);
+            T_g_2_cam.R *= R_grip_init.transpose();
 
-//        Eigen::Vector3f x = T_g_2_cam.R.col(0);
-////        auto y = T_g_2_cam.R.col(1);
-////        T_g_2_cam.R.col(0) = y;
-////        T_g_2_cam.R.col(1) = -1*x;
+            if(!T_g_2_cam.isUnitOrthogonal()) {
+                T_g_2_cam.unitOrthogonalize();
+                printf("T_g_2_cam is not unit-orthogonal.\n");
+            }
+
+            mmath::Pose T_cam2image(mmath::rotByZf(mmath::PI));
+            T_tb_2_cam = T_g_2_cam * T_t2e_2_tb.inverse();// * T_cam2image.T();
+            std::cout << "T_tb_2_cam: \n" << T_tb_2_cam << "\n";
+        }
+
+
+        auto T_g_2_cam = T_tb_2_cam * T_t2e_2_tb;
+
         T_g_2_cam.R *= R_grip_init;
 
         model = cvt2GlmMat4(T_g_2_cam);
@@ -199,9 +207,10 @@ void keyboardControlModel(GLFWwindow* window)
     else if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
         gl_util::print("Model", gl_util::transpose(model));
         mmath::Pose pose = cvt2Pose(model);
-        Eigen::Vector3f ypr = pose.R.eulerAngles(2, 1, 0);
-        printf("%f,%f,%f,%f,%f,%f\n", ypr[2], ypr[1], ypr[0],
-                pose.t[0], pose.t[1], pose.t[2]);
+        printf("pose unit-orthogonal: %d\n", pose.isUnitOrthogonal());
+//        Eigen::Vector3f ypr = pose.R.eulerAngles(2, 1, 0);
+//        printf("%f,%f,%f,%f,%f,%f\n", ypr[2], ypr[1], ypr[0],
+//                pose.t[0], pose.t[1], pose.t[2]);
     }
     else if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
         updateBackground();
@@ -218,19 +227,22 @@ void findTtb2cam()
                                 0.012064, 3.012736);
     STMgr->initialize(TOOL1, tool_param, SURGICAL_TOOL_TYPE_SP_TOOL, 0);
     STMgr->updateConfig(TOOL1, config);
-
-    auto T_b_wrt_trocar = STMgr->getBasePose(TOOL1);
-    auto T_2e_wrt_trocar = STMgr->getEndPose(TOOL1);
-
-    mmath::Pose T_2e_wrt_b = T_b_wrt_trocar.inverse() * T_2e_wrt_trocar;
+    mmath::Pose T_2e_wrt_b = STMgr->getEnd2BasePose(TOOL1);
 
     // For sequence_09
-    mmath::Pose T_g_wrt_cam(
-                0.000292, 0.074980, 0.997186, -16.154986,
-                0.997980,0.063391,-0.004474, -2.498408,
-                0.063548,0.995169, -0.074848, 38.223778);
+    Eigen::Matrix3f R_grip_init;
+    R_grip_init << 0, -1, 0,
+            1, 0, 0,
+            0, 0, 1;
+    mmath::Pose T_g_2_cam(data_mgr.init_grip_info.poses[GRIP_IDX]);
+    T_g_2_cam.R *= R_grip_init.transpose();
+
+    if(!T_g_2_cam.isUnitOrthogonal()) {
+        T_g_2_cam.unitOrthogonalize();
+        printf("T_g_2_cam is not unit-orthogonal.\n");
+    }
 
     mmath::Pose T_cam2image(mmath::rotByZf(mmath::PI));
-    T_tb_2_cam = T_g_wrt_cam * T_2e_wrt_b.inverse();// * T_cam2image.T();
-    std::cout << T_tb_2_cam << "\n";
+    T_tb_2_cam = T_g_2_cam * T_2e_wrt_b.inverse();// * T_cam2image.T();
+    std::cout << "T_tb_2_cam: \n" << T_tb_2_cam << "\n";
 }
