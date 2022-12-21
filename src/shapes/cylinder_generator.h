@@ -4,17 +4,16 @@
 
 
 /**
- * @brief A class for generating circle vertices
+ * @brief A class for generating cylinder vertices
+ *     ___     
+ *    |   |    
+ *    |   |    length
+ *    |_._|    radius
+ *      origin
  */
 class CylinderGenerator : public GeneratorBase
 {
 public:
-    /**
-     * @brief Default constructor of class CylinderGenerator
-     */
-    CylinderGenerator();
-
-
     /**
      * @brief Constructor of class CylinderGenerator
      * @param points_num The number of points in each end circle

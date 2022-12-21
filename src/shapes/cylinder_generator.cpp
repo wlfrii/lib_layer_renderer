@@ -3,12 +3,6 @@
 #include "generator_util.h"
 
 
-CylinderGenerator::CylinderGenerator()
-{
-
-}
-
-
 CylinderGenerator::CylinderGenerator(int points_num, const glm::vec3& origin,
                                      float length, float radius)
 {
@@ -37,8 +31,8 @@ void CylinderGenerator::createVertices(int points_num, const glm::vec3 &origin,
     o2.z += length;
     CircleGenerator c2(points_num, o2, radius);
 
-    const auto& pos1 = c1.positions();
-    const auto& pos2 = c2.positions();
+    const auto& pos1 = c1.vertexPositions();
+    const auto& pos2 = c2.vertexPositions();
     const size_t num = pos1.size();
 
     _vertices_without_end_face.resize(num * 6);
