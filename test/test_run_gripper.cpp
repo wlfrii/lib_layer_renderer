@@ -6,7 +6,7 @@
 #include <surgical_tool_manager.h>
 
 
-DataManager data_mgr(10);
+DataManager data_mgr(11);
 constexpr uint8_t GRIP_IDX = 0;
 glm::mat4 model;// = cvt2GlmMat4(data_mgr.init_grip_info.poses[GRIP_IDX]);
 float angle = 0.0;
@@ -113,10 +113,11 @@ bool updateBackground()
         STMgr->updateConfig(TOOL1, config);
         mmath::Pose T_t2e_2_tb = STMgr->getEnd2BasePose(TOOL1);
 
+//        std::cout << "config: \n" << config << "\n";
+//        std::cout << "T_t2e_2_tb: \n" << T_t2e_2_tb << "\n";
+
         Eigen::Matrix3f R_grip_init;
-        R_grip_init << 0, -1, 0,
-                1, 0, 0,
-                0, 0, 1;
+        R_grip_init << 0, -1, 0, 1, 0, 0, 0, 0, 1;
         if(data_mgr.current_image_idx - 1 == data_mgr.min_image_idx) {
             mmath::Pose T_g_2_cam(data_mgr.init_grip_info.poses[GRIP_IDX]);
             T_g_2_cam.R *= R_grip_init.transpose();
@@ -126,8 +127,10 @@ bool updateBackground()
                 printf("T_g_2_cam is not unit-orthogonal.\n");
             }
 
-            mmath::Pose T_cam2image(mmath::rotByZf(mmath::PI));
-            T_tb_2_cam = T_g_2_cam * T_t2e_2_tb.inverse();// * T_cam2image.T();
+            T_tb_2_cam = T_g_2_cam * T_t2e_2_tb.inverse();
+
+//            T_tb_2_cam = data_mgr.T_tb2cam;
+
             std::cout << "T_tb_2_cam: \n" << T_tb_2_cam << "\n";
         }
 
