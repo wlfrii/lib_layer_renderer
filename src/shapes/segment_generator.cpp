@@ -15,8 +15,8 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
     std::vector<float> L;
     mmath::linspace(0, len_gap, length, L);
 
-    std::vector<CircleGenerator> circles(L.size());
-    circles[0] = CircleGenerator(points_num, glm::vec3(0.f,0.f,0.f), radius);
+    std::vector<CircleGenerator*> circles(L.size());
+    circles[0] = new CircleGenerator(points_num, glm::vec3(0.f,0.f,0.f), radius);
 
     mmath::Pose endpose;
     for(size_t i = 1; i < L.size(); i++){
@@ -24,20 +24,20 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
         float t_theta = t_len / length * theta;
         endpose = mmath::continuum::calcSingleSegmentPose(t_len, t_theta, delta);
 
-        circles[i] = CircleGenerator(points_num, cvt2GlmMat4(endpose), radius);
+        circles[i] = new CircleGenerator(points_num, cvt2GlmMat4(endpose), radius);
     }
 
     _vertices_spacers.clear();
     for(auto& cc : circles){
         _vertices_spacers.insert(_vertices_spacers.end(),
-                                 cc.result().begin(), cc.result().end());
+                                 cc->result().begin(), cc->result().end());
     }
     //printf("_vertices_spacers.size:%ld\n", _vertices_spacers.size());
 
     _vertices.clear();
     for(size_t i = 0; i < L.size() - 1; i++){
-        auto& pos1 = circles[i].positions();
-        auto& pos2 = circles[i + 1].positions();
+        auto& pos1 = circles[i]->vertexPositions();
+        auto& pos2 = circles[i + 1]->vertexPositions();
 
         Vertices vertices(points_num * 6);
         for(int i = 0; i < points_num; i++){
@@ -63,8 +63,13 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
     }
     auto& c1 = circles[0];
     auto& c2 = circles[circles.size() - 1];
-    _vertices.insert(_vertices.end(), c1.result().begin(), c1.result().end());
-    _vertices.insert(_vertices.end(), c2.result().begin(), c2.result().end());
+    _vertices.insert(_vertices.end(), c1->result().begin(), c1->result().end());
+    _vertices.insert(_vertices.end(), c2->result().begin(), c2->result().end());
+
+    for(auto& cc : circles){
+        delete cc;
+        cc = nullptr;
+    }
 }
 
 

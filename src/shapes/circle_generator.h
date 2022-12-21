@@ -10,12 +10,6 @@ class CircleGenerator : public GeneratorBase
 {
 public:
     /**
-     * @brief Default constructor of class CircleGenerator
-     */
-    CircleGenerator();
-
-
-    /**
      * @brief Constructor of class CircleGenerator
      * @param points_num The number of points in the circle
      * @param origin     The origin of the circle
@@ -37,12 +31,12 @@ public:
      * @brief Return the vertex positions of the circle
      * @return
      */
-    const Positions& positions() const;
+    const VertexPositions& vertexPositions() const;
 
 private:
     void createVertices(const glm::vec3& origin, int points_num);
 
-    Positions   _positions;  //!< vertex positions of the circle
+    VertexPositions   _vert_positions;  //!< vertex positions of the circle
 };
 
 #endif // CIRCLEGENERATOR_H
