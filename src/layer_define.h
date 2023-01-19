@@ -6,7 +6,7 @@
 
 
 /**
- * @brief A struct designed for vertex
+ * @brief A struct designed for vertex(position,normal)
  */
 struct Vertex
 {
@@ -16,7 +16,9 @@ struct Vertex
 
 
 /**
- * @brief A struct designed for vertex
+ * @brief A struct designed for vertex(position,color)
+ * For now, this Type only for PCL in layer_texture3d, it might be deleted in
+ * the future
  */
 struct VertexC
 {
@@ -34,7 +36,7 @@ using Vertices = std::vector<Vertex>;
 /**
  * @brief Store the vertex position
  */
-using Positions = std::vector<glm::vec4>;
+using VertexPositions = std::vector<glm::vec4>;
 
 
 
