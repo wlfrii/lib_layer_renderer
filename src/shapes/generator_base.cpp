@@ -12,7 +12,7 @@ GeneratorBase::~GeneratorBase()
 }
 
 
-const Vertices &GeneratorBase::result() const
+const Vertices &GeneratorBase::vertices() const
 {
     return _vertices;
 }

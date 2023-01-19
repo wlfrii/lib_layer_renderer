@@ -19,7 +19,7 @@ public:
      * @brief Return the generated vertices
      * @return
      */
-    const Vertices& result() const;
+    const Vertices& vertices() const;
 
 protected:
     Vertices    _vertices;   //!< Store the generated vertices
