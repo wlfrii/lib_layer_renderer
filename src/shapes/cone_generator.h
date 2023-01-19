@@ -13,25 +13,16 @@
  */
 class ConeGenerator : public GeneratorBase
 {
-public:
+public:    
     /**
      * @brief Constructor of class ConeGenerator
      * @param points_num The number of points in the cone base
      * @param height     The height of the cone
      * @param radius     The radius of the cone base
-     */
-    ConeGenerator(int points_num, float height, float radius);
-
-    
-    /**
-     * @brief Constructor of class ConeGenerator
-     * @param points_num The number of points in the cone base
      * @param pose       The pose of cone
-     * @param height     The height of the cone
-     * @param radius     The radius of the cone base
      */
-    ConeGenerator(int points_num, const glm::mat4& pose, float height,
-                  float radius);
+    ConeGenerator(int points_num, float height, float radius,
+                  const glm::mat4& pose);
 
 
 private:

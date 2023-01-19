@@ -15,8 +15,7 @@ public:
      * @param radius     The radius of the circle
      * @param pose       The pose of the circle
      */
-    CircleGenerator(int points_num,  float radius,
-                    const glm::mat4& pose = glm::mat4(1.0f));
+    CircleGenerator(int points_num,  float radius, const glm::mat4& pose);
 
 
     /**
