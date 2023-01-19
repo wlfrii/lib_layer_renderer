@@ -51,6 +51,8 @@ public:
      * @param color   The color of the cylinder
      */
     LayerCylinder(float length, float radius, const glm::vec3 &color);
+
+
     ~LayerCylinder();
 
 
