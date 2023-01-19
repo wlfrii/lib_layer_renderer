@@ -36,21 +36,13 @@ class LayerCylinder : public LayerModel
 public:
     /**
      * @brief Constructor of class LayerCylinder.
-     * @param origin  The origin of the cylinder
      * @param length  The length of the cylinder
      * @param radius  The radius of the cylinder
      * @param color   The color of the cylinder
+     * @param pose  The origin of the cylinder
      */
-    LayerCylinder(const glm::vec3 &origin, float length, float radius,
-                  const glm::vec3 &color);
-
-    /**
-     * @brief Constructor of class LayerCylinder, with default (0,0,0) origin.
-     * @param length  The length of the cylinder
-     * @param radius  The radius of the cylinder
-     * @param color   The color of the cylinder
-     */
-    LayerCylinder(float length, float radius, const glm::vec3 &color);
+    LayerCylinder(float length, float radius, const glm::vec3 &color,
+                  const glm::mat4& pose = glm::mat4(1.f));
 
 
     ~LayerCylinder();
@@ -58,11 +50,11 @@ public:
 
     /**
      * @brief Change the property for current object.
-     * @param origin  The origin of the cylinder
      * @param length  The length of the cylinder
      * @param radius  The radius of the cylinder
+     * @param pose  The origin of the cylinder
      */
-    void setProperty(const glm::vec3 &origin, float length, float radius);
+    void setProperty(float length, float radius, const glm::mat4 &pose);
 
 
     /**
@@ -80,8 +72,9 @@ public:
     void setProperty(float length);
 
 private:
-    glm::vec3 _origin;      //!< The origin of the cylinder
-    float     _radius;      //!< The radius of the cylinder
+    glm::mat4 _pose;      //!< The origin of the cylinder
+    float     _length;    //!< The length of the cylinder
+    float     _radius;    //!< The radius of the cylinder
 };
 
 #endif // LAYER_CYLINDER_H_LF

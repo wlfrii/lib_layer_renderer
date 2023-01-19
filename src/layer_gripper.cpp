@@ -196,9 +196,8 @@ bool LayerGripper::loadModel()
 
     // Bind the ignored part
     if(part_num >= 3){
-        int num = (int)radius*3.1415926*2 / 1.f;
-        CylinderGenerator cg(num, origin, length, radius);
-        auto data = cg.result();
+        CylinderGenerator cg(length, radius, origin);
+        auto data = cg.vertices();
 
         _vavbo_ignore = new gl_util::VAVBEBO();
         _vavbo_ignore->bind(&data[0].position.x, data.size() * sizeof(Vertex));

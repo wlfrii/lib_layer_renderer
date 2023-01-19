@@ -32,12 +32,12 @@ void LayerSegment::setProperty(float length, float theta, float delta,
 
     Vertices data;
     if(abs(theta) < 1e-4){
-        CylinderGenerator cg(num, length, radius);
-        data = cg.result();
+        CylinderGenerator cg(length, radius, glm::mat4(1.f));
+        data = cg.vertices();
     }
     else{
         SegmentGenerator sg(num, length, len_gap, theta, delta, radius);
-        data = sg.result();
+        data = sg.vertices();
         //auto data = sg.resultSpacers();
     }
 

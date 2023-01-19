@@ -23,9 +23,8 @@ LayerCone::~LayerCone()
 
 void LayerCone::setProperty(float height, float radius, const glm::mat4& pose)
 {
-    int num = (int)radius*3.1415926*2 / 0.7f;
-    ConeGenerator cg(num, height, radius, pose);
-    auto data = cg.result();
+    ConeGenerator cg(height, radius, pose);
+    auto data = cg.vertices();
 
     _vavbebo->bind(&data[0].position.x, data.size() * sizeof(Vertex));
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);

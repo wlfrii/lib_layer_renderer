@@ -22,9 +22,8 @@ LayerCircle::~LayerCircle()
 
 void LayerCircle::setProperty(const glm::mat4 &pose, float radius)
 {
-    int num = (int)radius*3.1415926*2 / 0.7f;
-    CircleGenerator cg(num, radius, pose);
-    auto data = cg.result();
+    CircleGenerator cg(radius, pose);
+    auto data = cg.vertices();
 
     _vavbebo->bind(&data[0].position.x, data.size() * sizeof(Vertex));
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);

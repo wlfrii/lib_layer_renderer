@@ -58,6 +58,7 @@ enum LayerType
     LAYER_CYLINDER,
     LAYER_SEGMENT,
     LAYER_CONE,
+    LAYER_COORDINATE,
     LAYER_GRIPPER,        // Needle holder
     LAYER_TEXTURE3D,
     LAYER_UNKNOWN

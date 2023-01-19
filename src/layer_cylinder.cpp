@@ -4,22 +4,14 @@
 #include <global.h>
 
 
-LayerCylinder::LayerCylinder(const glm::vec3 &origin, float length,
-                             float radius, const glm::vec3 &color)
+LayerCylinder::LayerCylinder(float length, float radius, const glm::vec3 &color,
+                             const glm::mat4& pose)
     : LayerModel(LAYER_CYLINDER, color)
-    , _origin(origin)
+    , _pose(pose)
+    , _length(length)
     , _radius(radius)
 {
-    setProperty(origin, length, radius);
-}
-
-
-LayerCylinder::LayerCylinder(float length, float radius, const glm::vec3 &color)
-    : LayerModel(LAYER_CYLINDER, color)
-    , _origin(glm::vec3(0.f, 0.f, 0.f))
-    , _radius(radius)
-{
-    setProperty(length, radius);
+    setProperty(length, radius, pose);
 }
 
 
@@ -29,14 +21,14 @@ LayerCylinder::~LayerCylinder()
 }
 
 
-void LayerCylinder::setProperty(const glm::vec3 &origin, float length, float radius)
+void LayerCylinder::setProperty(float length, float radius, const glm::mat4 &pose)
 {
-    _origin = origin;
+    _pose = pose;
+    _length = length;
     _radius = radius;
 
-    int num = (int)radius*3.1415926*2 / 0.7f;
-    CylinderGenerator cg(num, origin, length, radius);
-    auto data = cg.result();
+    CylinderGenerator cg(length, radius, pose);
+    auto data = cg.vertices();
 
     _vavbebo->bind(&data[0].position.x, data.size() * sizeof(Vertex));
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -50,11 +42,11 @@ void LayerCylinder::setProperty(const glm::vec3 &origin, float length, float rad
 void LayerCylinder::setProperty(float length, float radius)
 {
     _radius = radius;
-    setProperty(_origin, length, radius);
+    setProperty(length, radius, _pose);
 }
 
 
 void LayerCylinder::setProperty(float length)
 {
-    setProperty(_origin, length, _radius);
+    setProperty(length, _radius, _pose);
 }

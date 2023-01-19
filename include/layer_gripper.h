@@ -27,7 +27,6 @@
 #define LAYER_GRIPPER_H_LF
 #include "layer_model.h"
 
-class LayerCylinder;
 
 /**
  * @brief The GripperType enum specify the support gripper type.
