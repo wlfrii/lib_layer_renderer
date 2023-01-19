@@ -54,8 +54,10 @@ enum LayerRenderMode
 enum LayerType
 {
     LAYER_BACKGROUND,
+    LAYER_CIRCLE,
     LAYER_CYLINDER,
     LAYER_SEGMENT,
+    LAYER_CONE,
     LAYER_GRIPPER,        // Needle holder
     LAYER_TEXTURE3D,
     LAYER_UNKNOWN
