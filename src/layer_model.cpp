@@ -52,6 +52,15 @@ void LayerModel::setProjection(const glm::mat4& proj)
 }
 
 
+void LayerModel::setColor(const glm::vec3 &object_color)
+{
+    _object_color = object_color;
+
+    _shader->use();
+    _shader->setVec3f("object_color", _object_color);
+}
+
+
 void LayerModel::draw(bool is_right)
 {
     _shader->use();

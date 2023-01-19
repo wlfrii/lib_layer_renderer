@@ -66,6 +66,14 @@ public:
      */
     static void setProjection(const glm::mat4& proj);
 
+
+    /**
+     * @brief Change the object color
+     * @param color
+     */
+    void setColor(const glm::vec3 &object_color);
+
+
 protected:
     /* Draw the vertices */
     virtual void draw(bool is_right) override;
