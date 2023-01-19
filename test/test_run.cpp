@@ -1,5 +1,8 @@
+#include <layer_circle.h>
 #include <layer_cylinder.h>
 #include <layer_segment.h>
+#include <layer_cone.h>
+#include <layer_coordinate.h>
 #include <layer_background.h>
 #include <gl_util.h>
 #include <lib_math/lib_math.h>
@@ -14,7 +17,7 @@ float theta = 0.7;
 void keyboardControlModel(GLFWwindow* window);
 
 #define IDX 2
-int main()
+int main(int argc, char* argv[])
 {
     int height = 1080;
     int width = 1920;
@@ -22,21 +25,67 @@ int main()
     window.enableDepthTest();
     window.setKeyboardEventCallBack(keyboardControlModel);
 
-    float len = 10;
-    float delta = 0.2;
-    float radius = 2;
-#if IDX == 0
-    printf("Test layerCylinder\n");
-    LayerCylinder layer_obj2(10, 2, glm::vec3(1.0, 0.0, 1.0));
-#elif IDX == 1
-    printf("Test layerSegment\n");
-    LayerSegment layer_obj(len, theta, delta, radius, glm::vec3(1.0, 1.0, 0.0));
-#elif IDX == 2
-    printf("Test layerSegment and layerCylinder\n");
-    LayerSegment layer_obj(len, theta, delta, radius, glm::vec3(1.0, 1.0, 0.0));
-    mmath::Pose pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
-    LayerCylinder layer_obj2(len, radius, glm::vec3(0.0, 1.0, 1.0));
-#endif
+
+    // Create object
+    LayerModel *layer_obj;
+    glm::mat4 pose(1.f);
+    pose = glm::rotate(pose, glm::radians(60.f), glm::vec3(1.f, 0.f, 0.f));
+    // Create coordinate
+//    LayerModel layer_coord = LayerCoordinate(10, 2);
+
+    // --------------------------- Prase inputs -----------------------------
+    unsigned char type = 0;
+    // Check input
+    if(argc < 2)
+    {
+        printf("Test lib render layer."
+               "\nPlease input an index (0-4) to specify the object to be"
+               "reendered. The deatials of the index is as follows:"
+               "\n\t0 - Render coordinate system"
+               "\n\t1 - Render circle with coordinate"
+               "\n\t2 - Render cylinder with coordinate"
+               "\n\t3 - Render segment with coordinate"
+               "\n\t4 - Render cone with coordinate"
+               "\n");
+        return 0;
+    }
+    else{
+        type = std::stoi(argv[1]);
+        switch(type){
+        case 0:
+            printf("Test - Render LayerCoordinate\n");
+            break;
+        case 1:
+            printf("Test - Render LayerCircle\n");
+            layer_obj = new LayerCircle(10, glm::vec3(0.3, 0.0, 1.0), pose);
+            break;
+        case 2:
+            printf("Test - Render LayerCylinder\n");
+            layer_obj = new LayerCylinder(10, 2, glm::vec3(1.0, 0.0, 1.0), pose);
+            break;
+        case 3:
+            printf("Test - Render LayerSegment\n");
+            layer_obj = new LayerSegment(10, 0.8, 0.2, 2, glm::vec3(1.0, 1.0, 0.0));
+            break;
+        case 4:
+            printf("Test - Render LayerCone\n");
+            layer_obj = new LayerCone(20, 5, glm::vec3(1.0, 0.3, 0.0), pose);
+            break;
+        }
+
+    }
+    // -------------------------------------------------------------------------
+
+
+//    float len = 10;
+//    float delta = 0.2;
+//    float radius = 2;
+//    printf("Test layerSegment and layerCylinder\n");
+//    LayerSegment layer_obj(len, theta, delta, radius, glm::vec3(1.0, 1.0, 0.0));
+//    mmath::Pose pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
+//    LayerCylinder layer_obj2(len, radius, glm::vec3(0.0, 1.0, 1.0));
+
+//    model = glm::rotate(model, glm::radians(60.f), glm::vec3(1.f, 0.f, 0.f));
 
     glm::mat4 view = glm::rotate(glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
     view[3][0] += 2.f;
@@ -48,44 +97,32 @@ int main()
 
     LayerViewPort viewport(width, height);
 
-    // Add background
-//    std::string name = "../data/sequences2/frame_0001.png";
-//    cv::Mat image = cv::imread(name);
-//    cv::resize(image, image, cv::Size(3840, 1080));
-//    cv::Mat left = image.colRange(0, 1920).clone();
-//    cv::Mat right = image.colRange(1920, 3840).clone();
-//    cv::cvtColor(left, left, cv::COLOR_BGR2RGB);
-//    cv::cvtColor(right, right, cv::COLOR_BGR2RGB);
-//    cv::flip(left, left, 0);
-//    cv::flip(right, right, 0);
-//    LayerBackground layer_bg = LayerBackground();
-//    LayerBackgroundData layer_bg_data;
-//    layer_bg_data.data[0] = left.data;
-//    layer_bg_data.data[1] = right.data;
-//    layer_bg_data.width = left.cols;
-//    layer_bg_data.height = left.rows;
-//    layer_bg_data.channels = left.channels();
-//    layer_bg.updateData(&layer_bg_data);
-//    printf("left.data:%p, bg.data:%p\n", left.data, layer_bg_data.data[0]);
-//    printf("right.data:%p, bg.data:%p\n", right.data, layer_bg_data.data[1]);
-
     auto mode = LAYER_RENDER_LEFT;
     while (!window.shouldClose()) {
         window.activate();
         window.clear();
         glClearDepth(1.0);
 
+//        layer_coord.setModel(model);
+//        layer_coord.render(viewport, mode);
         //layer_bg.render(viewport, mode);
 
-        layer_obj.setProperty(len, theta, delta);
-        layer_obj.setModel(model);
-        layer_obj.render(viewport, mode);
-        pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
-        layer_obj2.setModel(model*cvt2GlmMat4(pose));
-        layer_obj2.render(viewport, mode);
+//        layer_obj->setProperty(len, theta, delta);
+        if(layer_obj){
+            layer_obj->setModel(model);
+            layer_obj->render(viewport, mode);
+        }
+//        pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
+//        layer_obj2.setModel(model*cvt2GlmMat4(pose));
+//        layer_obj2.render(viewport, mode);
         window.refresh();
     }
     window.release();
+
+    if(layer_obj){
+        delete layer_obj;
+        layer_obj = nullptr;
+    }
 
     return 0;
 }
