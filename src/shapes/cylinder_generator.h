@@ -16,33 +16,30 @@ class CylinderGenerator : public GeneratorBase
 public:
     /**
      * @brief Constructor of class CylinderGenerator
-     * @param points_num The number of points in each end circle
-     * @param origin     The origin of the cylinder
      * @param length     The length of the cylinder
      * @param radius     The radius of the cylinder
+     * @param pose       The pose of the cylinder
      */
-    CylinderGenerator(int points_num, const glm::vec3& origin, float length,
-                      float radius);
+    CylinderGenerator(float length, float radius, const glm::mat4& pose);
 
 
     /**
      * @brief Constructor of class CylinderGenerator
-     * @param points_num The number of points in the end circle
      * @param length     The length of the cylinder
      * @param radius     The radius of the cylinder
+     * @param origin     The origin of the cylinder
      */
-    CylinderGenerator(int points_num, float length, float radius);
+    CylinderGenerator(float length, float radius, const glm::vec3& origin);
 
 
     /**
      * @brief Return cylinder vertices without end circle.
      * @return
      */
-    const Vertices& resultWithoutEndFace() const;
+    const Vertices& verticesWithoutEndFace() const;
 
 private:
-    void createVertices(int points_num, const glm::vec3& origin, float length,
-                        float radius);
+    void createVertices(float length, float radius, const glm::mat4& pose);
 
 private:
     Vertices _vertices_without_end_face;

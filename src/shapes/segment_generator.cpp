@@ -16,7 +16,7 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
     mmath::linspace(0, len_gap, length, L);
 
     std::vector<CircleGenerator*> circles(L.size());
-    circles[0] = new CircleGenerator(points_num, radius, glm::vec3(0.f,0.f,0.f));
+    circles[0] = new CircleGenerator(radius, glm::mat4(1.f));
 
     mmath::Pose endpose;
     for(size_t i = 1; i < L.size(); i++){
@@ -24,13 +24,13 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
         float t_theta = t_len / length * theta;
         endpose = mmath::continuum::calcSingleSegmentPose(t_len, t_theta, delta);
 
-        circles[i] = new CircleGenerator(points_num, radius, cvt2GlmMat4(endpose));
+        circles[i] = new CircleGenerator(radius, cvt2GlmMat4(endpose));
     }
 
     _vertices_spacers.clear();
     for(auto& cc : circles){
         _vertices_spacers.insert(_vertices_spacers.end(),
-                                 cc->result().begin(), cc->result().end());
+                                 cc->vertices().begin(), cc->vertices().end());
     }
     //printf("_vertices_spacers.size:%ld\n", _vertices_spacers.size());
 
@@ -63,8 +63,8 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
     }
     auto& c1 = circles[0];
     auto& c2 = circles[circles.size() - 1];
-    _vertices.insert(_vertices.end(), c1->result().begin(), c1->result().end());
-    _vertices.insert(_vertices.end(), c2->result().begin(), c2->result().end());
+    _vertices.insert(_vertices.end(), c1->vertices().begin(), c1->vertices().end());
+    _vertices.insert(_vertices.end(), c2->vertices().begin(), c2->vertices().end());
 
     for(auto& cc : circles){
         delete cc;

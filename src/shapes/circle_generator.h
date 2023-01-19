@@ -11,20 +11,10 @@ class CircleGenerator : public GeneratorBase
 public:
     /**
      * @brief Constructor of class CircleGenerator
-     * @param points_num The number of points in the circle
      * @param radius     The radius of the circle
      * @param pose       The pose of the circle
      */
-    CircleGenerator(int points_num,  float radius, const glm::mat4& pose);
-
-
-    /**
-     * @brief Constructor of class CircleGenerator
-     * @param points_num The number of points in the circle
-     * @param origin     The origin of the circle
-     * @param radius     The radius of the circle
-     */
-    CircleGenerator(int points_num, float radius, const glm::vec3& origin);
+    CircleGenerator(float radius, const glm::mat4& pose);
 
 
     /**
@@ -35,14 +25,15 @@ public:
 
 
     /**
-     * @brief flip the Normal of Vertex, since circle has two faces
+     * @brief Return the Vertices with flipped normal since circle has two faces
      * @return
      */
-    Vertices flipVertexNormal() const;
+    Vertices normalFlippedVertices() const;
 
 
 private:
-    void createVertices(int points_num, const glm::mat4 &pose, float radius);
+    /* Create the circle vertices */
+    void createVertices(float radius, const glm::mat4 &pose);
 
     VertexPositions   _vert_positions;  //!< vertex positions of the circle
 };

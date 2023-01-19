@@ -3,33 +3,39 @@
 #include "generator_util.h"
 
 
-CylinderGenerator::CylinderGenerator(int points_num, const glm::vec3& origin,
-                                     float length, float radius)
+CylinderGenerator::CylinderGenerator(float length, float radius,
+                                     const glm::mat4& pose)
 {
-    createVertices(points_num, origin, length, radius);
+    createVertices(length, radius, pose);
 }
 
 
-CylinderGenerator::CylinderGenerator(int points_num, float length, float radius)
+CylinderGenerator::CylinderGenerator(float length, float radius,
+                                     const glm::vec3& origin)
 {
-    createVertices(points_num, glm::vec3(0, 0, 0), length, radius);
+    glm::mat4 pose(1.f);
+    pose[3][0] = origin[0];
+    pose[3][1] = origin[1];
+    pose[3][2] = origin[2];
+    createVertices(length, radius, pose);
 }
 
 
-const Vertices &CylinderGenerator::resultWithoutEndFace() const
+const Vertices &CylinderGenerator::verticesWithoutEndFace() const
 {
     return _vertices_without_end_face;
 }
 
 
-void CylinderGenerator::createVertices(int points_num, const glm::vec3 &origin,
-                                       float length, float radius)
+void CylinderGenerator::createVertices(float length, float radius,
+                                       const glm::mat4& pose)
 {
-    glm::vec3 o1 = origin;
-    CircleGenerator c1(points_num, radius, o1);
-    glm::vec3 o2 = origin;
-    o2.z += length;
-    CircleGenerator c2(points_num, radius, o2);
+    CircleGenerator c1(radius, pose);
+    glm::mat4 end_pose = pose;
+    end_pose[3][0] += length * end_pose[2][0];
+    end_pose[3][1] += length * end_pose[2][1];
+    end_pose[3][2] += length * end_pose[2][2];
+    CircleGenerator c2(radius, end_pose);
 
     const auto& pos1 = c1.vertexPositions();
     const auto& pos2 = c2.vertexPositions();
@@ -57,6 +63,6 @@ void CylinderGenerator::createVertices(int points_num, const glm::vec3 &origin,
     }
 
     _vertices = _vertices_without_end_face;
-    _vertices.insert(_vertices.end(), c1.result().begin(), c1.result().end());
-    _vertices.insert(_vertices.end(), c2.result().begin(), c2.result().end());
+    _vertices.insert(_vertices.end(), c1.vertices().begin(), c1.vertices().end());
+    _vertices.insert(_vertices.end(), c2.vertices().begin(), c2.vertices().end());
 }
