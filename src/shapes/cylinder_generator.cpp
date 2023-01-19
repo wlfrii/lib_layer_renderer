@@ -26,10 +26,10 @@ void CylinderGenerator::createVertices(int points_num, const glm::vec3 &origin,
                                        float length, float radius)
 {
     glm::vec3 o1 = origin;
-    CircleGenerator c1(points_num, o1, radius);
+    CircleGenerator c1(points_num, radius, o1);
     glm::vec3 o2 = origin;
     o2.z += length;
-    CircleGenerator c2(points_num, o2, radius);
+    CircleGenerator c2(points_num, radius, o2);
 
     const auto& pos1 = c1.vertexPositions();
     const auto& pos2 = c2.vertexPositions();

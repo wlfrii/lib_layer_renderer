@@ -2,32 +2,54 @@
 #include "generator_util.h"
 
 
-CircleGenerator::CircleGenerator(int points_num, const glm::vec3& origin,
-                                 float radius)
+CircleGenerator::CircleGenerator(int points_num, float radius,
+                                 const glm::mat4& pose)
 {
     assert(points_num >= 3);
 
-    // Build circle points
-    _vert_positions.resize(points_num);
-    double angle = 2.0*M_PI / points_num;
-    for(int i = 0; i < points_num; i++){
-        float delta = angle * i;
-        float x = origin.x + radius * glm::cos(delta);
-        float y = origin.y + radius * glm::sin(delta);
-        float z = origin.z;
-        _vert_positions[i] = glm::vec4(x, y, z, 1);
-    }
-
     // Build circle vertices with normal
-    createVertices(origin, points_num);
+    createVertices(points_num, pose, radius);
 }
 
 
-CircleGenerator::CircleGenerator(int points_num, const glm::mat4 &pose, float radius)
+CircleGenerator::CircleGenerator(int points_num, float radius,
+                                 const glm::vec3& origin)
 {
     assert(points_num >= 3);
 
-    // Build circle points
+    glm::mat4 pose(1.0f);
+    pose[3][0] = origin[0];
+    pose[3][1] = origin[1];
+    pose[3][2] = origin[2];
+
+    // Build circle vertices with normal
+    createVertices(points_num, pose, radius);
+}
+
+
+
+
+const VertexPositions& CircleGenerator::vertexPositions() const
+{
+    return _vert_positions;
+}
+
+
+Vertices CircleGenerator::flipVertexNormal() const
+{
+    Vertices vertices = _vertices;
+    for(auto& vert : vertices){
+        glm::vec4 n = vert.normal;
+        vert.normal = glm::vec4(-n[0], -n[1], -n[2], 1.0f);
+    }
+    return vertices;
+}
+
+
+void CircleGenerator::createVertices(int points_num, const glm::mat4 &pose,
+                                     float radius)
+{
+    // Create positions
     _vert_positions.resize(points_num);
     double angle = 2.0*M_PI / points_num;
     for(int i = 0; i < points_num; i++){
@@ -38,28 +60,16 @@ CircleGenerator::CircleGenerator(int points_num, const glm::mat4 &pose, float ra
         _vert_positions[i] = pose * glm::vec4(x, y, z, 1);
     }
 
-    // Build circle vertices with normal
-    createVertices(glm::vec3(pose[3][0], pose[3][1], pose[3][2]), points_num);
-}
-
-
-const VertexPositions& CircleGenerator::vertexPositions() const
-{
-    return _vert_positions;
-}
-
-
-void CircleGenerator::createVertices(const glm::vec3& origin, int points_num)
-{
+    // Create vertices
     _vertices.resize(points_num * 3);
-    glm::vec4 p = glm::vec4(origin, 1.f);
+    glm::vec4 p = glm::vec4(pose[3][0], pose[3][1], pose[3][2], 1.f);
     for(int i = 0; i < points_num; i++){
-        glm::vec4 p1 = _vert_positions[i];
-        glm::vec4 p2 = _vert_positions[(i + 1) % points_num];
+        const glm::vec4& p1 = _vert_positions[i];
+        const glm::vec4& p2 = _vert_positions[(i + 1) % points_num];
         glm::vec4 n = getNormal(p1, p, p2);
 
-        _vertices.push_back({p1, n});
-        _vertices.push_back({p2, n});
-        _vertices.push_back({p, n});
+        _vertices[i*3 + 0] = {p1, n};
+        _vertices[i*3 + 1] = {p2, n};
+        _vertices[i*3 + 2] = {p, n};
     }
 }
