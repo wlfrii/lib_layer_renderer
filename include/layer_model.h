@@ -67,6 +67,7 @@ public:
     static void setProjection(const glm::mat4& proj);
 
 protected:
+    /* Draw the vertices */
     virtual void draw(bool is_right) override;
 
     static glm::mat4  _projection;                 //!< Projection matrix

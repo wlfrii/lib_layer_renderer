@@ -34,19 +34,6 @@ LayerModel::~LayerModel()
 }
 
 
-void LayerModel::draw(bool is_right)
-{
-    _shader->use();
-    _shader->setMat4f("projection", _projection);
-    _shader->setMat4f("model", _model);
-    _shader->setMat4f("view", _view[is_right]);
-    auto &view = _view[is_right];
-    _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
-    _vavbebo->bindVertexArray();
-    glDrawArrays(GL_TRIANGLES, 0, _vert_num);
-}
-
-
 void LayerModel::setModel(const glm::mat4& model)
 {
     _model = model;
@@ -62,4 +49,17 @@ void LayerModel::setView(const glm::mat4& view, bool is_right)
 void LayerModel::setProjection(const glm::mat4& proj)
 {
     _projection = proj;
+}
+
+
+void LayerModel::draw(bool is_right)
+{
+    _shader->use();
+    _shader->setMat4f("projection", _projection);
+    _shader->setMat4f("model", _model);
+    _shader->setMat4f("view", _view[is_right]);
+    auto &view = _view[is_right];
+    _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
+    _vavbebo->bindVertexArray();
+    glDrawArrays(GL_TRIANGLES, 0, _vert_num);
 }
