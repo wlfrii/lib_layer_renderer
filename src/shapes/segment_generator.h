@@ -17,14 +17,13 @@ public:
 
     /**
      * @brief Constructor of class SegmentGenerator.
-     * @param points_num The number of points in each end circle
      * @param length     The length of the segment
      * @param len_gap    The length gap of the segment
      * @param theta      The bending angle of the segment
      * @param delta      The bending direction of the segment
      * @param radius     The radius of the segment
      */
-    SegmentGenerator(int points_num, float length, float len_gap,
+    SegmentGenerator(float length, float len_gap,
                      float theta, float delta, float radius);
 
 
@@ -32,7 +31,7 @@ public:
      * @brief Reture the vertices of the spacers of the segment.
      * @return
      */
-    const Vertices& resultSpacers() const;
+    const Vertices& spacerVertices() const;
 
 private:
     Vertices _vertices_spacers;

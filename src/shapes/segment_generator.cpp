@@ -9,7 +9,7 @@ SegmentGenerator::SegmentGenerator()
 
 }
 
-SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
+SegmentGenerator::SegmentGenerator(float length, float len_gap,
                                    float theta, float delta, float radius)
 {
     std::vector<float> L;
@@ -33,6 +33,7 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
                                  cc->vertices().begin(), cc->vertices().end());
     }
     //printf("_vertices_spacers.size:%ld\n", _vertices_spacers.size());
+    int points_num = circles[0]->vertexPositions().size();
 
     _vertices.clear();
     for(size_t i = 0; i < L.size() - 1; i++){
@@ -73,7 +74,7 @@ SegmentGenerator::SegmentGenerator(int points_num, float length, float len_gap,
 }
 
 
-const Vertices &SegmentGenerator::resultSpacers() const
+const Vertices &SegmentGenerator::spacerVertices() const
 {
     return _vertices_spacers;
 }

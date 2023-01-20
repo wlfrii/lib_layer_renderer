@@ -27,16 +27,14 @@ void LayerSegment::setProperty(float length, float theta, float delta,
 {
     _radius = radius;
 
-    int num = (int)radius*3.1415926*2 / 0.7f;
-    float len_gap = 2.0f;
-
     Vertices data;
     if(abs(theta) < 1e-4){
         CylinderGenerator cg(length, radius, glm::mat4(1.f));
         data = cg.vertices();
     }
     else{
-        SegmentGenerator sg(num, length, len_gap, theta, delta, radius);
+        float len_gap = std::fmaxf(length / 25.f / theta, 1.f);
+        SegmentGenerator sg(length, len_gap, theta, delta, radius);
         data = sg.vertices();
         //auto data = sg.resultSpacers();
     }
