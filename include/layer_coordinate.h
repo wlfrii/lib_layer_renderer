@@ -51,11 +51,16 @@ protected:
     /* Draw the vertices */
     void draw(bool is_right) override;
 
-private:    
-    gl_util::VAVBEBO* _vavbo_x_;
-    size_t            _vert_num_x;
-    gl_util::VAVBEBO* _vavbo_y;
-    size_t            _vert_num_y;
+private:
+    void createCoordinate(float length, float radius, const glm::mat4& pose);
+
+    gl_util::Shader*     _shader_x;
+    gl_util::VAVBEBO*    _vavbo_x;
+    size_t               _vert_num_x;
+
+    gl_util::Shader*     _shader_y;
+    gl_util::VAVBEBO*    _vavbo_y;
+    size_t               _vert_num_y;
 };
 
 #endif // LAYER_COORDINATE_H_LF
