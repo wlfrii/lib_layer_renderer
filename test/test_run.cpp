@@ -27,11 +27,10 @@ int main(int argc, char* argv[])
 
 
     // Create object
-    LayerModel *layer_obj;
+    LayerModel *layer_obj = nullptr;
+    LayerModel *layer_coord = nullptr;
     glm::mat4 pose(1.f);
-    pose = glm::rotate(pose, glm::radians(60.f), glm::vec3(1.f, 0.f, 0.f));
-    // Create coordinate
-//    LayerModel layer_coord = LayerCoordinate(10, 2);
+    //pose = glm::rotate(pose, glm::radians(60.f), glm::vec3(1.f, 0.f, 0.f));
 
     // --------------------------- Prase inputs -----------------------------
     unsigned char type = 0;
@@ -50,26 +49,28 @@ int main(int argc, char* argv[])
         return 0;
     }
     else{
+        layer_coord = new LayerCoordinate(20, 1, pose);
+
         type = std::stoi(argv[1]);
         switch(type){
-        case 0:
-            printf("Test - Render LayerCoordinate\n");
-            break;
         case 1:
             printf("Test - Render LayerCircle\n");
             layer_obj = new LayerCircle(10, glm::vec3(0.3, 0.0, 1.0), pose);
             break;
         case 2:
             printf("Test - Render LayerCylinder\n");
-            layer_obj = new LayerCylinder(10, 2, glm::vec3(1.0, 0.0, 1.0), pose);
+            layer_obj = new LayerCylinder(20, 4, glm::vec3(1.0, 0.0, 1.0), pose);
             break;
         case 3:
             printf("Test - Render LayerSegment\n");
-            layer_obj = new LayerSegment(10, 0.8, 0.2, 2, glm::vec3(1.0, 1.0, 0.0));
+            layer_obj = new LayerSegment(30, 2, 0.2, 3, glm::vec3(1.0, 1.0, 0.0));
             break;
         case 4:
             printf("Test - Render LayerCone\n");
             layer_obj = new LayerCone(20, 5, glm::vec3(1.0, 0.3, 0.0), pose);
+            break;
+        default:
+            printf("Test - Render LayerCoordinate\n");
             break;
         }
 
@@ -103,18 +104,15 @@ int main(int argc, char* argv[])
         window.clear();
         glClearDepth(1.0);
 
-//        layer_coord.setModel(model);
-//        layer_coord.render(viewport, mode);
-        //layer_bg.render(viewport, mode);
+        if(layer_coord) {
+            layer_coord->setModel(model);
+            layer_coord->render(viewport, mode);
+        }
 
-//        layer_obj->setProperty(len, theta, delta);
         if(layer_obj){
             layer_obj->setModel(model);
             layer_obj->render(viewport, mode);
         }
-//        pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
-//        layer_obj2.setModel(model*cvt2GlmMat4(pose));
-//        layer_obj2.render(viewport, mode);
         window.refresh();
     }
     window.release();
@@ -122,6 +120,10 @@ int main(int argc, char* argv[])
     if(layer_obj){
         delete layer_obj;
         layer_obj = nullptr;
+    }
+    if(layer_coord){
+        delete layer_coord;
+        layer_coord = nullptr;
     }
 
     return 0;
