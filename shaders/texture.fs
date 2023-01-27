@@ -11,6 +11,7 @@ void main()
 {
     vec4 color = texture(image, texCoord);
     vec4 m = texture(mask, texCoord);
+    color.x += m.x * 0.7;
     color.y += m.x * 0.7;
     fragColor = color;
 }
