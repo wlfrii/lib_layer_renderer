@@ -107,9 +107,10 @@ bool updateBackground()
         layer_bg->updateData(&layer_bg_data);
 
         printf("\t update config.\n");
-        SurgicalToolConfig config(fdata.psi.L + 19.6+29.5, fdata.psi.phi,
-                                  fdata.psi.theta1, fdata.psi.delta1,
-                                  fdata.psi.theta2, fdata.psi.delta2);
+        SurgicalToolConfig config(fdata.psi[0].L_insert + 19.6+29.5,
+                                  fdata.psi[0].phi,
+                                  fdata.psi[0].theta1, fdata.psi[0].delta1,
+                                  fdata.psi[0].theta2, fdata.psi[0].delta2);
         STMgr->updateConfig(TOOL1, config);
         mmath::Pose T_t2e_2_tb = STMgr->getEnd2BasePose(TOOL1);
 
@@ -140,7 +141,7 @@ bool updateBackground()
         T_g_2_cam.R *= R_grip_init;
 
         model = cvt2GlmMat4(T_g_2_cam);
-        angle = fdata.psi.angle;
+        angle = fdata.angles[0];
 
 //        printf("config:%s\n", config.info());
 //        std::cout << config << "\n";

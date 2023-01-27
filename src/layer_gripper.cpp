@@ -143,7 +143,7 @@ bool LayerGripper::loadModel()
         part_num = 3;
         // Lengthen cylinder as tool body
         origin = glm::vec3(0.f,0.f,-3.0f);
-        length = 3.05;
+        length = 3.05 + 0.1;
         radius = 3.55;
         break;
     case GRIPPER_TISSUE_GRASPING_FORCEPS:
@@ -158,7 +158,7 @@ bool LayerGripper::loadModel()
         part_num = 3;
         // Lengthen cylinder as tool body
         origin = glm::vec3(0.f,0.f,-3.0f);
-        length = 3.05;
+        length = 3.05 + 0.1;
         radius = 3.25;
         break;
     default:

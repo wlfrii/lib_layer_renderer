@@ -4,6 +4,7 @@
 #include <layer_cone.h>
 #include <layer_coordinate.h>
 #include <layer_background.h>
+#include <layer_gripper.h>
 #include <gl_util.h>
 #include <lib_math/lib_math.h>
 #include <opencv2/opencv.hpp>
@@ -45,11 +46,14 @@ int main(int argc, char* argv[])
                "\n\t2 - Render cylinder with coordinate"
                "\n\t3 - Render segment with coordinate"
                "\n\t4 - Render cone with coordinate"
+               "\n\t10 - Render gripper - needle holder"
+               "\n\t11 - Render gripper - tissue grasping forceps"
+               "\n\t12 - Render gripper - bipolar grasping forceps"
                "\n");
         return 0;
     }
     else{
-        layer_coord = new LayerCoordinate(20, 1, pose);
+        layer_coord = new LayerCoordinate(20, 0.2, pose);
 
         type = std::stoi(argv[1]);
         switch(type){
@@ -68,6 +72,21 @@ int main(int argc, char* argv[])
         case 4:
             printf("Test - Render LayerCone\n");
             layer_obj = new LayerCone(20, 5, glm::vec3(1.0, 0.3, 0.0), pose);
+            break;
+        case 10:
+            printf("Test - Render LayerGripper\n");
+            layer_obj = new LayerGripper(glm::vec3(0.1, 0.8, 1.0),
+                                         GRIPPER_NEEDLE_HOLDER);
+            break;
+        case 11:
+            printf("Test - Render LayerGripper\n");
+            layer_obj = new LayerGripper(glm::vec3(0.1, 0.8, 1.0),
+                                         GRIPPER_TISSUE_GRASPING_FORCEPS);
+            break;
+        case 12:
+            printf("Test - Render LayerGripper\n");
+            layer_obj = new LayerGripper(glm::vec3(0.1, 0.8, 1.0),
+                                         GRIPPER_BIPOLAR_GRASPING_FORCEPS);
             break;
         default:
             printf("Test - Render LayerCoordinate\n");
