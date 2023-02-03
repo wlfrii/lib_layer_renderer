@@ -16,7 +16,7 @@ glm::mat4 model = glm::mat4(0.963560,0.187968,0.190531,0.000000,
                             17.924475,-6.661742,22.319082,1.000000);
 int height = 1080;
 int width = 1920;
-DataManager data_mgr(4);
+DataManager data_mgr;
 LayerTexture3D *layer_tex;
 
 bool updateBackground();

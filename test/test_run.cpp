@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
     gl_util::Window window(width, height);
     window.enableDepthTest();
     window.setKeyboardEventCallBack(keyboardControlModel);
+//    window.setBackgroundColor(0, 0, 0);
 
 
     // Create object
@@ -53,38 +54,38 @@ int main(int argc, char* argv[])
         return 0;
     }
     else{
-        layer_coord = new LayerCoordinate(20, 0.2, pose);
+        //layer_coord = new LayerCoordinate(20, 0.2, pose);
 
         type = std::stoi(argv[1]);
         switch(type){
         case 1:
-            printf("Test - Render LayerCircle\n");
+            printf("Test - Render circle with coordinate\n");
             layer_obj = new LayerCircle(10, glm::vec3(0.3, 0.0, 1.0), pose);
             break;
         case 2:
-            printf("Test - Render LayerCylinder\n");
+            printf("Test - Render cylinder with coordinate\n");
             layer_obj = new LayerCylinder(20, 4, glm::vec3(1.0, 0.0, 1.0), pose);
             break;
         case 3:
-            printf("Test - Render LayerSegment\n");
+            printf("Test - Render segment with coordinate\n");
             layer_obj = new LayerSegment(30, 2, 0.2, 3, glm::vec3(1.0, 1.0, 0.0));
             break;
         case 4:
-            printf("Test - Render LayerCone\n");
+            printf("Test - Render cone with coordinate\n");
             layer_obj = new LayerCone(20, 5, glm::vec3(1.0, 0.3, 0.0), pose);
             break;
         case 10:
-            printf("Test - Render LayerGripper\n");
+            printf("Test - Render gripper - needle holder\n");
             layer_obj = new LayerGripper(glm::vec3(0.1, 0.8, 1.0),
                                          GRIPPER_NEEDLE_HOLDER);
             break;
         case 11:
-            printf("Test - Render LayerGripper\n");
+            printf("Test - Render gripper - tissue grasping forceps\n");
             layer_obj = new LayerGripper(glm::vec3(0.1, 0.8, 1.0),
                                          GRIPPER_TISSUE_GRASPING_FORCEPS);
             break;
         case 12:
-            printf("Test - Render LayerGripper\n");
+            printf("Test - Render gripper - bipolar grasping forceps\n");
             layer_obj = new LayerGripper(glm::vec3(0.1, 0.8, 1.0),
                                          GRIPPER_BIPOLAR_GRASPING_FORCEPS);
             break;
@@ -95,18 +96,6 @@ int main(int argc, char* argv[])
 
     }
     // -------------------------------------------------------------------------
-
-
-//    float len = 10;
-//    float delta = 0.2;
-//    float radius = 2;
-//    printf("Test layerSegment and layerCylinder\n");
-//    LayerSegment layer_obj(len, theta, delta, radius, glm::vec3(1.0, 1.0, 0.0));
-//    mmath::Pose pose = mmath::continuum::calcSingleSegmentPose(len, theta, delta);
-//    LayerCylinder layer_obj2(len, radius, glm::vec3(0.0, 1.0, 1.0));
-
-//    model = glm::rotate(model, glm::radians(60.f), glm::vec3(1.f, 0.f, 0.f));
-
     glm::mat4 view = glm::rotate(glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
     view[3][0] += 2.f;
     LayerModel::setView(view, 0);
