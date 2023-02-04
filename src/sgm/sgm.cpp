@@ -4,6 +4,8 @@
 #include <vector>
 #include <cassert>
 #include <chrono>
+#include <cstring>
+#include <cmath>
 using namespace std::chrono;
 
 
