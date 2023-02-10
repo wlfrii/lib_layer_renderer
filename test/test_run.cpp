@@ -9,17 +9,20 @@
 #include <lib_math/lib_math.h>
 #include <opencv2/opencv.hpp>
 
-glm::mat4 model = glm::mat4(1.000000,0.000000,0.000000,0.000000,
-                  0.000000,-0.241922,-0.970296,0.000000,
-                  0.000000,0.970296,-0.241922,0.000000,
-                  0.000000,0.000000,57.500000,1.000000);
+
+glm::mat4 model = glm::mat4(
+            1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,
+            0.000000000000000,0.984807789325714,0.173648193478584,0.000000000000000,
+            0.000000000000000,-0.173648193478584,0.984807789325714,0.000000000000000,
+            0.000000000000000,0.000000000000000,37.500000000000000,1.000000000000000);
+
 float theta = 0.7;
 
 void keyboardControlModel(GLFWwindow* window);
 
 #define IDX 2
 int main(int argc, char* argv[])
-{
+{    
     int height = 1080;
     int width = 1920;
     gl_util::Window window(width, height);
@@ -54,7 +57,7 @@ int main(int argc, char* argv[])
         return 0;
     }
     else{
-        //layer_coord = new LayerCoordinate(20, 0.2, pose);
+        layer_coord = new LayerCoordinate(20, 0.2, pose);
 
         type = std::stoi(argv[1]);
         switch(type){
@@ -106,7 +109,7 @@ int main(int argc, char* argv[])
 
     LayerViewPort viewport(width, height);
 
-    auto mode = LAYER_RENDER_LEFT;
+    auto mode = LAYER_RENDER_STEREO;
     while (!window.shouldClose()) {
         window.activate();
         window.clear();
