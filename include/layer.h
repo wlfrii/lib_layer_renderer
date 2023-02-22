@@ -53,14 +53,14 @@ enum LayerRenderMode
  */
 enum LayerType
 {
-    LAYER_BACKGROUND,
-    LAYER_CIRCLE,
-    LAYER_CYLINDER,
-    LAYER_SEGMENT,
-    LAYER_CONE,
-    LAYER_COORDINATE,
-    LAYER_GRIPPER,        // Needle holder
-    LAYER_TEXTURE3D,
+    LAYER_BACKGROUND,     //!< For rendering 2D texture / image
+    LAYER_CIRCLE,         //!< For rendering circle shape
+    LAYER_CYLINDER,       //!< For rendering cylinder model
+    LAYER_SEGMENT,        //!< For rendering continuum segment
+    LAYER_CONE,           //!< For rendering cone model
+    LAYER_COORDINATE,     //!< For rendering coordinate
+    LAYER_GRIPPER,        //!< For surigcal gripper
+    LAYER_TEXTURE3D,      //!< For rendering 3D texture / (colored) point cloud
     LAYER_UNKNOWN
 };
 
