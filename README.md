@@ -1,4 +1,4 @@
-# RenderLayer
+# lib_layer_renderer
 
 This module is splited from XXXX project (_which was designed as a static library mainly for rendering continuum-based surgical robot and gripper_).
 
@@ -11,45 +11,44 @@ Currently, this library is modularized for rendering shapes, model, vertices, an
 
 Some other requirements can be found in the two required modules above.
 
-## Brief Introduction
+## How to use
 
-The rendering mode in this library include 
-```C++
-LAYER_RENDER_LEFT       // Only rendering left view
-LAYER_RENDER_RIGHT      // Only rendering right view
-LAYER_RENDER_STEREO     // Rendering stereo view
+### I. Configure the library in your project 
+
+#### I.1 For Linux / Mac OS (recommended)
+
+
+### II. Use the library
+
+A breif useage of this library is given as follows.
+
+```c++
+#include <lib_layer_renderer/lib_layer_renderer>
+
+int main()
+{
+    // Set a rendering mode
+    LayerRenderMode mode = LAYER_RENDER_LEFT;
+    // Create a gl_util::Projection
+    gl_util::Projection gl_proj(1120, 960, 540, 1920, 1080, 0.2, 150);
+    // Create LayerRenderer object
+    LayerRenderer renderer(gl_proj, mode);
+
+    // (Optional)
+    renderer.setView(...);
+    renderer.setModel(...);
+
+    // Add a layer to the renderer
+    renderer.addLayers(std::make_shared<LayerCylinder>(
+                       20, 4, glm::vec3(1.0, 0.0, 1.0)));
+
+    // Show the rendered results
+    renderer.render();
+
+    return 0;
+}
 ```
 
-The currently supported layer type include 
-```C++
-LAYER_BACKGROUND    // See <layer_background.h>
-LAYER_CYLINDER      // See <layer_cylinder.h>
-LAYER_SEGMENT       // See <layer_segment.h>
-LAYER_GRIPPER       // See <layer_gripper.h>
-LAYER_TEXTURE3D     // See <layer_texture3d.h>
-```
-
-Some rendered results based on this library are shown below in the table, which shows (from left to right and top to bottom)
-
- + a yellow __Segment__ (with greater _theta_) connected with a cyan __Cylinder__;
- + a yellow __Segment__ (with smaller _theta_) connected with a magenta __Cylinder__
- + a stereo view that includes a yellow __Segment__ connected with a manenta __Cylinder__ and a stereo endoscopic image __Background__;
- + a __3DTexture__ view with white window background.
-
-<table>
-    <tr><th> Segment + Cylinder </th> <th> Segment + Cylinder </th>
-    </tr>
-    <tr><td> <img src="./test/results/layer_segment_circle_1.png"> </td>
-    <td> <img src="./test/results/layer_segment_circle_2.png"> </td>
-    </tr>
-    <tr><th> (Stereo) Segment + Cylinder + Background </th> <th> 3D Texture </th>
-    </tr>
-    <tr><td> <img src="./test/results/layer_bg_segment_circle_stereo.png"> </td>
-    <td> <img src="./test/results/layer_texture3d.png"> </td>
-    </tr>
-</table>
-
-
-More __useage details of this library__ could be found in [`test`](https://github.com/wlfrii/EndoVision/tree/main/RenderLayer/test) folder, which includes several test files.
+More __useage details of this library__ could be found in [`test/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/test) folder.
 
 Note, there should be a `models` folder that stores some gripper STL model. However, these files will not be uploaded due to usage restriction.
