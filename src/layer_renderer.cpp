@@ -2,6 +2,33 @@
 #include "assertm.h"
 
 
+LayerRenderer::LayerRenderer(
+        const gl_util::Projection& proj, bool is_binocular,
+        uint16_t window_width, uint16_t window_height)
+    :_window(std::make_unique<gl_util::Window>(window_width, window_height))
+    , _projection(proj.mat4())
+    , _N(is_binocular + 1)
+{
+    _window->enableDepthTest();
+
+    if(_N == 1) _n_viewport = {LayerViewPort(window_width, window_height)};
+    else{
+        LayerViewPort viewport(window_width / 2, window_height);
+        _n_viewport.push_back(viewport);
+        viewport.y = window_width / 2;
+        _n_viewport.push_back(viewport);
+    }
+
+    _n_model.resize(_N);
+    _n_view.resize(_N);
+    for(size_t i = 0; i < _N; i++) {
+        _n_model[i] = glm::mat4(1.0f);
+        _n_view[i] = glm::mat4(1.0f);
+    }
+
+    _n_layers.resize(_N);
+}
+
 
 LayerRenderer::LayerRenderer(
         const gl_util::Projection& proj,

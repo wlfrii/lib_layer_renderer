@@ -39,16 +39,30 @@ class LayerRenderer
 public:
     LayerRenderer() = delete;
 
+
     /**
-     * @brief Constructor of LayerRenderer
+     * @brief Constructor of LayerRenderer for monocular/binocular.
+     * @param proj      The object of gl_util::Projection
+     * @param is_binocular  Specify monocular (false) / binocular (true)
+     * @param window_width  The width of the specified window
+     * @param window_height  The height of the specified window
+     */
+    LayerRenderer(const gl_util::Projection& proj,
+                  bool is_binocular,
+                  uint16_t window_width = 800,
+                  uint16_t window_height = 600
+                  );
+
+
+    /**
+     * @brief Constructor of LayerRenderer for multiple viewport
      * @param proj      The object of gl_util::Projection
      * @param n_viewport  The numer of view port in the specified window
      * @param window_width  The width of the specified window
      * @param window_height  The height of the specified window
      */
     LayerRenderer(const gl_util::Projection& proj,
-                  const std::vector<LayerViewPort>& n_viewport
-                    = {LayerViewPort(800, 600)},
+                  const std::vector<LayerViewPort>& n_viewport,
                   uint16_t window_width = 800,
                   uint16_t window_height = 600
                   );
