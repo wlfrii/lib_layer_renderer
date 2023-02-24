@@ -5,6 +5,7 @@
 #include <lib_math/lib_math.h>
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerSegment::LayerSegment(float length, float theta, float delta, float radius,
                            const glm::vec3 &color)
@@ -57,3 +58,5 @@ void LayerSegment::setProperty(const mmath::continuum::ConfigSpc &q)
 {
     setProperty(q.length, q.theta, q.delta);
 }
+
+} // namespace::mlayer

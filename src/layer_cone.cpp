@@ -2,6 +2,7 @@
 #include "./shapes/cone_generator.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerCone::LayerCone(float height, float radius, const glm::vec3 &color,
                      const glm::mat4& pose)
@@ -40,4 +41,4 @@ void LayerCone::setHeight(float height)
     setProperty(_height, _radius, _pose);
 }
 
-
+} // namespace::mlayer

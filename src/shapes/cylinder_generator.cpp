@@ -2,6 +2,7 @@
 #include "circle_generator.h"
 #include "generator_util.h"
 
+namespace mlayer{
 
 CylinderGenerator::CylinderGenerator(float length, float radius,
                                      const glm::mat4& pose)
@@ -66,3 +67,5 @@ void CylinderGenerator::createVertices(float length, float radius,
     _vertices.insert(_vertices.end(), c1.vertices().begin(), c1.vertices().end());
     _vertices.insert(_vertices.end(), c2.vertices().begin(), c2.vertices().end());
 }
+
+} // namespace::mlayer

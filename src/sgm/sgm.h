@@ -31,6 +31,7 @@
 #include <array>
 #include <limits>
 
+namespace mlayer{
 
 class SGM
 {
@@ -140,5 +141,5 @@ private:
     std::vector<std::pair<int, int>> _mismatches;
 };
 
-
+} // namespace::mlayer
 #endif // SGM_H_LF

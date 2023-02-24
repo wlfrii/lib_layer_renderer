@@ -27,6 +27,7 @@
 #define LAYER_CIRCLE_H_LF
 #include "layer_model.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for rendering circle
@@ -67,4 +68,5 @@ private:
     float     _radius;      //!< The radius of the circle
 };
 
+} // namespace::mlayer
 #endif // LAYER_CIRCLE_H_LF

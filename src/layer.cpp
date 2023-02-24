@@ -1,6 +1,7 @@
 #include "layer.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 Layer::Layer(LayerType type)
     : type(type)
@@ -56,3 +57,5 @@ void Layer::draw()
 {
 
 }
+
+} // namespace::mlayer

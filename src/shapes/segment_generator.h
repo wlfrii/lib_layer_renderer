@@ -2,6 +2,7 @@
 #define SEGMENT_GENERATOR_H_LF
 #include "generator_base.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for generating continuum segment vertices
@@ -37,4 +38,5 @@ private:
     Vertices _vertices_spacers;
 };
 
+} // namespace::mlayer
 #endif // SEGMENT_GENERATOR_H_LF

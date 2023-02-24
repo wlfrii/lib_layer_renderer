@@ -27,6 +27,7 @@
 #define LAYER_MODEL_H_LF
 #include "layer.h"
 
+namespace mlayer{
 
 /**
  * @brief A base class for rendering model that requires Model, View, and
@@ -88,5 +89,5 @@ protected:
     glm::vec3  _light_pos;              //!< Position of the light source
 };
 
-
+} // namespace::mlayer
 #endif // LAYER_MODEL_H_LF

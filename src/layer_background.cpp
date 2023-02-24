@@ -1,6 +1,7 @@
 #include "layer_background.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerBackground::LayerBackground()
     : Layer(LAYER_BACKGROUND)
@@ -104,3 +105,5 @@ void LayerBackground::bindTextureMask(uint8_t *data, uint16_t w, uint16_t h)
     glTexImage2D(GL_TEXTURE_2D, 0, fmt, w, h, 0, fmt, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
+
+} // namespace::mlayer

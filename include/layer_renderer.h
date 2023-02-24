@@ -30,6 +30,8 @@
 #include <memory>
 #include "layer.h"
 
+namespace mlayer{
+
 /**
  * @brief Specify the render index, Left/Right for 2D mode or Stereo 3D mode.
  */
@@ -158,6 +160,5 @@ private:
     std::vector<std::vector<std::shared_ptr<Layer>>> _n_layers;
 };
 
-
-
+} // namespace::mlayer
 #endif // LAYER_RENDERER_H_LF

@@ -27,6 +27,7 @@
 #define LAYER_COORDINATE_H_LF
 #include "layer_model.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for rendering coordinate system
@@ -63,4 +64,5 @@ private:
     size_t               _vert_num_y;
 };
 
+} // namespace::mlayer
 #endif // LAYER_COORDINATE_H_LF

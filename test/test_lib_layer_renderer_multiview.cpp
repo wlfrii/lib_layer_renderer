@@ -14,8 +14,10 @@ glm::mat4 model = glm::mat4(
             0.297768801450729,-0.739400446414948,0.603843271732330,0.000000000000000,
             -9.799218177795410,2.354556083679199,39.070983886718750,1.000000000000000);
 
-int main(int argc, char* argv[])
+int main()
 {
+    using namespace mlayer;
+
     gl_util::Projection gl_proj(1120, 960, 540, 1920, 1080, 0.2, 150);
     uint16_t w = 1920, h = 1080;
     LayerViewPort vp1(0, 0, w / 2, h / 2);

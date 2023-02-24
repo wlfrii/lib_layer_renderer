@@ -12,6 +12,7 @@
 #include <pcl/surface/poisson.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+namespace mlayer{
 
 namespace {
 bool isNear(float d1, float d2, float d3, float thresh = 2.f)
@@ -544,8 +545,8 @@ void LayerTexture3D::pclProcess()
     // Now, vertices are only storing valid locations
     // Covert the VertexC to pcl::Point
     PointCloud::Ptr pt_cloud(new PointCloud);
-    for(auto& vert : ::vertices) {
-        pt_cloud->emplace_back(::cvt2PCLPointXYZRGB(vert));
+    for(auto& vert : vertices) {
+        pt_cloud->emplace_back(cvt2PCLPointXYZRGB(vert));
     }
     // Estimate normal for the PointCloud
     //PointCloudWithNormal::Ptr pt_cloud_with_normal = ::estimateNormal(pt_cloud);
@@ -607,7 +608,7 @@ void LayerTexture3D::pclProcess()
     vertices.clear();
     for(size_t i = 0; i < _pt_cloud->points.size(); i++) {
         Point vert = _pt_cloud->points[i];
-        vertices.emplace_back(::cvt2VertexC(vert));
+        vertices.emplace_back(cvt2VertexC(vert));
     }
 #endif
 }
@@ -675,3 +676,5 @@ void LayerTexture3D::cvProcess()
 {
 
 }
+
+} // namespace::mlayer

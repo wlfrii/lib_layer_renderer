@@ -36,6 +36,7 @@ namespace gl_util{
     class VAVBEBO;
 }
 
+namespace mlayer{
 
 /**
  * @brief The Layer Type enum
@@ -129,4 +130,5 @@ protected:
     gl_util::VAVBEBO*    _vavbebo;      //!< VAO,VBO,EBO for current layer
 };
 
+} // namespace::mlayer
 #endif // LAYER_H_LF

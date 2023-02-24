@@ -30,6 +30,8 @@
 #define SAFE_DELETE(P) {if(P) delete[](P);(P)=nullptr;}
 #endif
 
+namespace mlayer{
+
 /**
  * @brief dm is the abbreviation of disparity map.
  */
@@ -142,4 +144,5 @@ void removeSpeckles(float *disparity_map, uint16_t width, uint16_t height, int32
 
 } // namespace::dm_util
 
+} // namespace::mlayer
 #endif // DISPARITY_MAP_UTILITY_H_LF

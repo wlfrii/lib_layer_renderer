@@ -1,6 +1,7 @@
 #include "circle_generator.h"
 #include "generator_util.h"
 
+namespace mlayer{
 
 namespace {
 const uint16_t MIN_POINTS_NUM = 8;
@@ -62,3 +63,5 @@ void CircleGenerator::createVertices(float radius, const glm::mat4 &pose)
         _vertices[i*3 + 2] = {p, n};
     }
 }
+
+} // namespace::mlayer

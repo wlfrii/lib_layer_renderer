@@ -2,6 +2,7 @@
 #define CIRCLE_GENERATOR_H_LF
 #include "generator_base.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for generating circle vertices
@@ -38,4 +39,5 @@ private:
     VertexPositions   _vert_positions;  //!< vertex positions of the circle
 };
 
+} // namespace::mlayer
 #endif // CIRCLEGENERATOR_H

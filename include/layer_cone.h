@@ -27,6 +27,7 @@
 #define LAYER_CONE_H_LF
 #include "layer_model.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for rendering circle
@@ -70,4 +71,5 @@ private:
     float     _height;      //!< The height of the cone
 };
 
+} // namespace::mlayer
 #endif // LAYER_CONE_H_LF

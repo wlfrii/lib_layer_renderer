@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+namespace mlayer{
 
 /**
  * @brief A struct designed for vertex(position,normal)
@@ -39,6 +40,5 @@ using Vertices = std::vector<Vertex>;
 using VertexPositions = std::vector<glm::vec4>;
 
 
-
-
+} // namespace::mlayer
 #endif // VERTEX_DATA_H_LF

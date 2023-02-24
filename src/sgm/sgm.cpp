@@ -8,6 +8,7 @@
 #include <cmath>
 using namespace std::chrono;
 
+namespace mlayer{
 
 SGM::SGM()
     : _image_width(0), _image_height(0)
@@ -391,3 +392,5 @@ void SGM::fillHoles()
         }
 	}
 }
+
+} // namespace::mlayer

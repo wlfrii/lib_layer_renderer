@@ -2,6 +2,7 @@
 #define CYLINDER_GENERATOR_H_LF
 #include "generator_base.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for generating cylinder vertices
@@ -45,4 +46,5 @@ private:
     Vertices _vertices_without_end_face;
 };
 
+} // namespace::mlayer
 #endif // CYLINDERGENERATOR_H

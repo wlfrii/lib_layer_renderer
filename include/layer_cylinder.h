@@ -27,6 +27,7 @@
 #define LAYER_CYLINDER_H_LF
 #include "layer_model.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for rendering cylinder
@@ -77,4 +78,5 @@ private:
     float     _radius;    //!< The radius of the cylinder
 };
 
+} // namespace::mlayer
 #endif // LAYER_CYLINDER_H_LF

@@ -28,6 +28,7 @@
 #include <glm/glm.hpp>
 #include <lib_math/lib_math.h>
 
+namespace mlayer{
 
 /**
  * @brief Convert Eigen::Matrix4f to glm::mat4
@@ -102,4 +103,5 @@ inline mmath::Pose cvt2Pose(const glm::mat4 &mat)
     return pose;
 }
 
+} // namespace::mlayer
 #endif // LAYER_UTIL_H_LF

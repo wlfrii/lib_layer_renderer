@@ -1,6 +1,8 @@
 #include "../include/layer_renderer.h"
 #include "assertm.h"
 
+namespace mlayer{
+
 namespace{
 const static glm::mat4 default_camera_view = glm::rotate(
             glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
@@ -203,3 +205,5 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
         setModel(model);
     }
 }
+
+} // namespace::mlayer

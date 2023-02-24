@@ -1,6 +1,8 @@
 #include "stl_reader.h"
 #include <cstdio>
 
+namespace mlayer{
+
 STLReader::STLReader()
     : _is_stl_exist(false)
 {
@@ -160,3 +162,5 @@ bool STLReader::read(STLModelType type, Vertices &data)
     }
     return false;
 }
+
+} // namespace::mlayer

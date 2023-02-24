@@ -2,6 +2,7 @@
 #define CONE_GENERATOR_H_LF
 #include "generator_base.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for generating cone vertices
@@ -24,4 +25,5 @@ public:
 
 };
 
+} // namespace::mlayer
 #endif // CONE_GENERATOR_H_LF

@@ -4,6 +4,8 @@
 #include "../include/layer_util.h"
 #include <lib_math/lib_math.h>
 
+namespace mlayer{
+
 SegmentGenerator::SegmentGenerator()
 {
 
@@ -79,4 +81,4 @@ const Vertices &SegmentGenerator::spacerVertices() const
     return _vertices_spacers;
 }
 
-
+} // namespace::mlayer

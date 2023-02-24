@@ -28,6 +28,7 @@
 #include "layer_model.h"
 #include <lib_math/lib_math.h>
 
+namespace mlayer{
 
 /**
  * @brief A class for rendering continuum segment.
@@ -78,4 +79,5 @@ private:
     float _radius;   //!< The radius of the continuum segment.
 };
 
+} // namespace::mlayer
 #endif // LAYER_CYLINDER_H_LF

@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/normal.hpp>
 
+namespace mlayer{
 
 /**
  * @brief Return the normal of a face depending on three points.
@@ -35,4 +36,5 @@ inline glm::vec3 getNormal(const glm::vec3& p1, const glm::vec3& p2,
     return glm::triangleNormal(p1, p2, p3);
 }
 
+} // namespace::mlayer
 #endif // UTIL_GENERATOR_H

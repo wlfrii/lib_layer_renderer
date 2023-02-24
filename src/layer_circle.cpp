@@ -2,6 +2,7 @@
 #include "./shapes/circle_generator.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerCircle::LayerCircle(float radius, const glm::vec3 &color,
                          const glm::mat4& pose)
@@ -39,4 +40,4 @@ void LayerCircle::setProperty(float radius)
     setProperty(_pose, radius);
 }
 
-
+} // namespace::mlayer

@@ -1,6 +1,7 @@
 #include "layer_model.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerModel::LayerModel(LayerType type, const glm::vec3 &color)
     : Layer(type)
@@ -70,3 +71,5 @@ void LayerModel::draw()
     _vavbebo->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num);
 }
+
+} // namespace::mlayer

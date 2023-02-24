@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include "layer_define.h"
 
+namespace mlayer{
+
 /**
  * @brief The existing STL model. 
  */
@@ -71,4 +73,5 @@ private:
     bool _is_stl_exist; // The flag for existing STL model
 };
 
+} // namespace::mlayer
 #endif // STL_READER_H_LF

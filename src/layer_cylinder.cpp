@@ -2,6 +2,7 @@
 #include "./shapes/cylinder_generator.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerCylinder::LayerCylinder(float length, float radius, const glm::vec3 &color,
                              const glm::mat4& pose)
@@ -49,3 +50,5 @@ void LayerCylinder::setProperty(float length)
 {
     setProperty(length, _radius, _pose);
 }
+
+} // namespace::mlayer

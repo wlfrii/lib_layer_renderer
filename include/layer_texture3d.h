@@ -31,6 +31,8 @@
 #include <pcl/registration/icp.h>
 #include <pcl/registration/icp_nl.h>
 
+namespace mlayer{
+
 class SGM;
 
 
@@ -109,4 +111,5 @@ private:
     PointCloud::Ptr _pt_cloud;
 };
 
+} // namespace::mlayer
 #endif // LAYER_TEXTURE3D_H_LF

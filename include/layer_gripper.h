@@ -27,6 +27,7 @@
 #define LAYER_GRIPPER_H_LF
 #include "layer_model.h"
 
+namespace mlayer{
 
 /**
  * @brief The GripperType enum specify the support gripper type.
@@ -88,5 +89,5 @@ private:
     size_t            _vert_num_ignore;
 };
 
-
+} // namespace::mlayer
 #endif // LAYER_GRIPPER_H_LF

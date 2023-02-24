@@ -6,6 +6,8 @@
 #include <array>
 #include <cstdio>
 
+namespace mlayer{
+
 void dm_util::debug(const uint16_t* cost, uint16_t width, uint16_t height, uint16_t d_range)
 {
     for (int v = 0; v < height; v++){
@@ -198,7 +200,7 @@ void aggregateLeftRight(const uint8_t* src,
             offset = direction;
             updateAggregateParams(offset);
             
-            ::doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
+            doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
                         cost_init_path, cost_aggr_path, cost_array_prev, false);
         }
     }
@@ -229,7 +231,7 @@ void aggregateTopBottom(const uint8_t* src,
             offset = direction * width;
             updateAggregateParams(offset);
 
-            ::doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
+            doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
                         cost_init_path, cost_aggr_path, cost_array_prev);
         }
     }
@@ -280,7 +282,7 @@ void aggregateDiagonal_1(const uint8_t* src,
                 updateAggregateParams(offset);
             }
 
-            ::doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
+            doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
                         cost_init_path, cost_aggr_path, cost_array_prev);
 
             current_row += direction;
@@ -334,7 +336,7 @@ void aggregateDiagonal_2(const uint8_t* src,
                 updateAggregateParams(offset);
             }
 
-            ::doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
+            doAggregate(P1, P2, *src_path, gray_prev, d_range, min_cost_prev,
                         cost_init_path, cost_aggr_path, cost_array_prev);
 
             current_row += direction;
@@ -356,28 +358,28 @@ void dm_util::costAggregation(const uint8_t* src,
     switch(path)
     {
     case dm_util::AGGREGATION_PATH_L2R:
-        ::aggregateLeftRight(src, cost_init, width, height, d_range, P1, P2, true, dst);
+        aggregateLeftRight(src, cost_init, width, height, d_range, P1, P2, true, dst);
         break;
     case dm_util::AGGREGATION_PATH_R2L:
-        ::aggregateLeftRight(src, cost_init, width, height, d_range, P1, P2, false, dst);
+        aggregateLeftRight(src, cost_init, width, height, d_range, P1, P2, false, dst);
         break;
     case dm_util::AGGREGATION_PATH_T2B:
-        ::aggregateTopBottom(src, cost_init, width, height, d_range, P1, P2, true, dst);
+        aggregateTopBottom(src, cost_init, width, height, d_range, P1, P2, true, dst);
         break;
     case dm_util::AGGREGATION_PATH_B2T:
-        ::aggregateTopBottom(src, cost_init, width, height, d_range, P1, P2, false, dst);
+        aggregateTopBottom(src, cost_init, width, height, d_range, P1, P2, false, dst);
         break;
     case dm_util::AGGREGATION_PATH_LT2RB:
-        ::aggregateDiagonal_1(src, cost_init, width, height, d_range, P1, P2, true, dst);
+        aggregateDiagonal_1(src, cost_init, width, height, d_range, P1, P2, true, dst);
         break;
     case dm_util::AGGREGATION_PATH_RB2LT:
-        ::aggregateDiagonal_1(src, cost_init, width, height, d_range, P1, P2, false, dst);
+        aggregateDiagonal_1(src, cost_init, width, height, d_range, P1, P2, false, dst);
         break;
     case dm_util::AGGREGATION_PATH_RT2LB:
-        ::aggregateDiagonal_2(src, cost_init, width, height, d_range, P1, P2, true, dst);
+        aggregateDiagonal_2(src, cost_init, width, height, d_range, P1, P2, true, dst);
         break;
     case dm_util::AGGREGATION_PATH_LB2RT:
-        ::aggregateDiagonal_2(src, cost_init, width, height, d_range, P1, P2, false, dst);
+        aggregateDiagonal_2(src, cost_init, width, height, d_range, P1, P2, false, dst);
         break;
     default:
         break;
@@ -469,3 +471,5 @@ void dm_util::removeSpeckles(float* disparity_map, uint16_t width, uint16_t heig
 		}
 	}
 }
+
+} // namespace::mlayer

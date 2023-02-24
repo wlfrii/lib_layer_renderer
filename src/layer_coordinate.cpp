@@ -2,6 +2,7 @@
 #include "./shapes/arrow_generator.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerCoordinate::LayerCoordinate(float length, float radius,
                                  const glm::mat4& pose)
@@ -132,3 +133,4 @@ void LayerCoordinate::createCoordinate(float length, float radius,
     _vert_num_y = data.size();
 }
 
+} // namespace::mlayer

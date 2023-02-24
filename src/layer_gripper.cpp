@@ -4,6 +4,7 @@
 #include "./shapes/cylinder_generator.h"
 #include <gl_util.h>
 
+namespace mlayer{
 
 LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
     : LayerModel(LAYER_GRIPPER, color)
@@ -211,4 +212,4 @@ bool LayerGripper::loadModel()
     return true;
 }
 
-
+} // namespace::mlayer

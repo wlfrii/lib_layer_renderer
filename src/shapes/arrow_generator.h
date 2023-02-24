@@ -2,6 +2,7 @@
 #define ARROW_GENERATOR_H_LF
 #include "generator_base.h"
 
+namespace mlayer{
 
 /**
  * @brief A class for generating vertices for arrow
@@ -30,4 +31,5 @@ public:
 
 };
 
+} // namespace::mlayer
 #endif // ARROW_GENERATOR_H_LF

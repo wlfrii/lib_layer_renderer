@@ -2,6 +2,7 @@
 #include "circle_generator.h"
 #include "generator_util.h"
 
+namespace mlayer{
 
 ConeGenerator::ConeGenerator(float height, float radius, const glm::mat4 &pose)
 {
@@ -26,3 +27,5 @@ ConeGenerator::ConeGenerator(float height, float radius, const glm::mat4 &pose)
 
     _vertices.insert(_vertices.end(), cir.vertices().begin(), cir.vertices().end());
 }
+
+} // namespace::mlayer

@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    using namespace mlayer;
 
     LayerRenderMode mode = LayerRenderMode(std::stoi(argv[1]));
 

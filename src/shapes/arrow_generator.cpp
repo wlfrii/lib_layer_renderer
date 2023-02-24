@@ -3,6 +3,7 @@
 #include "cone_generator.h"
 #include "generator_util.h"
 
+namespace mlayer{
 
 ArrowGenerator::ArrowGenerator(float length, float radius,
                                float cone_height, float cone_radius,
@@ -19,3 +20,5 @@ ArrowGenerator::ArrowGenerator(float length, float radius,
     _vertices.insert(_vertices.end(), axis.vertices().begin(), axis.vertices().end());
     _vertices.insert(_vertices.end(), cone.vertices().begin(), cone.vertices().end());
 }
+
+} // namespace::mlayer

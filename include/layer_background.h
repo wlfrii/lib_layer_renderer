@@ -28,6 +28,7 @@
 #include "layer.h"
 #include <string>
 
+namespace mlayer{
 
 /**
  * @brief The LayerBackground Data
@@ -78,4 +79,5 @@ private:
     GLuint _texture_mask;
 };
 
+} // namespace::mlayer
 #endif // LAYER_BACKGROUND_H_LF
