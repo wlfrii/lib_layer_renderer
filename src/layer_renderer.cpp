@@ -1,6 +1,10 @@
 #include "../include/layer_renderer.h"
 #include "assertm.h"
 
+namespace{
+const static glm::mat4 default_camera_view = glm::rotate(
+            glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
+}
 
 LayerRenderer::LayerRenderer(
         const gl_util::Projection& proj, LayerRenderMode mode,
@@ -8,6 +12,7 @@ LayerRenderer::LayerRenderer(
     :_window(std::make_unique<gl_util::Window>(window_width, window_height))
     , _projection(proj.mat4())
     , _N(std::max(int(mode), 1))
+    , _mode(mode)
 {
     _window->enableDepthTest();
 
@@ -23,7 +28,7 @@ LayerRenderer::LayerRenderer(
     _n_view.resize(_N);
     for(size_t i = 0; i < _N; i++) {
         _n_model[i] = glm::mat4(1.0f);
-        _n_view[i] = glm::mat4(1.0f);
+        _n_view[i] = default_camera_view;
     }
 
     _n_layers.resize(_N);
@@ -38,6 +43,7 @@ LayerRenderer::LayerRenderer(
     , _projection(proj.mat4())
     , _n_viewport(n_viewport)
     , _N(n_viewport.size())
+    , _mode(LAYER_RENDER_MULTIPLE)
 {
     _window->enableDepthTest();
 
@@ -45,7 +51,7 @@ LayerRenderer::LayerRenderer(
     _n_view.resize(_N);
     for(size_t i = 0; i < _N; i++) {
         _n_model[i] = glm::mat4(1.0f);
-        _n_view[i] = glm::mat4(1.0f);
+        _n_view[i] = default_camera_view;
     }
 
     _n_layers.resize(_N);
@@ -135,8 +141,7 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
 
     static size_t n = 0;
     float step = 0.5;
-    auto& model = _n_model[n];
-
+    glm::mat4& model = _n_model[n];
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
@@ -178,7 +183,7 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
         model = glm::rotate(model, glm::radians(2.f), glm::vec3(0.f, 0.f, 1.f));
     }
     else if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
-        if(_N > 1){
+        if(_mode == LAYER_RENDER_MULTIPLE && _N > 1){
             while(true){
                 printf("LayerRenderer: ");
                 printf("Specify a viewport index (0-%zu) to control: ", _N - 1);
@@ -192,5 +197,9 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
     }
     else if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
         gl_util::print("Model", model);
+    }
+
+    if(_mode == LAYER_RENDER_STEREO) {
+        setModel(model);
     }
 }

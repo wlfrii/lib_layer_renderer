@@ -35,9 +35,10 @@
  */
 enum LayerRenderMode
 {
-    LAYER_RENDER_LEFT   = 0,
-    LAYER_RENDER_RIGHT  = 1,
-    LAYER_RENDER_STEREO = 2
+    LAYER_RENDER_LEFT      = 0,
+    LAYER_RENDER_RIGHT     = 1,
+    LAYER_RENDER_STEREO    = 2,
+    LAYER_RENDER_MULTIPLE  = 3
 };
 
 
@@ -145,10 +146,11 @@ private:
 
     std::unique_ptr<gl_util::Window> _window; // The window for rendering
 
-    glm::mat4 _projection;  // The projection matrix
-    std::vector<LayerViewPort> _n_viewport; // N viewport
+    glm::mat4 _projection;                    // The projection matrix
+    std::vector<LayerViewPort> _n_viewport;   // N viewport
 
-    const size_t _N;  // The number of viewport
+    const size_t _N;                 // The number of viewport
+    const LayerRenderMode _mode;     // The render mode
 
     std::vector<glm::mat4> _n_model; // N local frames for each viewport
     std::vector<glm::mat4> _n_view;  // N local views for each viewport
