@@ -54,15 +54,15 @@ LayerCoordinate::~LayerCoordinate()
 }
 
 
-void LayerCoordinate::draw(bool is_right)
+void LayerCoordinate::draw()
 {
-    auto &view = _view[is_right];
+    auto &view = _view;
 
     // Draw z-axis
     _shader->use();
     _shader->setMat4f("projection", _projection);
     _shader->setMat4f("model", _model);
-    _shader->setMat4f("view", _view[is_right]);
+    _shader->setMat4f("view", view);
     _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbebo->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num);
@@ -71,7 +71,7 @@ void LayerCoordinate::draw(bool is_right)
     _shader_x->use();
     _shader_x->setMat4f("projection", _projection);
     _shader_x->setMat4f("model", _model);
-    _shader_x->setMat4f("view", _view[is_right]);
+    _shader_x->setMat4f("view", view);
     _shader_x->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbo_x->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num_x);
@@ -80,7 +80,7 @@ void LayerCoordinate::draw(bool is_right)
     _shader_y->use();
     _shader_y->setMat4f("projection", _projection);
     _shader_y->setMat4f("model", _model);
-    _shader_y->setMat4f("view", _view[is_right]);
+    _shader_y->setMat4f("view", view);
     _shader_y->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbo_y->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num_y);

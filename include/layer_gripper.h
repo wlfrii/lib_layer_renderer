@@ -62,7 +62,7 @@ public:
     void setAngle(float angle);
 
 protected:
-    void draw(bool is_right) override;
+    void draw() override;
 
 private:
     // Load gripper STL model

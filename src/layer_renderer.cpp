@@ -3,11 +3,11 @@
 
 
 LayerRenderer::LayerRenderer(
-        const gl_util::Projection& proj, bool is_binocular,
+        const gl_util::Projection& proj, LayerRenderMode mode,
         uint16_t window_width, uint16_t window_height)
     :_window(std::make_unique<gl_util::Window>(window_width, window_height))
     , _projection(proj.mat4())
-    , _N(is_binocular + 1)
+    , _N(std::max(int(mode), 1))
 {
     _window->enableDepthTest();
 

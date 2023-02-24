@@ -65,7 +65,7 @@ public:
     void update3DTexture(const cv::Mat &left_tex, const cv::Mat &right_tex);
 
 protected:
-    virtual void draw(bool is_right) override;
+    virtual void draw() override;
 
 private:
     /**

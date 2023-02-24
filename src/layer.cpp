@@ -27,29 +27,32 @@ Layer::~Layer()
 }
 
 
-void Layer::render(const LayerViewPort &port, LayerRenderMode mode)
+void Layer::render(const LayerViewPort &port)
 {
-    if(mode == LAYER_RENDER_LEFT){
-        glViewport(port.x, port.y, port.width, port.height);
-        draw(LAYER_RENDER_LEFT);
-    }
-    else if(mode == LAYER_RENDER_RIGHT){
-        glViewport(port.x, port.y, port.width, port.height);
-        draw(LAYER_RENDER_RIGHT);
-    }
-    else{
-        // Draw left
-        glViewport(port.x, port.y, port.width / 2, port.height);
-        draw(LAYER_RENDER_LEFT);
-
-        // Draw right
-        glViewport(port.width / 2, 0, port.width / 2, port.height);
-        draw(LAYER_RENDER_RIGHT);
-    }
+    glViewport(port.x, port.y, port.width, port.height);
+    draw();
 }
 
 
-void Layer::draw(bool is_right)
+void Layer::setModel(const glm::mat4&)
+{
+
+}
+
+
+void Layer::setView(const glm::mat4& )
+{
+
+}
+
+
+void Layer::setProjection(const glm::mat4&)
+{
+
+}
+
+
+void Layer::draw()
 {
 
 }

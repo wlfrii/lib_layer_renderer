@@ -49,7 +49,7 @@ public:
 
 protected:
     /* Draw the vertices */
-    void draw(bool is_right) override;
+    void draw() override;
 
 private:
     void createCoordinate(float length, float radius, const glm::mat4& pose);

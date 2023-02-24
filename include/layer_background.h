@@ -34,16 +34,13 @@
  */
 struct LayerBackgroundData
 {
-    LayerBackgroundData() : width(0), height(0), channels(0)
-    {
-        data[LAYER_RENDER_LEFT] = nullptr;
-        data[LAYER_RENDER_RIGHT] = nullptr;
-    }
+    LayerBackgroundData() : data(nullptr), width(0), height(0), channels(0)
+    { }
 
-    unsigned char* data[LAYER_RENDER_STEREO]; //!< The stereo image data
-    uint16_t width;                           //!< The width of the image
-    uint16_t height;                          //!< The height of the image
-    uint8_t  channels;                        //!< The channels of the image
+    unsigned char* data; //!< The stereo image data
+    uint16_t width;      //!< The width of the image
+    uint16_t height;     //!< The height of the image
+    uint8_t  channels;   //!< The channels of the image
 };
 
 
@@ -70,16 +67,15 @@ public:
     void updateMask(const LayerBackgroundData *data);
 
 protected:
-    void draw(bool is_right) override;
+    void draw() override;
 
 
 private:
-    void bindTexture(const uint8_t *data, uint16_t w, uint16_t h, uint8_t c,
-                     bool is_right);
-    void bindTextureMask(uint8_t *data, uint16_t w, uint16_t h, bool is_right);
+    void bindTexture(const uint8_t *data, uint16_t w, uint16_t h, uint8_t c);
+    void bindTextureMask(uint8_t *data, uint16_t w, uint16_t h);
 
-    GLuint _texture[LAYER_RENDER_STEREO];
-    GLuint _texture_mask[LAYER_RENDER_STEREO];
+    GLuint _texture;
+    GLuint _texture_mask;
 };
 
 #endif // LAYER_BACKGROUND_H_LF

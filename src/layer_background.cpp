@@ -32,10 +32,8 @@ LayerBackground::LayerBackground()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    for(int i = 0; i < LAYER_RENDER_STEREO; i++){
-        glGenTextures(1, &_texture[i]);
-        glGenTextures(1, &_texture_mask[i]);
-    }
+    glGenTextures(1, &_texture);
+    glGenTextures(1, &_texture_mask);
 }
 
 
@@ -47,11 +45,9 @@ LayerBackground::~LayerBackground()
 
 void LayerBackground::updateData(const LayerBackgroundData* data)
 {
-    for(int i = 0; i < LAYER_RENDER_STEREO; i++){
-        if(data->data[i]){
-            bindTexture(data->data[i], data->width, data->height,
-                    data->channels, i);
-        }
+    if(data->data){
+        bindTexture(data->data, data->width, data->height,
+                    data->channels);
     }
 }
 
@@ -60,30 +56,28 @@ void LayerBackground::updateMask(const LayerBackgroundData* data)
 {
     if(data->channels != 1) std::abort();
 
-    for(int i = 0; i < LAYER_RENDER_STEREO; i++){
-        if(data->data[i]){
-            bindTextureMask(data->data[i], data->width, data->height, i);
-        }
+    if(data->data){
+        bindTextureMask(data->data, data->width, data->height);
     }
 }
 
 
-void LayerBackground::draw(bool is_right)
+void LayerBackground::draw()
 {
     _shader->use();
     _vavbebo->bindVertexArray();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _texture[is_right]);
+    glBindTexture(GL_TEXTURE_2D, _texture);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, _texture_mask[is_right]);
+    glBindTexture(GL_TEXTURE_2D, _texture_mask);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 
 void LayerBackground::bindTexture(const uint8_t *data, uint16_t w, uint16_t h,
-                                  uint8_t c, bool is_right)
+                                  uint8_t c)
 {
-    glBindTexture(GL_TEXTURE_2D, _texture[is_right]);
+    glBindTexture(GL_TEXTURE_2D, _texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -97,10 +91,9 @@ void LayerBackground::bindTexture(const uint8_t *data, uint16_t w, uint16_t h,
 }
 
 
-void LayerBackground::bindTextureMask(uint8_t *data, uint16_t w, uint16_t h,
-                                  bool is_right)
+void LayerBackground::bindTextureMask(uint8_t *data, uint16_t w, uint16_t h)
 {
-    glBindTexture(GL_TEXTURE_2D, _texture_mask[is_right]);
+    glBindTexture(GL_TEXTURE_2D, _texture_mask);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);

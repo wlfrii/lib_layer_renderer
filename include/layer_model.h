@@ -49,22 +49,21 @@ public:
      * @brief Set Model matrix
      * @param model
      */
-    void setModel(const glm::mat4& model);
+    void setModel(const glm::mat4& model) override;
 
 
     /**
      * @brief Set View matrix
      * @param view
-     * @param is_right Specify the left or right view
      */
-    static void setView(const glm::mat4& view, bool is_right);
+    void setView(const glm::mat4& view) override;
 
 
     /**
      * @brief Set Projection matrix
      * @param proj
      */
-    static void setProjection(const glm::mat4& proj);
+    void setProjection(const glm::mat4& proj) override;
 
 
     /**
@@ -76,10 +75,10 @@ public:
 
 protected:
     /* Draw the vertices */
-    virtual void draw(bool is_right) override;
+    virtual void draw() override;
 
-    static glm::mat4  _projection;                 //!< Projection matrix
-    static glm::mat4  _view[LAYER_RENDER_STEREO];  //!< View matrix
+    glm::mat4  _projection;             //!< Projection matrix
+    glm::mat4  _view;                   //!< View matrix
 
     size_t     _vert_num;               //!< The number of vertex
 

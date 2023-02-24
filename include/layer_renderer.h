@@ -30,6 +30,16 @@
 #include <memory>
 #include "layer.h"
 
+/**
+ * @brief Specify the render index, Left/Right for 2D mode or Stereo 3D mode.
+ */
+enum LayerRenderMode
+{
+    LAYER_RENDER_LEFT   = 0,
+    LAYER_RENDER_RIGHT  = 1,
+    LAYER_RENDER_STEREO = 2
+};
+
 
 /**
  * @brief The LayerRenderer class for rendering layers
@@ -48,7 +58,7 @@ public:
      * @param window_height  The height of the specified window
      */
     LayerRenderer(const gl_util::Projection& proj,
-                  bool is_binocular,
+                  LayerRenderMode mode,
                   uint16_t window_width = 800,
                   uint16_t window_height = 600
                   );

@@ -50,13 +50,13 @@ LayerGripper::~LayerGripper()
 }
 
 
-void LayerGripper::draw(bool is_right)
+void LayerGripper::draw()
 {
     // Draw main part
     _shader->use();
     _shader->setMat4f("projection", _projection);
     _shader->setMat4f("model", _model);
-    _shader->setMat4f("view", _view[is_right]);
+    _shader->setMat4f("view", _view);
     _vavbebo->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num);
 
@@ -83,7 +83,7 @@ void LayerGripper::draw(bool is_right)
     _shader_ignore->use();
     _shader_ignore->setMat4f("projection", _projection);
     _shader_ignore->setMat4f("model", _model);
-    _shader_ignore->setMat4f("view", _view[is_right]);
+    _shader_ignore->setMat4f("view", _view);
     _vavbo_ignore->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num_ignore);
 }

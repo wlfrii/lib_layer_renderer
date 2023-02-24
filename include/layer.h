@@ -38,17 +38,6 @@ namespace gl_util{
 
 
 /**
- * @brief Specify the render index, Left/Right for 2D mode or Stereo 3D mode.
- */
-enum LayerRenderMode
-{
-    LAYER_RENDER_LEFT   = 0,
-    LAYER_RENDER_RIGHT  = 1,
-    LAYER_RENDER_STEREO = 2
-};
-
-
-/**
  * @brief The Layer Type enum
  */
 enum LayerType
@@ -102,16 +91,39 @@ public:
     /**
      * @brief Render current layer
      */
-    virtual void render(const LayerViewPort &port, LayerRenderMode mode = LAYER_RENDER_LEFT);
+    virtual void render(const LayerViewPort &port);
+
+
+    /**
+     * @brief Set Model matrix
+     * @param model
+     */
+    virtual void setModel(const glm::mat4& model);
+
+
+    /**
+     * @brief Set View matrix
+     * @param view
+     */
+    virtual void setView(const glm::mat4& view);
+
+
+    /**
+     * @brief Set Projection matrix
+     * @param proj
+     */
+    virtual void setProjection(const glm::mat4& proj);
+
 
     const LayerType       type;         //!< Type of current layer
+
 
 protected:
     /**
      * @brief draw  For the derivative class to draw.
      * @param is_right
      */
-    virtual void draw(bool is_right);
+    virtual void draw();
 
     gl_util::Shader*     _shader;       //!< Shader for current layer
     gl_util::VAVBEBO*    _vavbebo;      //!< VAO,VBO,EBO for current layer
