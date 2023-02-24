@@ -59,8 +59,8 @@ public:
      */
     LayerRenderer(const gl_util::Projection& proj,
                   LayerRenderMode mode,
-                  uint16_t window_width = 800,
-                  uint16_t window_height = 600
+                  uint16_t window_width = 1920,
+                  uint16_t window_height = 1080
                   );
 
 
@@ -73,8 +73,8 @@ public:
      */
     LayerRenderer(const gl_util::Projection& proj,
                   const std::vector<LayerViewPort>& n_viewport,
-                  uint16_t window_width = 800,
-                  uint16_t window_height = 600
+                  uint16_t window_width = 1920,
+                  uint16_t window_height = 1080
                   );
 
 
@@ -83,7 +83,7 @@ public:
      * @param model
      * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
      */
-    void setModel(const glm::mat4& model, uint8_t viewport_idx = 0);
+    void setModel(const glm::mat4& model, uint8_t viewport_idx);
 
 
     /**
@@ -91,7 +91,7 @@ public:
      * @param view
      * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
      */
-    void setView(const glm::mat4& view, uint8_t viewport_idx = 0);
+    void setView(const glm::mat4& view, uint8_t viewport_idx);
 
 
     /**
@@ -105,7 +105,7 @@ public:
 
 
 
-    void addLayers(std::shared_ptr<Layer> layer, uint8_t viewport_idx = 0);
+    void addLayers(std::shared_ptr<Layer> layer, uint8_t viewport_idx);
 
 
     /**
@@ -115,6 +115,9 @@ public:
 
 
 private:
+    void keyboardControlModel(GLFWwindow* window);
+
+
     std::unique_ptr<gl_util::Window> _window; // The window for rendering
 
     glm::mat4 _projection;  // The projection matrix
