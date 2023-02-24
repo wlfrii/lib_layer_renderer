@@ -1,7 +1,6 @@
 #include "../include/layer_coordinate.h"
 #include "./shapes/arrow_generator.h"
 #include <gl_util.h>
-#include <global.h>
 
 
 LayerCoordinate::LayerCoordinate(float length, float radius,
@@ -13,9 +12,9 @@ LayerCoordinate::LayerCoordinate(float length, float radius,
     , _vavbo_y(nullptr)
 {
     bool flag = _shader_x->load("./shaders/model.vs", "./shaders/model.fs");
-    if(!flag) EV_LOG("LayerCoordinate read shader: %d\n", flag);
+    if(!flag) printf("LayerCoordinate read shader: %d\n", flag);
     flag = _shader_y->load("./shaders/model.vs", "./shaders/model.fs");
-    if(!flag) EV_LOG("LayerCoordinate read shader: %d\n", flag);
+    if(!flag) printf("LayerCoordinate read shader: %d\n", flag);
 
     _shader_x->use();
     _shader_x->setVec3f("object_color", glm::vec3(1.f, 0.f, 0.f));

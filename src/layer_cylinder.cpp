@@ -1,7 +1,6 @@
 #include "../include/layer_cylinder.h"
 #include "./shapes/cylinder_generator.h"
 #include <gl_util.h>
-#include <global.h>
 
 
 LayerCylinder::LayerCylinder(float length, float radius, const glm::vec3 &color,

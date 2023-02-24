@@ -1,7 +1,6 @@
 #include "../include/layer_cone.h"
 #include "./shapes/cone_generator.h"
 #include <gl_util.h>
-#include <global.h>
 
 
 LayerCone::LayerCone(float height, float radius, const glm::vec3 &color,

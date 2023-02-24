@@ -3,7 +3,7 @@
 #include "stl_reader.h"
 #include "./shapes/cylinder_generator.h"
 #include <gl_util.h>
-#include <global.h>
+
 
 LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
     : LayerModel(LAYER_GRIPPER, color)
@@ -18,10 +18,10 @@ LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
     _shader_ignore = new gl_util::Shader();
     bool flag = _shader_ignore->load("./shaders/model_ignore.vs",
                                 "./shaders/model_ignore.fs");
-    if(!flag) EV_LOG("LayerGripper read shader ignored: %d\n", flag);
+    if(!flag) printf("LayerGripper read shader ignored: %d\n", flag);
 
     flag = loadModel();
-    if(!flag) EV_LOG("LayerGripper read gripper model: %d\n", flag);
+    if(!flag) printf("LayerGripper read gripper model: %d\n", flag);
 }
 
 

@@ -1,6 +1,5 @@
 #include "stl_reader.h"
 #include <cstdio>
-#include <global.h>
 
 STLReader::STLReader()
     : _is_stl_exist(false)
@@ -40,7 +39,7 @@ bool STLReader::read(const std::string &filename, Vertices &data)
 
     std::FILE* fp = fopen(filename.c_str(), "rb");
     if(fp == nullptr){
-        EV_LOG("Failed to read STL file.\n");
+        throw "Failed to read STL file.\n";
         return false;
     }
 

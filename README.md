@@ -1,6 +1,8 @@
 # RenderLayer
 
-This module is designed as a static library mainly for rendering continuum-based surgical robot and gripper.
+This module is splited from XXXX project (_which was designed as a static library mainly for rendering continuum-based surgical robot and gripper_).
+
+Currently, this library is modularized for rendering shapes, model, vertices, and graph based on OpenGL.
 
 ## Requirements
 

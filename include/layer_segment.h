@@ -1,6 +1,6 @@
 /**--------------------------------------------------------------------
  *																		
- *   				   Mathematics extension library 					
+ *   				    Layer renderer library
  *																		
  * Description:													
  * This file is a part of lib_render_layer. You can redistribute it or

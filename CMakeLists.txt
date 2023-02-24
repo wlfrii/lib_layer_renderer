@@ -1,18 +1,81 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(lib_render_layer
-    VERSION 1.1.0
-    DESCRIPTION "A project for rendering surgical tool and its background"
+project(lib_layer_renderer
+    VERSION 1.2.0
+    DESCRIPTION "A library for rendering shapes, model, vertices, and graph based on OpenGL."
 )
 message("==== Build Library: ${PROJECT_NAME} ====")
 
+set(CMAKE_CXX_STANDARD 14)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+
+# Set the install path and prefix
+#option(SPECIFY_INSTALL_PATH "Specify the install path" ON)
+#if(SPECIFY_INSTALL_PATH)
+#    set(MODULE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+#    message(STATUS "Module root: ${MODULE_ROOT}")
+#    set(REPO_ROOT ${MODULE_ROOT}/../)
+#    message(STATUS "Repo root: ${REPO_ROOT}")
+#    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#        set(CMAKE_INSTALL_PREFIX
+#            ${REPO_ROOT}/buildtarget/ CACHE PATH "repo root" FORCE
+#            )
+#    endif()
+#endif()
+#message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 # --------------------------------------------------------------------
-#                   Create target and set properties
+#                      Find and Set Dependency
 # --------------------------------------------------------------------
+
+# gl_util{} path
+set(GL_UTIL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../mylearn/learn_OpenGL/gl_util")
+file(GLOB GL_UTIL_SRC ${GL_UTIL_PATH}/gl_util/*.cpp)
+
+# GLM, GLAD path
+set(PATH_3RDPARTY "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty")
+
+# Add lib_math
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../buildtarget/)
+message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
+find_package(lib_math REQUIRED)
+if(${lib_math_FOUND})
+    message(STATUS "lib_math found")
+    message(STATUS "  include path: ${lib_math_INCLUDE_DIRS}")
+else()
+    message(ERROR "Cannot find lib_math")
+endif()
+
+# Add GLFW
+find_package(glfw3 REQUIRED)
+if(${glfw3_FOUND})
+    message(STATUS "GLFW3 found")
+else()
+    message(ERROR "Cannot find GLFW3")
+endif()
+
+# Add OpenCV
+find_package(OpenCV REQUIRED)
+if(${OpenCV_FOUND})
+    message(STATUS "OpenCV library status:")
+    message(STATUS "  version: ${OpenCV_VERSION}")
+    message(STATUS "  libraries: ${OpenCV_LIBS}")
+    message(STATUS "  include path: ${OpenCV_INCLUDE_DIRS}")
+else(${OpenCV_FOUND})
+    message(WARNING "Cannot found OpenCV.")
+endif(${OpenCV_FOUND})
+
+## Add Eigen
+#find_package(Eigen3 REQUIRED)
+#if(${Eigen3_FOUND})
+#    message(STATUS "Eigen found: ${EIGEN3_INCLUDE_DIRS}")
+#else(${Eigen3_FOUND})
+#    message(ERROR "Cannot find Eigen")
+#endif(${Eigen3_FOUND})
+
 # PCL requires Qt5
 set(CMAKE_PREFIX_PATH /usr/local/Cellar/qt@5/5.15.3/)
 find_package(PCL REQUIRED)
@@ -23,6 +86,10 @@ if(PCL_FOUND)
     message(STATUS "  Libraries: ${PCL_LIBRARIES}")
     # message(STATUS "  Definitions: ${PCL_DEFINITIONS}")
 endif()
+
+# --------------------------------------------------------------------
+#                   Create target and set properties
+# --------------------------------------------------------------------
 
 
 file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)

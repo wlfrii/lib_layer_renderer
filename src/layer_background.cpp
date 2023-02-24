@@ -1,6 +1,5 @@
 #include "layer_background.h"
 #include <gl_util.h>
-#include <global.h>
 
 
 LayerBackground::LayerBackground()
@@ -8,7 +7,7 @@ LayerBackground::LayerBackground()
 {
     // Load shader
     bool flag = _shader->load("./shaders/texture.vs", "./shaders/texture.fs");
-    if(!flag) EV_LOG("LayerBackground read shader: %d\n", flag);
+    if(!flag) printf("LayerBackground read shader: %d\n", flag);
 
     _shader->use();
     _shader->setInt("image", 0);

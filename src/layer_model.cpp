@@ -1,6 +1,6 @@
 #include "layer_model.h"
 #include <gl_util.h>
-#include <global.h>
+
 
 glm::mat4 LayerModel::_projection = glm::mat4(1.0);
 glm::mat4 LayerModel::_view[LAYER_RENDER_STEREO] = { glm::mat4(1.0), glm::mat4(1.0) };
@@ -14,11 +14,11 @@ LayerModel::LayerModel(LayerType type, const glm::vec3 &color)
 {
     if(type == LAYER_TEXTURE3D){
         bool flag = _shader->load("./shaders/texture_3d.vs", "./shaders/texture_3d.fs");
-        if(!flag) EV_LOG("LayerTexture3D read shader: %d\n", flag);
+        if(!flag) printf("LayerTexture3D read shader: %d\n", flag);
     }
     else {
         bool flag = _shader->load("./shaders/model.vs", "./shaders/model.fs");
-        if(!flag) EV_LOG("LayerModel read shader: %d\n", flag);
+        if(!flag) printf("LayerModel read shader: %d\n", flag);
     }
 
     _shader->use();

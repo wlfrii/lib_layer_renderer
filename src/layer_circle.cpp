@@ -1,7 +1,6 @@
 #include "../include/layer_circle.h"
 #include "./shapes/circle_generator.h"
 #include <gl_util.h>
-#include <global.h>
 
 
 LayerCircle::LayerCircle(float radius, const glm::vec3 &color,

@@ -2,7 +2,6 @@
 #include "sgm/sgm.h"
 #include <lib_math/lib_math.h>
 #include <gl_util.h>
-#include <global.h>
 #include "layer_define.h"
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/search/kdtree.h>
@@ -67,7 +66,7 @@ LayerTexture3D::LayerTexture3D(const cv::Mat &left_tex, const cv::Mat &right_tex
     }
 
     bool flag = _sgm->initialize(_width, _height, sgm_option);
-    if(!flag) EV_LOG("LayerTexture3D initialize SGM: %d\n", flag);
+    if(!flag) printf("LayerTexture3D initialize SGM: %d\n", flag);
 
     _disparity = (float*)malloc(_width * _height * sizeof(float));
 
