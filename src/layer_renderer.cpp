@@ -52,11 +52,29 @@ LayerRenderer::LayerRenderer(
 }
 
 
+LayerRenderer::~LayerRenderer()
+{
+
+}
+
+
+void LayerRenderer::setModel(const glm::mat4& model)
+{
+    for(auto& m : _n_model) m = model;
+}
+
+
 void LayerRenderer::setModel(const glm::mat4& model, uint8_t viewport_idx)
 {
     ASSERTM(viewport_idx < _N,
             "The input index of viewport is out of range [0, %zu]\n", _N - 1)
     _n_model[viewport_idx] = model;
+}
+
+
+void LayerRenderer::setView(const glm::mat4& view)
+{
+    for(auto& v : _n_view) v = view;
 }
 
 
@@ -68,9 +86,9 @@ void LayerRenderer::setView(const glm::mat4& view, uint8_t viewport_idx)
 }
 
 
-void LayerRenderer::setBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+void LayerRenderer::addLayers(std::shared_ptr<Layer> layer)
 {
-    _window->setBackgroundColor(r, g, b, a);
+    for(auto& layers : _n_layers) layers.push_back(layer);
 }
 
 
@@ -79,6 +97,12 @@ void LayerRenderer::addLayers(std::shared_ptr<Layer> layer, uint8_t viewport_idx
     ASSERTM(viewport_idx < _N,
             "The input index of viewport is out of range [0, %zu]\n", _N - 1)
     _n_layers[viewport_idx].push_back(layer);
+}
+
+
+void LayerRenderer::setBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+{
+    _window->setBackgroundColor(r, g, b, a);
 }
 
 

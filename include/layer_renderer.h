@@ -74,12 +74,19 @@ public:
     LayerRenderer(const gl_util::Projection& proj,
                   const std::vector<LayerViewPort>& n_viewport,
                   uint16_t window_width = 1920,
-                  uint16_t window_height = 1080
-                  );
+                  uint16_t window_height = 1080);
+    ~LayerRenderer();
 
 
     /**
-     * @brief Set model for each viewport
+     * @brief Set the same model for each viewport
+     * @param model
+     */
+    void setModel(const glm::mat4& model);
+
+
+    /**
+     * @brief Set model for the specified viewport
      * @param model
      * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
      */
@@ -87,11 +94,33 @@ public:
 
 
     /**
-     * @brief Set view for each viewport
+     * @brief Set the same view for each viewport
+     * @param view
+     */
+    void setView(const glm::mat4& view);
+
+
+    /**
+     * @brief Set view for the specified viewport
      * @param view
      * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
      */
     void setView(const glm::mat4& view, uint8_t viewport_idx);
+
+
+    /**
+     * @brief Add the save layer for each viewport
+     * @param layer
+     */
+    void addLayers(std::shared_ptr<Layer> layer);
+
+
+    /**
+     * @brief Add layer for the specified viewport
+     * @param layer
+     * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
+     */
+    void addLayers(std::shared_ptr<Layer> layer, uint8_t viewport_idx);
 
 
     /**
@@ -102,10 +131,6 @@ public:
      * @param a
      */
     void setBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
-
-
-
-    void addLayers(std::shared_ptr<Layer> layer, uint8_t viewport_idx);
 
 
     /**
