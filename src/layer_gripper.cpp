@@ -1,5 +1,5 @@
-#include "../include/layer_gripper.h"
-#include "../include/layer_cylinder.h"
+#include "../export/lib_layer_renderer/layer_gripper.h"
+#include "../export/lib_layer_renderer/layer_cylinder.h"
 #include "stl_reader.h"
 #include "./shapes/cylinder_generator.h"
 #include <gl_util.h>

@@ -1,12 +1,4 @@
-#include <layer_circle.h>
-#include <layer_cylinder.h>
-#include <layer_segment.h>
-#include <layer_cone.h>
-#include <layer_coordinate.h>
-#include <layer_background.h>
-#include <layer_gripper.h>
-#include <layer_renderer.h>
-
+#include <lib_layer_renderer.h>
 
 glm::mat4 model = glm::mat4(
             1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,
