@@ -68,13 +68,6 @@ else(${OpenCV_FOUND})
     message(WARNING "Cannot found OpenCV.")
 endif(${OpenCV_FOUND})
 
-## Add Eigen
-#find_package(Eigen3 REQUIRED)
-#if(${Eigen3_FOUND})
-#    message(STATUS "Eigen found: ${EIGEN3_INCLUDE_DIRS}")
-#else(${Eigen3_FOUND})
-#    message(ERROR "Cannot find Eigen")
-#endif(${Eigen3_FOUND})
 
 # PCL requires Qt5
 set(CMAKE_PREFIX_PATH /usr/local/Cellar/qt@5/5.15.3/)
