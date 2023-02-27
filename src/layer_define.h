@@ -17,18 +17,6 @@ struct Vertex
 
 
 /**
- * @brief A struct designed for vertex(position,color)
- * For now, this Type only for PCL in layer_texture3d, it might be deleted in
- * the future
- */
-struct VertexC
-{
-    glm::vec4 position; //!< Positon of a vertex
-    glm::vec4 color;    //!< Color of a vertex
-};
-
-
-/**
  * @brief Store the vertex data
  */
 using Vertices = std::vector<Vertex>;

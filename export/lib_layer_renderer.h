@@ -29,23 +29,22 @@
 // Renderer
 #include "lib_layer_renderer/layer_renderer.h"
 
-// Layers
-#include "lib_layer_renderer/layer_background.h"
+// Layer utility
+#include "lib_layer_renderer/layer_util.h"
+
+// Model layers
 #include "lib_layer_renderer/layer_circle.h"
 #include "lib_layer_renderer/layer_cone.h"
 #include "lib_layer_renderer/layer_coordinate.h"
 #include "lib_layer_renderer/layer_cylinder.h"
 #include "lib_layer_renderer/layer_gripper.h"
 #include "lib_layer_renderer/layer_segment.h"
-#include "lib_layer_renderer/layer_util.h"
 
+// 2D texture Layer
+#include "lib_layer_renderer/layer_background.h"
 
-// Some explicit template class
-namespace mmath {
+// 3D texture Layer
+#include "lib_layer_renderer/layer_texture3d.h"
 
-using Linef = Line<float>;
-using GaussianCurvef = GaussianCurve<float>;
-
-}
 
 #endif // LIB_LAYER_RENDERER_LIB_LF

@@ -57,28 +57,6 @@ else()
     message(ERROR "Cannot find GLFW3")
 endif()
 
-# Add OpenCV
-find_package(OpenCV REQUIRED)
-if(${OpenCV_FOUND})
-    message(STATUS "OpenCV library status:")
-    message(STATUS "  version: ${OpenCV_VERSION}")
-    message(STATUS "  libraries: ${OpenCV_LIBS}")
-    message(STATUS "  include path: ${OpenCV_INCLUDE_DIRS}")
-else(${OpenCV_FOUND})
-    message(WARNING "Cannot found OpenCV.")
-endif(${OpenCV_FOUND})
-
-
-# PCL requires Qt5
-set(CMAKE_PREFIX_PATH /usr/local/Cellar/qt@5/5.15.3/)
-find_package(PCL REQUIRED)
-if(PCL_FOUND)
-    message(STATUS "Found PCL")
-    message(STATUS "  Include: ${PCL_INCLUDE_DIRS}")
-    message(STATUS "  Library path: ${PCL_LIBRARY_DIRS}")
-    message(STATUS "  Libraries: ${PCL_LIBRARIES}")
-    # message(STATUS "  Definitions: ${PCL_DEFINITIONS}")
-endif()
 
 # --------------------------------------------------------------------
 #                   Create target and set properties
@@ -102,7 +80,6 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${GL_UTIL_PATH}>
         $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${lib_math_INCLUDE_DIRS}>
-        $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
@@ -110,8 +87,6 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     glfw
     ${lib_math_LIBRARIES}
-    ${OpenCV_LIBS}
-    ${PCL_LIBRARIES}
 )
 
 file(GLOB MODEL_STL ${CMAKE_CURRENT_SOURCE_DIR}/models/*.STL)
