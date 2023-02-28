@@ -142,7 +142,7 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
     if(_N == 0) return;
 
     static size_t n = 0;
-    float step = 0.5;
+    float step = 1.f;
     glm::mat4& model = _n_model[n];
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){

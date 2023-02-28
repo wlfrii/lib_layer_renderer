@@ -60,8 +60,13 @@ public:
      */
     void updateVertex3D(std::vector<Vertex3D>& vertices_3d);
 
+
+    void updateVertex(std::vector<Vertex3D>& vertices);
+
 protected:
     virtual void draw() override;
+
+    uint8_t _draw_type;
 
 };
 

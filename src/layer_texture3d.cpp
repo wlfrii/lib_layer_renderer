@@ -21,6 +21,8 @@ LayerTexture3D::~LayerTexture3D()
 
 void LayerTexture3D::updateVertex3D(std::vector<Vertex3D>& vertices_3d)
 {
+    _draw_type = 1;
+
     // Now, vertices are arranged triangle vertices
     _vavbebo->bind(&vertices_3d[0].position.x, vertices_3d.size() * sizeof(Vertex3D));
     // position attribute
@@ -32,6 +34,24 @@ void LayerTexture3D::updateVertex3D(std::vector<Vertex3D>& vertices_3d)
     _vert_num = vertices_3d.size();
 }
 
+
+void LayerTexture3D::updateVertex(std::vector<Vertex3D>& vertices_3d)
+{
+    _draw_type = 2;
+
+    // Now, vertices are arranged triangle vertices
+    _vavbebo->bind(&vertices_3d[0].position.x, vertices_3d.size() * sizeof(Vertex3D));
+    // position attribute
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // texture attribute
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    _vert_num = vertices_3d.size();
+}
+
+
+
 void LayerTexture3D::draw()
 {
     _shader->use();
@@ -41,8 +61,13 @@ void LayerTexture3D::draw()
     auto &view = _view;
     _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbebo->bindVertexArray();
-    glPointSize(2);
-    glDrawArrays(GL_TRIANGLES, 0, _vert_num);
+    glPointSize(3);
+    if(_draw_type == 1){
+        glDrawArrays(GL_TRIANGLES, 0, _vert_num);
+    }
+    else{
+        glDrawArrays(GL_POINTS, 0, _vert_num);
+    }
 }
 
 
