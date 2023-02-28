@@ -47,27 +47,25 @@ else(${OpenCV_FOUND})
     message(WARNING "Cannot found OpenCV.")
 endif(${OpenCV_FOUND})
 
-
-# Add GLFW
-find_package(glfw3 REQUIRED)
-if(${glfw3_FOUND})
-    message(STATUS "GLFW3 found")
-else()
-    message(ERROR "Cannot find GLFW3")
+# PCL requires Qt5
+set(CMAKE_PREFIX_PATH /usr/local/Cellar/qt@5/5.15.3/)
+find_package(PCL REQUIRED)
+if(PCL_FOUND)
+    message(STATUS "Found PCL")
+    message(STATUS "  Include: ${PCL_INCLUDE_DIRS}")
+    message(STATUS "  Library path: ${PCL_LIBRARY_DIRS}")
+    message(STATUS "  Libraries: ${PCL_LIBRARIES}")
+    # message(STATUS "  Definitions: ${PCL_DEFINITIONS}")
 endif()
 
-
-# gl_util{} path
-set(GL_UTIL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../mylearn/learn_OpenGL/gl_util")
-file(GLOB GL_UTIL_SRC ${GL_UTIL_PATH}/gl_util/*.cpp)
-# include_directories(${GL_UTIL_PATH})
-
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty
+)
 
 file(GLOB_RECURSE SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_executable(${PROJECT_NAME}
     main.cpp
     ${SRCS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/../lib_layer_renderer/3rdparty/glad/src/glad.c
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -75,19 +73,14 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${lib_math_INCLUDE_DIRS}>
-        $<BUILD_INTERFACE:${GL_UTIL_PATH}>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/../lib_layer_renderer/export
-        ${CMAKE_CURRENT_SOURCE_DIR}/../lib_layer_renderer/3rdparty
-        ${CMAKE_CURRENT_SOURCE_DIR}/../lib_layer_renderer/3rdparty/glad/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/../lib_layer_renderer/3rdparty/glm
+        ${CMAKE_CURRENT_SOURCE_DIR}/../export
 )
-link_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}/../lib_layer_renderer/build)
+
 target_link_libraries(${PROJECT_NAME}
     ${OpenCV_LIBS}
     ${lib_math_LIBRARIES}
     lib_layer_renderer
-    glfw
+    ${PCL_LIBRARIES}
 )

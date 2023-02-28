@@ -4,6 +4,9 @@
 #include <lib_math.h>
 #include <lib_layer_renderer.h>
 #include <vector>
+#include <pcl/point_types.h>
+#include <pcl/point_cloud.h>
+
 
 class SGM;
 
@@ -20,7 +23,7 @@ public:
      * @param pyd_times  Times of downsampling for the texture.
      */
     SceneReconstructor(const mmath::CameraProjector& cam_proj,
-                       bool is_seqc = false, uint8_t pyd_times = 2);
+                       bool is_seqc = false);
     ~SceneReconstructor();
 
 
@@ -35,10 +38,9 @@ public:
     void plot();
 
 private:
-    /**
-     * @brief Calculate the RGBD for each valid pixel
-     */
-    void calcRGBD(const cv::Mat &l_image, const cv::Mat &r_image);
+    void calcDepthMap(const cv::Mat &l_image, const cv::Mat &r_image);
+
+    void buildVertices();
 
 
     /**
@@ -64,8 +66,9 @@ private:
     uint16_t _height;     //!< height of the pyd texture
 
     cv::Mat _texture;     //!< The default texture is set to left_tex
-
-    cv::Mat _rgbd;        //!< [R, G, B, disparoty]
+    cv::Mat _depthmap;    //!< [R, G, B, disparoty]
+    uint16_t _u_start;
+    uint16_t _u_end;
 
     std::vector<mlayer::Vertex3D> _vertices_3d;
 
