@@ -35,28 +35,27 @@ int main(int argc, char* argv[])
     using namespace mlayer;
 
     LayerRenderMode mode = LayerRenderMode(std::stoi(argv[1]));
-
     gl_util::Projection gl_proj(1120, 960, 540, 1920, 1080, 0.2, 150);
     LayerRenderer renderer(gl_proj, mode);
-
     glm::mat4 view = glm::rotate(glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
-    view[3][0] += 2.f;
+
+    if(mode == LAYER_RENDER_LEFT) view[3][0] += 2.f;
+    else if(mode == LAYER_RENDER_RIGHT) view[3][0] -= 2.f;
     renderer.setView(view);
     if (mode == LAYER_RENDER_STEREO) {
+        view[3][0] += 2.f;
+        renderer.setView(view, LAYER_RENDER_LEFT);
         view[3][0] -= 4.f;
         renderer.setView(view, LAYER_RENDER_RIGHT);
     }
-
     renderer.setModel(model);
 
     // Create object
     std::shared_ptr<LayerModel> layer_obj = nullptr;
     std::shared_ptr<LayerModel> layer_coord = nullptr;
     glm::mat4 pose(1.f);
-
     // --------------------------- Prase inputs -----------------------------
     layer_coord = std::make_shared<LayerCoordinate>(20, 0.2, pose);
-
     unsigned char type = std::stoi(argv[2]);
     switch(type){
     case 1:
