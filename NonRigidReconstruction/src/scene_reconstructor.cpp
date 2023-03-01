@@ -8,23 +8,7 @@
 
 
 namespace {
-float OUTLIERS_THRESH = 2.f;
-float VERTICES_DENSITY = 1.f;
-
-bool isNear(const Eigen::Vector3f& p1, const Eigen::Vector3f& p2,
-            const Eigen::Vector3f& p3, float thresh = OUTLIERS_THRESH)
-{
-    float d1 = (p1 - p2).norm();
-    float d2 = (p1 - p3).norm();
-    float d3 = (p2 - p3).norm();
-
-    float dmax = std::fmaxf(d1, std::fmaxf(d2, d3));
-    if(dmax < thresh){
-        return true;
-    }
-    else return false;
-}
-
+float VERTICES_DENSITY = 1.0f;
 }
 
 SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
@@ -34,6 +18,7 @@ SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
     , _sgm(nullptr)
     , _pyd_times(2)
     , _step(2)
+    , _pc_handler(new PointCloudHandler)
 {
     uint16_t w = cam_proj.cx*2;
     uint16_t h = cam_proj.cy*2;
@@ -121,9 +106,20 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
 }
 
 
-void SceneReconstructor::plot()
+void SceneReconstructor::plotVertices()
 {
-    _layer_texture3d->updateVertex3D(_vertices_3d);
+    _layer_texture3d->updateVertex(_vertices_3d);
+    _layer_renderer->addLayers(_layer_texture3d);
+
+    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
+    _layer_renderer->setModel(model);
+    _layer_renderer->render();
+}
+
+
+void SceneReconstructor::plotMesh()
+{
+    _layer_texture3d->updateVertex3D(_traingles_3d);
     _layer_renderer->addLayers(_layer_texture3d);
 
     glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
@@ -214,34 +210,37 @@ void SceneReconstructor::buildVertices()
     // Remove the points in the gap
     int gap = 50;
 
-    std::vector<Eigen::Vector3f> valid_points;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr valid_points(
+                new pcl::PointCloud<pcl::PointXYZ>);
     for (int32_t v = gap; v < _depthmap.rows - gap; v += _step) {
         for (int32_t u = _u_start + gap; u < _u_end - gap; u += _step) {
             float d = _depthmap.at<float>(v, u);
             if(d < 30) continue;
 
             Eigen::Vector3f pt = _cam_proj.cvt2Dto3D(u, v, d, mmath::cam::LEFT);
-            valid_points.push_back(pt);
+            valid_points->push_back({pt[0], pt[1], pt[2]});
         }
     }
-    printf("Point size: %zu\n", valid_points.size());
+    printf("Initial point size: %zu\n", valid_points->size());
 
-    PointCloudHandler pthandler(valid_points);
-    pthandler.voxelDownSampling(VERTICES_DENSITY);
-    pthandler.rmOutliersByRadius(VERTICES_DENSITY * 4, 13);
-    pthandler.rmOutliersByRadius(VERTICES_DENSITY * 2.5, 7);
-    pthandler.rmOutliersByKNeighbors(7, 3);
+    _pc_handler->bindPointCloud(valid_points);
+    _pc_handler->voxelDownSampling(VERTICES_DENSITY);
+    _pc_handler->rmOutliersByRadius(VERTICES_DENSITY*4, 37);
+    _pc_handler->statisticalOutliersRemoval(100, 1.0f);
+//    pthandler.rmOutliersByKNeighbors(20, 2);
     pcl::PolygonMesh mesh;
-    pthandler.createMesh(mesh, 2.5, 2.5, 20);
-
+    float radius = VERTICES_DENSITY * 2.5;
+    _pc_handler->createMesh(mesh, radius, radius, 80);
 
     // Retrive points color
-    const PointCloudXYZ& points = pthandler.getCurrentPointCloud();
-    std::vector<Eigen::Vector3f> points_color(points.rows());
-    for(long i = 0; i < points.rows(); i++) {
-        auto& pt = points.row(i);
+    _vertices_3d.clear();
+    auto& points = _pc_handler->getCurrentPointCloud();
+    std::vector<Eigen::Vector3f> points_color(points->size());
+    for(size_t i = 0; i < points->size(); i++) {
+        auto& pt = points->at(i);
 
-        Eigen::Vector2f pt2d = _cam_proj.cvt3Dto2D(pt, mmath::cam::LEFT);
+        Eigen::Vector2f pt2d = _cam_proj.cvt3Dto2D(
+                    pt.x, pt.y, pt.z, mmath::cam::LEFT);
         int u = round(pt2d[0]);
         int v = round(pt2d[1]);
         const cv::Vec3b pixel = _texture.at<cv::Vec3b>(v, u);
@@ -250,34 +249,31 @@ void SceneReconstructor::buildVertices()
         float b = 1.f*pixel[2]/255.f;
 
         points_color[i] = {r, g, b};
+
+        _vertices_3d.push_back({
+            glm::vec4(pt.x, pt.y, pt.z, 1),
+            glm::vec4(r, g, b, 1)
+        });
     }
 
     // Create my vertex3D
-    std::vector<mlayer::Vertex3D> layervert;
+    _traingles_3d.clear();
     //size_t count = 0;
     for(size_t i = 0; i < mesh.polygons.size(); i++) {
         pcl::Vertices vert = mesh.polygons[i];
         for(size_t j = 0; j < vert.vertices.size(); j++) {
             uint32_t idx = vert.vertices[j];
 
-            auto& pt = points.row(idx);
+            auto& pt = points->at(idx);
             auto& c = points_color[idx];
 
-            layervert.push_back({
-                glm::vec4(pt[0], pt[1], pt[2], 1),
+            _traingles_3d.push_back({
+                glm::vec4(pt.x, pt.y, pt.z, 1),
                 glm::vec4(c[0], c[1], c[2], 1)
             });
         }
     }
-    printf("mesh size: %zu\n", mesh.polygons.size() * 3);
-    printf("layervert size: %zu\n", layervert.size());
-
-    _layer_texture3d->updateVertex3D(layervert);
-    _layer_renderer->addLayers(_layer_texture3d);
-
-    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
-    _layer_renderer->setModel(model);
-    _layer_renderer->render();
+//    printf("mesh size: %zu\n", mesh.polygons.size() * 3);
 }
 
 

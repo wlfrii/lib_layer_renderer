@@ -9,33 +9,33 @@
 #include <pcl/kdtree/kdtree_flann.h> // For KdTreeFLANN
 
 
-// Smoothing depth map
-// https://www.cnblogs.com/zzk0/p/10468502.html
-
 using PointCloudXYZ = Eigen::Matrix<float, Eigen::Dynamic, 3>;
 
 namespace util {
-void vectorPoints2EigenPoints(const std::vector<Eigen::Vector3f>& in,
-                              PointCloudXYZ& out);
+void vectorPoints2pclPoints(const std::vector<Eigen::Vector3f>& in,
+                            pcl::PointCloud<pcl::PointXYZ>::Ptr out);
 
 
-void eigenPoints2vectorPoints(const PointCloudXYZ& in,
-                              std::vector<Eigen::Vector3f>& out);
+void eigenPoints2pclPoints(const PointCloudXYZ& in,
+                           pcl::PointCloud<pcl::PointXYZ>::Ptr out);
 
-
-void pclPoints2EigenPoints(const pcl::PointCloud<pcl::PointNormal>::Ptr in,
-                           PointCloudXYZ& out);
 }
 
 
 class PointCloudHandler
 {
 public:
-    PointCloudHandler(const PointCloudXYZ& point_cloud);
-    PointCloudHandler(const std::vector<Eigen::Vector3f>& point_cloud);
+    PointCloudHandler();
     ~PointCloudHandler();
 
+    void bindPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud);
+
+
     void voxelDownSampling(float voxel_size);
+
+
+    void voxelDownSampling(float voxel_size,
+                           pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud);
 
 
     void rmOutliersByRadius(float radius, int min_neighbor_num);
@@ -44,29 +44,25 @@ public:
     void rmOutliersByKNeighbors(int k, float max_neighbor_dis);
 
 
-    const PointCloudXYZ& getCurrentPointCloud() const;
+    void statisticalOutliersRemoval(size_t k, float std_thresh);
 
 
-    std::vector<size_t> findKNeighbors(const Eigen::Vector3f& query_point, int k);
-
-
-    std::vector<size_t> findNeighborsByRadius(const Eigen::Vector3f& query_point,
-                                              float radius);
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr toPCLPointCloud() const;
+    const pcl::PointCloud<pcl::PointXYZ>::Ptr getCurrentPointCloud() const;
 
 
     void createMesh(pcl::PolygonMesh& mesh, float search_radius, float mu,
-                    int max_neighbors, bool use_mls = true);
+                    int max_neighbors);
 
 
 private:
-    void setKDTree();
+    void updateKDTreeData();
 
 
-    PointCloudXYZ _point_cloud;
-    std::shared_ptr<nanoflann::KDTreeEigenMatrixAdaptor<PointCloudXYZ>> _kd_tree;
-    std::shared_ptr<pcl::KdTreeFLANN<pcl::PointXYZ>> _kdtree;
+//    PointCloudXYZ _point_cloud;
+//    std::shared_ptr<nanoflann::KDTreeEigenMatrixAdaptor<PointCloudXYZ>> _kd_tree;
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr _point_cloud;
+    std::shared_ptr<pcl::KdTreeFLANN<pcl::PointXYZ>> _kd_tree;
 };
 
 

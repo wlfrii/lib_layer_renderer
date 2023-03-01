@@ -21,7 +21,8 @@ int main()
     SceneReconstructor recons(cam_proj);
 
     recons.reconstruct(l_image, r_image);
-//    recons.plot();
+//    recons.plotVertices();
+    recons.plotMesh();
 
 
 

@@ -9,6 +9,7 @@
 
 
 class SGM;
+class PointCloudHandler;
 
 class SceneReconstructor
 {
@@ -35,7 +36,9 @@ public:
     void reconstruct(const cv::Mat &l_image, const cv::Mat &r_image);
 
 
-    void plot();
+    void plotVertices();
+
+    void plotMesh();
 
 private:
     void calcDepthMap(const cv::Mat &l_image, const cv::Mat &r_image);
@@ -71,9 +74,12 @@ private:
     uint16_t _u_end;
 
     std::vector<mlayer::Vertex3D> _vertices_3d;
+    std::vector<mlayer::Vertex3D> _traingles_3d;
 
     mlayer::LayerRenderer*  _layer_renderer;
     std::shared_ptr<mlayer::LayerTexture3D> _layer_texture3d;
+
+    std::shared_ptr<PointCloudHandler> _pc_handler;
 };
 
 #endif // SCENE_RECONSTRUCTOR_H_LF
