@@ -139,7 +139,7 @@ public:
      * @brief Set control all of the viewports at the same time
      * @param flag  True for keyboard control all the viewports at the same time
      */
-    void setControlAllViewports(bool flag);
+    void setKeyboardOnAllViewports(bool flag);
 
 
     /**
