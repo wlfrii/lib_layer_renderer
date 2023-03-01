@@ -27,7 +27,7 @@ std::vector<LayerViewPort> createViewPort(uint16_t w, uint16_t h, uint8_t n)
 LayerRenderer::LayerRenderer(
         const gl_util::Projection& proj, LayerRenderMode mode,
         uint16_t window_width, uint16_t window_height)
-    : _window(std::make_shared<gl_util::Window>(
+    : _window(std::make_unique<gl_util::Window>(
                    window_width, window_height, "LayerRenderer"))
     , _projection(proj.mat4())
     , _control_n_viewport(true)
@@ -42,7 +42,7 @@ LayerRenderer::LayerRenderer(
         const gl_util::Projection& proj,
         const std::vector<LayerViewPort>& n_viewport,
         uint16_t window_width, uint16_t window_height)
-    : _window(std::make_shared<gl_util::Window>(
+    : _window(std::make_unique<gl_util::Window>(
                    window_width, window_height, "LayerRenderer"))
     , _projection(proj.mat4())
     , _n_viewport(n_viewport)

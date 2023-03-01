@@ -167,7 +167,7 @@ private:
     void keyboardControlModel(GLFWwindow* window);
 
 
-    std::shared_ptr<gl_util::Window> _window; // The window for rendering
+    std::unique_ptr<gl_util::Window> _window; // The window for rendering
 
     glm::mat4 _projection;                    // The projection matrix
     std::vector<LayerViewPort> _n_viewport;   // N viewport
