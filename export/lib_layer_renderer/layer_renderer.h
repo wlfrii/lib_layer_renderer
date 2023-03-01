@@ -49,6 +49,14 @@ enum LayerRenderMode
 class LayerRenderer
 {
 public:
+    struct WindowShotData {
+        WindowShotData() : rgb_buffer(nullptr), width(0), height(0) {}
+        float* rgb_buffer;
+        uint16_t width;
+        uint16_t height;
+    };
+
+
     LayerRenderer() = delete;
 
 
@@ -148,22 +156,31 @@ public:
     void render();
 
 
+    /**
+     * @brief Get window shot
+     */
+    const WindowShotData& getWindowShot();
+
+
 private:
+    void init();
     void keyboardControlModel(GLFWwindow* window);
 
 
-    std::unique_ptr<gl_util::Window> _window; // The window for rendering
+    std::shared_ptr<gl_util::Window> _window; // The window for rendering
 
     glm::mat4 _projection;                    // The projection matrix
     std::vector<LayerViewPort> _n_viewport;   // N viewport
     bool _control_n_viewport;
 
-    const size_t _N;                 // The number of viewport
+    size_t _N;                       // The number of viewport
 
     std::vector<glm::mat4> _n_model; // N local frames for each viewport
     std::vector<glm::mat4> _n_view;  // N local views for each viewport
 
     std::vector<std::vector<std::shared_ptr<Layer>>> _n_layers;
+
+    WindowShotData _win_shot;
 };
 
 } // namespace::mlayer
