@@ -13,6 +13,7 @@ LayerRenderer::LayerRenderer(
         uint16_t window_width, uint16_t window_height)
     :_window(std::make_unique<gl_util::Window>(window_width, window_height))
     , _projection(proj.mat4())
+    , _control_n_viewport(false)
     , _N(std::max(int(mode), 1))
     , _mode(mode)
 {
@@ -114,6 +115,12 @@ void LayerRenderer::setBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t 
 }
 
 
+void LayerRenderer::setControlAllViewports(bool flag)
+{
+    _control_n_viewport = flag;
+}
+
+
 void LayerRenderer::render()
 {
     while (!_window->shouldClose()) {
@@ -185,7 +192,8 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
         model = glm::rotate(model, glm::radians(2.f), glm::vec3(0.f, 0.f, 1.f));
     }
     else if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
-        if(_mode == LAYER_RENDER_MULTIPLE && _N > 1){
+        if(_mode == LAYER_RENDER_MULTIPLE && _N > 1
+                && _control_n_viewport == false){
             while(true){
                 printf("LayerRenderer: ");
                 printf("Specify a viewport index (0-%zu) to control: ", _N - 1);
@@ -201,7 +209,7 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
         gl_util::print("Model", model);
     }
 
-    if(_mode == LAYER_RENDER_STEREO) {
+    if(_mode == LAYER_RENDER_STEREO || _control_n_viewport) {
         setModel(model);
     }
 }

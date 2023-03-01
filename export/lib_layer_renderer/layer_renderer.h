@@ -137,6 +137,13 @@ public:
 
 
     /**
+     * @brief Set control all of the viewports at the same time
+     * @param flag  True for keyboard control all the viewports at the same time
+     */
+    void setControlAllViewports(bool flag);
+
+
+    /**
      * @brief Do rendering
      */
     void render();
@@ -150,6 +157,7 @@ private:
 
     glm::mat4 _projection;                    // The projection matrix
     std::vector<LayerViewPort> _n_viewport;   // N viewport
+    bool _control_n_viewport;
 
     const size_t _N;                 // The number of viewport
     const LayerRenderMode _mode;     // The render mode
