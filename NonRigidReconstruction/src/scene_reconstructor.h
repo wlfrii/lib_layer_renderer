@@ -8,6 +8,8 @@
 #include <pcl/point_cloud.h>
 
 
+#define PLOT_ALL 1
+
 class SGM;
 class PointCloudHandler;
 
@@ -36,20 +38,24 @@ public:
     void reconstruct(const cv::Mat &l_image, const cv::Mat &r_image);
 
 
+#if PLOT_ALL
+    void plot();
+#else
     void plotVertices();
-
     void plotMesh();
+#endif // PLOT_ALL
+    cv::Mat getPlotResult();
 
 private:
     void calcDepthMap(const cv::Mat &l_image, const cv::Mat &r_image);
 
-    void buildVertices();
-
+    void filterPointCloud();
+    void createVertices(bool with_mesh);
 
     /**
      * @brief Filter out some points based on point density threshold
      */
-    void filterVertices();
+//    void filterVertices();
 
 
     std::vector<std::pair<cv::Point2i, cv::Point2i>>
@@ -76,8 +82,12 @@ private:
     std::vector<mlayer::Vertex3D> _vertices_3d;
     std::vector<mlayer::Vertex3D> _traingles_3d;
 
-    mlayer::LayerRenderer*  _layer_renderer;
+    std::shared_ptr<mlayer::LayerRenderer>  _layer_renderer;
+#if PLOT_ALL
+    std::array<std::shared_ptr<mlayer::LayerTexture3D>, 4> _layer_texture3d;
+#else
     std::shared_ptr<mlayer::LayerTexture3D> _layer_texture3d;
+#endif // PLOT_ALL
 
     std::shared_ptr<PointCloudHandler> _pc_handler;
 };

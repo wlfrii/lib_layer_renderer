@@ -24,9 +24,13 @@
 #include <pcl/surface/gp3.h> // For GreedyProjectionTriangulation
 #include <pcl/filters/statistical_outlier_removal.h>
 
-
-#define KDTREE_PTR \
-    std::make_shared<nanoflann::KDTreeEigenMatrixAdaptor<PointCloudXYZ>>
+#define PRINT_INFO 0
+#if PRINT_INFO
+#define PRINT(fmt, ...) \
+    printf("PointCloudHandler: " fmt, ##__VA_ARGS__)
+#else
+#define PRINT(fmt, ...)
+#endif
 
 
 PointCloudHandler::PointCloudHandler()
@@ -45,6 +49,7 @@ void PointCloudHandler::bindPointCloud(
         const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud)
 {
     _point_cloud = point_cloud;
+    PRINT("Initial point size: %zu\n", _point_cloud->size());
     updateKDTreeData();
 }
 
@@ -52,23 +57,10 @@ void PointCloudHandler::bindPointCloud(
 void PointCloudHandler::voxelDownSampling(float voxel_size)
 {
     voxelDownSampling(voxel_size, _point_cloud);
-    printf("Point size after voxel downsampled: %zu\n", _point_cloud->size());
+    PRINT("Point size after voxel downsampled: %zu\n", _point_cloud->size());
     updateKDTreeData();
 }
 
-//valid depth range: [160, 1856]
-//Point size: 375107
-//x_range:[-65.844421, 44.064537]
-//y_range:[-63.090122, 39.258923]
-//z_range:[30.016685, 148.688446]
-//voxel size: 110x103x119
-//Point size after voxel downsampled: 30035
-//Point size after radius-filter: 26143
-//Point size after radius-filter: 25249
-//Point size after k-neighbors-filter: 25243
-//pcl point.size: 25243
-//Point size after mls: 25243
-//mesh size: 128691
 
 struct PointWithOccurrences {
     PointWithOccurrences() : p({0, 0, 0}), n(0) {}
@@ -89,14 +81,14 @@ void PointCloudHandler::voxelDownSampling(
         if(min_xyzf[1] > pt.y) min_xyzf[1] = pt.y;
         if(min_xyzf[2] > pt.z) min_xyzf[2] = pt.z;
     }
-    printf("x_range:[%f, %f]\n", min_xyzf[0], max_xyzf[0]);
-    printf("y_range:[%f, %f]\n", min_xyzf[1], max_xyzf[1]);
-    printf("z_range:[%f, %f]\n", min_xyzf[2], max_xyzf[2]);
+    PRINT("x_range:[%f, %f]\n", min_xyzf[0], max_xyzf[0]);
+    PRINT("y_range:[%f, %f]\n", min_xyzf[1], max_xyzf[1]);
+    PRINT("z_range:[%f, %f]\n", min_xyzf[2], max_xyzf[2]);
 
     size_t x_node_num = floor((max_xyzf[0] - min_xyzf[0]) / voxel_size) + 1;
     size_t y_node_num = floor((max_xyzf[1] - min_xyzf[1]) / voxel_size) + 1;
     size_t z_node_num = floor((max_xyzf[2] - min_xyzf[2]) / voxel_size) + 1;
-    printf("voxel size: %zux%zux%zu\n", x_node_num, y_node_num, z_node_num);
+    PRINT("voxel size: %zux%zux%zu\n", x_node_num, y_node_num, z_node_num);
 
     // Group vertices into voxels
     std::vector<std::vector<std::vector<PointWithOccurrences>>> voxels(
@@ -151,7 +143,7 @@ void PointCloudHandler::rmOutliersByRadius(float radius, int min_neighbor_num)
         _point_cloud->erase(it + idx - count);
         count++;
     }
-    printf("Point size after radius-filter: %zu\n", _point_cloud->size());
+    PRINT("Point size after radius-filter: %zu\n", _point_cloud->size());
     updateKDTreeData();
 }
 
@@ -181,7 +173,7 @@ void PointCloudHandler::rmOutliersByKNeighbors(int k, float max_neighbor_dis)
         _point_cloud->erase(it + idx - count);
         count++;
     }
-    printf("Point size after k-neighbors-filter: %zu\n", _point_cloud->size());
+    PRINT("Point size after k-neighbors-filter: %zu\n", _point_cloud->size());
     updateKDTreeData();
 }
 
@@ -194,7 +186,7 @@ void PointCloudHandler::statisticalOutliersRemoval(size_t k, float std_thresh)
     sor.setStddevMulThresh(std_thresh);
     sor.filter(*_point_cloud);
 
-    printf("Point size after statistical-filter: %zu\n", _point_cloud->size());
+    PRINT("Point size after statistical-filter: %zu\n", _point_cloud->size());
     updateKDTreeData();
 }
 
@@ -224,7 +216,7 @@ void PointCloudHandler::createMesh(pcl::PolygonMesh& mesh,
     mls.setSearchMethod(tree);
     mls.setSearchRadius(search_radius);
     mls.process(*pcl_points_n);
-    printf("Point size after mls: %zu\n", pcl_points_n->size());
+    PRINT("Point size after mls: %zu\n", pcl_points_n->size());
 
 
     // Create search tree

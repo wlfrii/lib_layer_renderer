@@ -25,11 +25,24 @@ SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
     gl_util::Projection gl_proj(cam_proj.fxy, cam_proj.cx, cam_proj.cy,
                                 w, h, 0.2, 300);
 
-    _layer_renderer = new mlayer::LayerRenderer(
+#if PLOT_ALL
+    mlayer::LayerViewPort vp3(0, 0, w / 2, h / 2);
+    mlayer::LayerViewPort vp4(w / 2, 0, w / 2, h / 2);
+    mlayer::LayerViewPort vp1(0, h / 2, w / 2, h / 2);
+    mlayer::LayerViewPort vp2(w / 2, h / 2, w / 2, h / 2);
+    std::vector<mlayer::LayerViewPort> vps = {vp1, vp2, vp3, vp4};
+    _layer_renderer = std::make_shared<mlayer::LayerRenderer>(
+                gl_proj, vps, w, h);
+    _layer_renderer->setKeyboardOnAllViewports(true);
+    _layer_texture3d[0] = std::make_shared<mlayer::LayerTexture3D>();
+    _layer_texture3d[1] = std::make_shared<mlayer::LayerTexture3D>();
+    _layer_texture3d[2] = std::make_shared<mlayer::LayerTexture3D>();
+    _layer_texture3d[3] = std::make_shared<mlayer::LayerTexture3D>();
+#else
+    _layer_renderer = std::make_shared<mlayer::LayerRenderer>(
                 gl_proj, mlayer::LAYER_RENDER_LEFT, w, h);
-
     _layer_texture3d = std::make_shared<mlayer::LayerTexture3D>();
-
+#endif // PLOT_ALL
 }
 
 
@@ -40,11 +53,6 @@ SceneReconstructor::~SceneReconstructor()
         _sgm = nullptr;
     }
     free(_disparity);
-
-    if(_layer_renderer) {
-        delete _layer_renderer;
-        _layer_renderer = nullptr;
-    }
 }
 
 
@@ -71,7 +79,7 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
         sgm_option.aggr_path_num = 4;
         sgm_option.min_disparity = 1;
         sgm_option.max_disparity = 64;
-        sgm_option.census_block_radius = 5;
+        sgm_option.census_block_radius = 7;
         sgm_option.is_check_lr = true;
         sgm_option.lr_check_thresh = 1.0f;
         sgm_option.is_check_uniqueness = true;
@@ -95,7 +103,7 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
     // Calculate disparity
     calcDepthMap(l_image, r_image);
     // Filter out the valid texture position
-    buildVertices();
+    filterPointCloud();
 
     //printf("\tVertices.size: %zu\n", vertices.size());
 
@@ -106,6 +114,22 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
 }
 
 
+#if PLOT_ALL
+void SceneReconstructor::plot()
+{
+    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
+    _layer_renderer->setModel(model);
+    _layer_renderer->render();
+
+//    auto data = _layer_renderer->getWindowShot();
+//    cv::Mat bg(data.height, data.width, CV_32FC3, data.rgb_buffer);
+//    cv::cvtColor(bg, bg, cv::COLOR_RGB2BGR);
+//    cv::flip(bg, bg, 0);
+
+//    cv::imshow("test", bg);
+//    cv::waitKey(0);
+}
+#else
 void SceneReconstructor::plotVertices()
 {
     _layer_texture3d->updateVertex(_vertices_3d);
@@ -125,6 +149,20 @@ void SceneReconstructor::plotMesh()
     glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
     _layer_renderer->setModel(model);
     _layer_renderer->render();
+}
+#endif // PLOT_ALL
+
+cv::Mat SceneReconstructor::getPlotResult()
+{
+    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
+    _layer_renderer->setModel(model);
+
+    auto data = _layer_renderer->getWindowShot();
+    cv::Mat bg(data.height, data.width, CV_32FC3, data.rgb_buffer);
+    cv::cvtColor(bg, bg, cv::COLOR_RGB2BGR);
+    cv::flip(bg, bg, 0);
+
+    return bg;
 }
 
 
@@ -205,7 +243,7 @@ void SceneReconstructor::calcDepthMap(const cv::Mat &l_image,
 }
 
 
-void SceneReconstructor::buildVertices()
+void SceneReconstructor::filterPointCloud()
 {
     // Remove the points in the gap
     int gap = 50;
@@ -221,17 +259,29 @@ void SceneReconstructor::buildVertices()
             valid_points->push_back({pt[0], pt[1], pt[2]});
         }
     }
-    printf("Initial point size: %zu\n", valid_points->size());
-
     _pc_handler->bindPointCloud(valid_points);
+#if PLOT_ALL
+    createVertices(false);
+    _layer_texture3d[0]->updateVertex(_vertices_3d);
+    _layer_renderer->addLayers(_layer_texture3d[0], 0);
+#endif
     _pc_handler->voxelDownSampling(VERTICES_DENSITY);
     _pc_handler->rmOutliersByRadius(VERTICES_DENSITY*4, 37);
     _pc_handler->statisticalOutliersRemoval(100, 1.0f);
 //    pthandler.rmOutliersByKNeighbors(20, 2);
-    pcl::PolygonMesh mesh;
-    float radius = VERTICES_DENSITY * 2.5;
-    _pc_handler->createMesh(mesh, radius, radius, 80);
+    createVertices(true);
+#if PLOT_ALL
+    _layer_texture3d[1]->updateVertex(_vertices_3d);
+    _layer_renderer->addLayers(_layer_texture3d[1], 1);
 
+    _layer_texture3d[2]->updateVertex3D(_traingles_3d);
+    _layer_renderer->addLayers(_layer_texture3d[2], 2);
+#endif
+}
+
+
+void SceneReconstructor::createVertices(bool with_mesh)
+{
     // Retrive points color
     _vertices_3d.clear();
     auto& points = _pc_handler->getCurrentPointCloud();
@@ -255,6 +305,11 @@ void SceneReconstructor::buildVertices()
             glm::vec4(r, g, b, 1)
         });
     }
+    if(!with_mesh) return;
+
+    pcl::PolygonMesh mesh;
+    float radius = VERTICES_DENSITY * 2.5;
+    _pc_handler->createMesh(mesh, radius, radius, 80);
 
     // Create my vertex3D
     _traingles_3d.clear();
@@ -273,26 +328,26 @@ void SceneReconstructor::buildVertices()
             });
         }
     }
-//    printf("mesh size: %zu\n", mesh.polygons.size() * 3);
 }
 
 
-void SceneReconstructor::filterVertices()
-{
-    _vertices_3d.clear();
 
-    auto addVertex = [this](const Eigen::Vector3f& pt,
-            const cv::Vec4f &rgbd) {
-        mlayer::Vertex3D vertex3d;
-        vertex3d.position = glm::vec4(pt[0], pt[1], pt[2], 1.f);
-        vertex3d.color = glm::vec4(rgbd[0], rgbd[1], rgbd[2], 1.f);
+//void SceneReconstructor::filterVertices()
+//{
+//    _vertices_3d.clear();
 
-        _vertices_3d.push_back(vertex3d);
-    };
+//    auto addVertex = [this](const Eigen::Vector3f& pt,
+//            const cv::Vec4f &rgbd) {
+//        mlayer::Vertex3D vertex3d;
+//        vertex3d.position = glm::vec4(pt[0], pt[1], pt[2], 1.f);
+//        vertex3d.color = glm::vec4(rgbd[0], rgbd[1], rgbd[2], 1.f);
 
-    auto to3D = [this](int u, int v, float depth) -> Eigen::Vector3f {
-        return _cam_proj.cvt2Dto3D(u, v, depth);
-    };
+//        _vertices_3d.push_back(vertex3d);
+//    };
+
+//    auto to3D = [this](int u, int v, float depth) -> Eigen::Vector3f {
+//        return _cam_proj.cvt2Dto3D(u, v, depth);
+//    };
 
 //    cv::Mat used(_rgbd.size(), CV_8UC1, cv::Scalar(0));
 //    int step = _step;
@@ -352,7 +407,7 @@ void SceneReconstructor::filterVertices()
 //            }
 //        }
 //    }
-}
+//}
 
 
 
