@@ -9,64 +9,24 @@
 
 namespace util {
 
+void voxelDownSampling(pcl::PointCloud<pcl::PointXYZ>::Ptr in, float voxel_size,
+                       pcl::PointCloud<pcl::PointXYZ>::Ptr out);
+
+void voxelDownSampling(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in, float voxel_size,
+                       pcl::PointCloud<pcl::PointXYZ>::Ptr out);
+
+
 /**
  * @brief Estimate normal for the given point cloud
  * @param pt_cloud
  * @return
  */
-inline pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr estimateNormal(
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pt_cloud)
-{
-    pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(
-                new pcl::search::KdTree<pcl::PointXYZRGB>);
-    tree->setInputCloud(pt_cloud);
-    pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> ne;
-    ne.setInputCloud(pt_cloud);
-    ne.setSearchMethod(tree);
-    ne.setKSearch(30);
+pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr estimateNormal(
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pt_cloud);
 
-    // Estimate normals
-    pcl::PointCloud<pcl::Normal>::Ptr normals(
-                new pcl::PointCloud<pcl::Normal>);
-    ne.compute(*normals);
-    //printf("normal.size:%zu\n", normals->size());
 
-    // Concatenate the XYZ and normal fields*
-    pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud_with_normals(
-                new pcl::PointCloud<pcl::PointXYZRGBNormal>);
-    //* cloud_with_normals = cloud + normals
-    pcl::concatenateFields(*pt_cloud, *normals, *cloud_with_normals);
-    //printf("cloud_with_normals.size:%zu\n", cloud_with_normals->size());
-
-    return cloud_with_normals;
-}
-
-inline pcl::PointCloud<pcl::PointNormal>::Ptr estimateNormal(
-        pcl::PointCloud<pcl::PointXYZ>::Ptr pt_cloud)
-{
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(
-                new pcl::search::KdTree<pcl::PointXYZ>);
-    tree->setInputCloud(pt_cloud);
-    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
-    ne.setInputCloud(pt_cloud);
-    ne.setSearchMethod(tree);
-    ne.setKSearch(30);
-
-    // Estimate normals
-    pcl::PointCloud<pcl::Normal>::Ptr normals(
-                new pcl::PointCloud<pcl::Normal>);
-    ne.compute(*normals);
-    //printf("normal.size:%zu\n", normals->size());
-
-    // Concatenate the XYZ and normal fields*
-    pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals(
-                new pcl::PointCloud<pcl::PointNormal>);
-    //* cloud_with_normals = cloud + normals
-    pcl::concatenateFields(*pt_cloud, *normals, *cloud_with_normals);
-    //printf("cloud_with_normals.size:%zu\n", cloud_with_normals->size());
-
-    return cloud_with_normals;
-}
+pcl::PointCloud<pcl::PointNormal>::Ptr estimateNormal(
+        pcl::PointCloud<pcl::PointXYZ>::Ptr pt_cloud);
 
 
 } // namespace::util
