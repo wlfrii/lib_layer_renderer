@@ -252,15 +252,33 @@ void SceneReconstructor::filterPointCloud()
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr valid_points(
                 new pcl::PointCloud<pcl::PointXYZ>);
+//    for (int32_t v = gap; v < _depthmap.rows - gap; v += _step) {
+//        for (int32_t u = _u_start + gap; u < _u_end - gap; u += _step) {
+//            float d = _depthmap.at<float>(v, u);
+//            if(d < 30) continue;
+
+//            Eigen::Vector3f pt = _cam_proj.cvt2Dto3D(u, v, d, mmath::cam::LEFT);
+//            valid_points->push_back({pt[0], pt[1], pt[2]});
+//        }
+//    }
+
+    // Test version
+    valid_points->clear();
     for (int32_t v = gap; v < _depthmap.rows - gap; v += _step) {
         for (int32_t u = _u_start + gap; u < _u_end - gap; u += _step) {
-            float d = _depthmap.at<float>(v, u);
-            if(d < 30) continue;
-
+            float d = 50;
             Eigen::Vector3f pt = _cam_proj.cvt2Dto3D(u, v, d, mmath::cam::LEFT);
             valid_points->push_back({pt[0], pt[1], pt[2]});
+
+            if(v==gap || v==_depthmap.rows-gap-2 || v==540) {
+                if(u==gap+_u_start || u==_u_end-gap-2 || u==960) {
+                    printf("(%04d,%04d) - (%.3f, %.3f, %.3f)\n",
+                           v, u, pt[0], pt[1], pt[2]);
+                }
+            }
         }
     }
+
     _pc_handler->bindPointCloud(valid_points);
 #if PLOT_ALL
     createVertices(false);
@@ -300,11 +318,14 @@ void SceneReconstructor::filterPointCloud()
     _ed->addVertices(_pc_handler->getCurrentPointCloud(), {});
 
     std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> correspondences =
-        {{pcl::PointXYZ(-2, 0, 91.2628), pcl::PointXYZ(0, 0, 21.2628)},
-         {pcl::PointXYZ(-56.5754,-42.9223,106.82), pcl::PointXYZ(-56.5754,-42.9223,80.82)},
-         {pcl::PointXYZ(41.2693,-20.0516,64.4935), pcl::PointXYZ(41.2693,-20.0516,80.4935)},
-         {pcl::PointXYZ(-52.2787,34.785,83.5446), pcl::PointXYZ(-52.2787,34.785,80.5446)},
-         {pcl::PointXYZ(34.6152,20.0116,48.0629), pcl::PointXYZ(34.6152,20.0116,80.0629)}
+        {{pcl::PointXYZ(-2.000, 0.000, 50.000), pcl::PointXYZ(-2.000, 0.000, 100.000)}, // (540,960)
+         {pcl::PointXYZ(-4.000, 0.000, 50.000), pcl::PointXYZ(-4.000, 0.000, 100.000)}, // (540,960)
+         {pcl::PointXYZ(0.000, 0.000, 50.000), pcl::PointXYZ(0.000, 0.000, 100.000)}, // (540,960)
+         {pcl::PointXYZ(2.000, 0.000, 50.000), pcl::PointXYZ(2.000, 0.000, 100.000)}, // (540,960)
+         {pcl::PointXYZ(-36.091, -22.273, 50.000), pcl::PointXYZ(-36.091, -22.273, 50.000)}, // (50,210)
+         {pcl::PointXYZ(38.909, -22.273, 50.000), pcl::PointXYZ(38.909, -22.273, 50.000)}, // (50,1860)
+         {pcl::PointXYZ(-36.091, 22.182, 50.000), pcl::PointXYZ(-36.091, 22.182, 50.000)}, // (1028,210)
+         {pcl::PointXYZ(38.909, 22.182, 50.000), pcl::PointXYZ(38.909, 22.182, 50.000)}, // (1028,1860)
         };
     _ed->addVertices(nullptr, {}, correspondences);
 

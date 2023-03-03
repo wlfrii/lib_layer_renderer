@@ -6,7 +6,7 @@
 const float w_rot = 1000.f;
 const float w_reg = 10000.f;
 const float w_data = 1.f;
-const float w_corr = 1.f;
+const float w_corr = 10000.f;
 
 
 EmbeddedDeformation::EmbeddedDeformation(float node_density, int node_connectivity)
