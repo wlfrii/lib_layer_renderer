@@ -12,6 +12,7 @@
 
 class SGM;
 class PointCloudHandler;
+class EmbeddedDeformation;
 
 class SceneReconstructor
 {
@@ -90,6 +91,7 @@ private:
 #endif // PLOT_ALL
 
     std::shared_ptr<PointCloudHandler> _pc_handler;
+    std::shared_ptr<EmbeddedDeformation> _ed;
 };
 
 #endif // SCENE_RECONSTRUCTOR_H_LF

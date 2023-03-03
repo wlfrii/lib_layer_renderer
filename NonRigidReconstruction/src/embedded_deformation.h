@@ -2,15 +2,12 @@
 #define EMBEDDED_DEFORMATION_H_LF
 #include <Eigen/Dense>
 #include <vector>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
 
-struct Vertex {
-    Eigen::Vector3f coord;
-    Eigen::Vector3f color;
-    float weight;
+struct Vertices{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr coords;
+    std::vector<Eigen::Vector3f> colors;
 };
 
 
@@ -25,12 +22,16 @@ public:
     EmbeddedDeformation(float node_density = 5.f, int node_connectivity = 6);
     ~EmbeddedDeformation();
 
-    void addVertices(pcl::PointCloud<pcl::PointXYZRGB>::Ptr vertices);
+    void addVertices(pcl::PointCloud<pcl::PointXYZ>::Ptr coords,
+                     const std::vector<Eigen::Vector3f>& colors);
 
-    void addVertices(pcl::PointCloud<pcl::PointXYZRGB>::Ptr vertices,
+    void addVertices(pcl::PointCloud<pcl::PointXYZ>::Ptr coords,
+                     const std::vector<Eigen::Vector3f>& colors,
                      const std::vector<
-                        std::pair<pcl::PointXYZRGB, pcl::PointXYZRGB>
+                        std::pair<pcl::PointXYZ, pcl::PointXYZ>
                             > &correspondences);
+
+    const Vertices& getVertices() const;
 
 private:
     void updateKdTreeData();
@@ -38,13 +39,14 @@ private:
     float _node_density;        // Density of ED nodes
     float _node_connectivity;   // The max node neighbors for each vertex
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr _vertices;
-    pcl::PointCloud<pcl::PointXYZ>::Ptr _ed_nodes;
+    Vertices _vertices;
 
-    std::vector<Eigen::Matrix3f> _Rs; // rotation matrics
-    std::vector<Eigen::Vector3f> _ts; // translations
+    pcl::PointCloud<pcl::PointXYZ>::Ptr _nodes;
 
-    std::shared_ptr<pcl::KdTreeFLANN<pcl::PointXYZRGB>> _kd_tree;
+    std::vector<Eigen::Matrix3d> _Rs; // rotation matrics
+    std::vector<Eigen::Vector3d> _ts; // translations
+
+    std::shared_ptr<pcl::KdTreeFLANN<pcl::PointXYZ>> _kd_tree;
 };
 
 #endif // EMBEDDED_DEFORMATION_H_LF

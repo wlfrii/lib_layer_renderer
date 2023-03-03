@@ -38,11 +38,11 @@ void voxelDownSampling(pcl::PointCloud<pcl::PointXYZ>::Ptr in, float voxel_size,
                         z_node_num, PointWithOccurrences())));
     for(size_t i = 0; i < in->size(); i++) {
         const pcl::PointXYZ& pt = in->at(i);
-        int x_idx = floor(pt.x - min_xyzf[0] / voxel_size);
-        int y_idx = floor(pt.y - min_xyzf[1] / voxel_size);
-        int z_idx = floor(pt.z - min_xyzf[2] / voxel_size);
+        int x_idx = floor((pt.x - min_xyzf[0]) / voxel_size);
+        int y_idx = floor((pt.y - min_xyzf[1]) / voxel_size);
+        int z_idx = floor((pt.z - min_xyzf[2]) / voxel_size);
 
-        //printf("index: %dx%dx%d\n", x_idx, y_idx, z_idx);
+//        printf("index: %dx%dx%d\n", x_idx, y_idx, z_idx);
 
         voxels[x_idx][y_idx][z_idx].p += Eigen::Vector3f(pt.x, pt.y, pt.z);
         voxels[x_idx][y_idx][z_idx].n++;
@@ -94,9 +94,9 @@ void voxelDownSampling(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in, float voxel_si
                         z_node_num, PointWithOccurrences())));
     for(size_t i = 0; i < in->size(); i++) {
         const pcl::PointXYZRGB& pt = in->at(i);
-        int x_idx = floor(pt.x - min_xyzf[0] / voxel_size);
-        int y_idx = floor(pt.y - min_xyzf[1] / voxel_size);
-        int z_idx = floor(pt.z - min_xyzf[2] / voxel_size);
+        int x_idx = floor((pt.x - min_xyzf[0]) / voxel_size);
+        int y_idx = floor((pt.y - min_xyzf[1]) / voxel_size);
+        int z_idx = floor((pt.z - min_xyzf[2]) / voxel_size);
 
         //printf("index: %dx%dx%d\n", x_idx, y_idx, z_idx);
 

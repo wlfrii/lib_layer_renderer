@@ -5,6 +5,7 @@
 #include "pcl_viewer.h"
 #include "util.h"
 #include "point_cloud_handler.h"
+#include "embedded_deformation.h"
 
 
 namespace {
@@ -19,6 +20,7 @@ SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
     , _pyd_times(2)
     , _step(2)
     , _pc_handler(new PointCloudHandler)
+    , _ed(new EmbeddedDeformation)
 {
     uint16_t w = cam_proj.cx*2;
     uint16_t h = cam_proj.cy*2;
@@ -222,7 +224,7 @@ void SceneReconstructor::calcDepthMap(const cv::Mat &l_image,
             break;
         }
     }
-    printf("valid depth range: [%d, %d]\n", _u_start, _u_end);
+    printf("Valid depth range: [%d, %d]\n", _u_start, _u_end);
 
 
 #if DEBUG
@@ -277,6 +279,52 @@ void SceneReconstructor::filterPointCloud()
     _layer_texture3d[2]->updateVertex3D(_traingles_3d);
     _layer_renderer->addLayers(_layer_texture3d[2], 2);
 #endif
+
+    auto& points = _pc_handler->getCurrentPointCloud();
+    std::vector<Eigen::Vector3f> points_color(points->size());
+    for(size_t i = 0; i < points->size(); i++) {
+        auto& pt = points->at(i);
+
+        Eigen::Vector2f pt2d = _cam_proj.cvt3Dto2D(
+                    pt.x, pt.y, pt.z, mmath::cam::LEFT);
+        int u = round(pt2d[0]);
+        int v = round(pt2d[1]);
+        const cv::Vec3b pixel = _texture.at<cv::Vec3b>(v, u);
+        float r = 1.f*pixel[0]/255.f;
+        float g = 1.f*pixel[1]/255.f;
+        float b = 1.f*pixel[2]/255.f;
+
+        points_color[i] = {r, g, b};
+    }
+
+    _ed->addVertices(_pc_handler->getCurrentPointCloud(), {});
+
+    std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> correspondences =
+        {{pcl::PointXYZ(-2, 0, 91.2628), pcl::PointXYZ(0, 0, 21.2628)},
+         {pcl::PointXYZ(-56.5754,-42.9223,106.82), pcl::PointXYZ(-56.5754,-42.9223,80.82)},
+         {pcl::PointXYZ(41.2693,-20.0516,64.4935), pcl::PointXYZ(41.2693,-20.0516,80.4935)},
+         {pcl::PointXYZ(-52.2787,34.785,83.5446), pcl::PointXYZ(-52.2787,34.785,80.5446)},
+         {pcl::PointXYZ(34.6152,20.0116,48.0629), pcl::PointXYZ(34.6152,20.0116,80.0629)}
+        };
+    _ed->addVertices(nullptr, {}, correspondences);
+
+    _pc_handler->bindPointCloud(_ed->getVertices().coords);
+    _vertices_3d.clear();
+    auto& newpoints = _pc_handler->getCurrentPointCloud();
+    for(size_t i = 0; i < points->size(); i++) {
+        auto& pt = newpoints->at(i);
+        auto& rgb = points_color[i];
+
+        _vertices_3d.push_back({
+            glm::vec4(pt.x, pt.y, pt.z, 1),
+            glm::vec4(rgb[0], rgb[1], rgb[2], 1)
+        });
+    }
+    _layer_texture3d[3]->updateVertex(_vertices_3d);
+    std::shared_ptr<mlayer::LayerCoordinate> layer_coord(
+                new mlayer::LayerCoordinate(30, 0.5));
+    _layer_renderer->addLayers(layer_coord, 3);
+    _layer_renderer->addLayers(_layer_texture3d[3], 3);
 }
 
 

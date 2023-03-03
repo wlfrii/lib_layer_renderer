@@ -24,7 +24,7 @@
 #include <pcl/surface/gp3.h> // For GreedyProjectionTriangulation
 #include <pcl/filters/statistical_outlier_removal.h>
 
-#define PRINT_INFO 0
+#define PRINT_INFO 1
 #if PRINT_INFO
 #define PRINT(fmt, ...) \
     printf("PointCloudHandler: " fmt, ##__VA_ARGS__)
@@ -49,6 +49,15 @@ void PointCloudHandler::bindPointCloud(
         const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud)
 {
     _point_cloud = point_cloud;
+    PRINT("Initial point size: %zu\n", _point_cloud->size());
+    updateKDTreeData();
+}
+
+
+void PointCloudHandler::bindPointCloud(const PointCloudXYZ &point_cloud)
+{
+    _point_cloud->resize(point_cloud.rows());
+    _point_cloud->getMatrixXfMap() = point_cloud.transpose();
     PRINT("Initial point size: %zu\n", _point_cloud->size());
     updateKDTreeData();
 }
@@ -97,9 +106,9 @@ void PointCloudHandler::voxelDownSampling(
                         z_node_num, PointWithOccurrences())));
     for(size_t i = 0; i < _point_cloud->size(); i++) {
         const pcl::PointXYZ& pt = _point_cloud->at(i);
-        int x_idx = floor(pt.x - min_xyzf[0] / voxel_size);
-        int y_idx = floor(pt.y - min_xyzf[1] / voxel_size);
-        int z_idx = floor(pt.z - min_xyzf[2] / voxel_size);
+        int x_idx = floor((pt.x - min_xyzf[0]) / voxel_size);
+        int y_idx = floor((pt.y - min_xyzf[1]) / voxel_size);
+        int z_idx = floor((pt.z - min_xyzf[2]) / voxel_size);
 
         //printf("index: %dx%dx%d\n", x_idx, y_idx, z_idx);
 
@@ -196,6 +205,13 @@ const pcl::PointCloud<pcl::PointXYZ>::Ptr PointCloudHandler::getCurrentPointClou
     return _point_cloud;
 }
 
+
+Eigen::MatrixXf PointCloudHandler::toEigenMatrix() const
+{
+    Eigen::MatrixXf mat(_point_cloud->size(), 3);
+    mat = _point_cloud->getMatrixXfMap().transpose();
+    return mat;
+}
 
 
 void PointCloudHandler::createMesh(pcl::PolygonMesh& mesh,

@@ -9,6 +9,25 @@
 
 namespace util {
 
+inline float distance(const pcl::PointXYZ& p1, const pcl::PointXYZ& p2) {
+    return sqrtf(powf(p1.x - p2.x, 2) + powf(p1.y - p2.y, 2) +
+                 powf(p1.z - p2.z, 2));
+}
+
+
+inline Eigen::VectorXd nodeWeights(const std::vector<float>& squared_distances){
+    Eigen::VectorXd weight(squared_distances.size());
+    float sum = 0;
+    float dmax = squared_distances.back();
+    for(size_t j = 0; j < squared_distances.size(); j++) {
+        weight[j] = 1 - squared_distances[j] / dmax;
+        sum += weight[j];
+    }
+    weight /= sum;
+    return weight;
+}
+
+
 void voxelDownSampling(pcl::PointCloud<pcl::PointXYZ>::Ptr in, float voxel_size,
                        pcl::PointCloud<pcl::PointXYZ>::Ptr out);
 

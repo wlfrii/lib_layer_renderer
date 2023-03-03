@@ -31,6 +31,9 @@ public:
     void bindPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud);
 
 
+    void bindPointCloud(const PointCloudXYZ& point_cloud);
+
+
     void voxelDownSampling(float voxel_size);
 
 
@@ -48,6 +51,9 @@ public:
 
 
     const pcl::PointCloud<pcl::PointXYZ>::Ptr getCurrentPointCloud() const;
+
+
+    Eigen::MatrixXf toEigenMatrix() const;
 
 
     void createMesh(pcl::PolygonMesh& mesh, float search_radius, float mu,
