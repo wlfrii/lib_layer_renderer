@@ -1,7 +1,7 @@
 #include "scene_reconstructor.h"
 #include "sgm/sgm.h"
 #include <Eigen/Dense>
-#include <lib_math.h>
+#include <lib_math/lib_math.h>
 #include "pcl_viewer.h"
 #include "util.h"
 #include "point_cloud_handler.h"
@@ -9,17 +9,17 @@
 
 
 namespace {
-float VERTICES_DENSITY = 1.0f;
+float VERTICES_DENSITY = 0.5f;
 }
 
 SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
                                        bool is_seqc)
-    : _cam_proj(cam_proj)
+    : _cam_proj(new mmath::CameraProjector(cam_proj))
     , _is_seqc(is_seqc)
     , _sgm(nullptr)
     , _pyd_times(2)
     , _step(2)
-    , _pc_handler(new PointCloudHandler)
+    , _pc_handler(new PointCloudHandler(_cam_proj, mmath::cam::LEFT))
     , _ed(new EmbeddedDeformation)
 {
     uint16_t w = cam_proj.cx*2;
@@ -204,7 +204,7 @@ void SceneReconstructor::calcDepthMap(const cv::Mat &l_image,
             if (disp == SGM::FLOAT_INF || disp < 1)
                 continue;
 
-            float d = _cam_proj.t * _cam_proj.fxy / disp;
+            float d = _cam_proj->t * _cam_proj->fxy / disp;
             if(d < 30 || d > 150) continue;
 
             depthsum[j] += d;
@@ -252,36 +252,20 @@ void SceneReconstructor::filterPointCloud()
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr valid_points(
                 new pcl::PointCloud<pcl::PointXYZ>);
-//    for (int32_t v = gap; v < _depthmap.rows - gap; v += _step) {
-//        for (int32_t u = _u_start + gap; u < _u_end - gap; u += _step) {
-//            float d = _depthmap.at<float>(v, u);
-//            if(d < 30) continue;
-
-//            Eigen::Vector3f pt = _cam_proj.cvt2Dto3D(u, v, d, mmath::cam::LEFT);
-//            valid_points->push_back({pt[0], pt[1], pt[2]});
-//        }
-//    }
-
-    // Test version
-    valid_points->clear();
     for (int32_t v = gap; v < _depthmap.rows - gap; v += _step) {
         for (int32_t u = _u_start + gap; u < _u_end - gap; u += _step) {
-            float d = 50;
-            Eigen::Vector3f pt = _cam_proj.cvt2Dto3D(u, v, d, mmath::cam::LEFT);
-            valid_points->push_back({pt[0], pt[1], pt[2]});
+            float d = _depthmap.at<float>(v, u);
+            if(d < 30) continue;
 
-            if(v==gap || v==_depthmap.rows-gap-2 || v==540) {
-                if(u==gap+_u_start || u==_u_end-gap-2 || u==960) {
-                    printf("(%04d,%04d) - (%.3f, %.3f, %.3f)\n",
-                           v, u, pt[0], pt[1], pt[2]);
-                }
-            }
+            Eigen::Vector3f pt = _cam_proj->cvt2Dto3D(u, v, d, mmath::cam::LEFT);
+            valid_points->push_back({pt[0], pt[1], pt[2]});
         }
     }
 
     _pc_handler->bindPointCloud(valid_points);
+    _pc_handler->bindTexture(_texture);
 #if PLOT_ALL
-    createVertices(false);
+    _pc_handler->createVertices(_vertices_3d);
     _layer_texture3d[0]->updateVertex(_vertices_3d);
     _layer_renderer->addLayers(_layer_texture3d[0], 0);
 #endif
@@ -289,116 +273,18 @@ void SceneReconstructor::filterPointCloud()
     _pc_handler->rmOutliersByRadius(VERTICES_DENSITY*4, 37);
     _pc_handler->statisticalOutliersRemoval(100, 1.0f);
 //    pthandler.rmOutliersByKNeighbors(20, 2);
-    createVertices(true);
+
 #if PLOT_ALL
+    _pc_handler->createVertices(_vertices_3d);
     _layer_texture3d[1]->updateVertex(_vertices_3d);
     _layer_renderer->addLayers(_layer_texture3d[1], 1);
-
+    float radius = VERTICES_DENSITY + 1.5;
+    _pc_handler->createMesh(radius, radius, 20.f*radius*radius, _traingles_3d);
     _layer_texture3d[2]->updateVertex3D(_traingles_3d);
     _layer_renderer->addLayers(_layer_texture3d[2], 2);
 #endif
 
-    auto& points = _pc_handler->getCurrentPointCloud();
-    std::vector<Eigen::Vector3f> points_color(points->size());
-    for(size_t i = 0; i < points->size(); i++) {
-        auto& pt = points->at(i);
-
-        Eigen::Vector2f pt2d = _cam_proj.cvt3Dto2D(
-                    pt.x, pt.y, pt.z, mmath::cam::LEFT);
-        int u = round(pt2d[0]);
-        int v = round(pt2d[1]);
-        const cv::Vec3b pixel = _texture.at<cv::Vec3b>(v, u);
-        float r = 1.f*pixel[0]/255.f;
-        float g = 1.f*pixel[1]/255.f;
-        float b = 1.f*pixel[2]/255.f;
-
-        points_color[i] = {r, g, b};
-    }
-
-    _ed->addVertices(_pc_handler->getCurrentPointCloud(), {});
-
-    std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> correspondences =
-        {{pcl::PointXYZ(-2.000, 0.000, 50.000), pcl::PointXYZ(-2.000, 0.000, 100.000)}, // (540,960)
-         {pcl::PointXYZ(-4.000, 0.000, 50.000), pcl::PointXYZ(-4.000, 0.000, 100.000)}, // (540,960)
-         {pcl::PointXYZ(0.000, 0.000, 50.000), pcl::PointXYZ(0.000, 0.000, 100.000)}, // (540,960)
-         {pcl::PointXYZ(2.000, 0.000, 50.000), pcl::PointXYZ(2.000, 0.000, 100.000)}, // (540,960)
-         {pcl::PointXYZ(-36.091, -22.273, 50.000), pcl::PointXYZ(-36.091, -22.273, 50.000)}, // (50,210)
-         {pcl::PointXYZ(38.909, -22.273, 50.000), pcl::PointXYZ(38.909, -22.273, 50.000)}, // (50,1860)
-         {pcl::PointXYZ(-36.091, 22.182, 50.000), pcl::PointXYZ(-36.091, 22.182, 50.000)}, // (1028,210)
-         {pcl::PointXYZ(38.909, 22.182, 50.000), pcl::PointXYZ(38.909, 22.182, 50.000)}, // (1028,1860)
-        };
-    _ed->addVertices(nullptr, {}, correspondences);
-
-    _pc_handler->bindPointCloud(_ed->getVertices().coords);
-    _vertices_3d.clear();
-    auto& newpoints = _pc_handler->getCurrentPointCloud();
-    for(size_t i = 0; i < points->size(); i++) {
-        auto& pt = newpoints->at(i);
-        auto& rgb = points_color[i];
-
-        _vertices_3d.push_back({
-            glm::vec4(pt.x, pt.y, pt.z, 1),
-            glm::vec4(rgb[0], rgb[1], rgb[2], 1)
-        });
-    }
-    _layer_texture3d[3]->updateVertex(_vertices_3d);
-    std::shared_ptr<mlayer::LayerCoordinate> layer_coord(
-                new mlayer::LayerCoordinate(30, 0.5));
-    _layer_renderer->addLayers(layer_coord, 3);
-    _layer_renderer->addLayers(_layer_texture3d[3], 3);
 }
-
-
-void SceneReconstructor::createVertices(bool with_mesh)
-{
-    // Retrive points color
-    _vertices_3d.clear();
-    auto& points = _pc_handler->getCurrentPointCloud();
-    std::vector<Eigen::Vector3f> points_color(points->size());
-    for(size_t i = 0; i < points->size(); i++) {
-        auto& pt = points->at(i);
-
-        Eigen::Vector2f pt2d = _cam_proj.cvt3Dto2D(
-                    pt.x, pt.y, pt.z, mmath::cam::LEFT);
-        int u = round(pt2d[0]);
-        int v = round(pt2d[1]);
-        const cv::Vec3b pixel = _texture.at<cv::Vec3b>(v, u);
-        float r = 1.f*pixel[0]/255.f;
-        float g = 1.f*pixel[1]/255.f;
-        float b = 1.f*pixel[2]/255.f;
-
-        points_color[i] = {r, g, b};
-
-        _vertices_3d.push_back({
-            glm::vec4(pt.x, pt.y, pt.z, 1),
-            glm::vec4(r, g, b, 1)
-        });
-    }
-    if(!with_mesh) return;
-
-    pcl::PolygonMesh mesh;
-    float radius = VERTICES_DENSITY * 2.5;
-    _pc_handler->createMesh(mesh, radius, radius, 80);
-
-    // Create my vertex3D
-    _traingles_3d.clear();
-    //size_t count = 0;
-    for(size_t i = 0; i < mesh.polygons.size(); i++) {
-        pcl::Vertices vert = mesh.polygons[i];
-        for(size_t j = 0; j < vert.vertices.size(); j++) {
-            uint32_t idx = vert.vertices[j];
-
-            auto& pt = points->at(idx);
-            auto& c = points_color[idx];
-
-            _traingles_3d.push_back({
-                glm::vec4(pt.x, pt.y, pt.z, 1),
-                glm::vec4(c[0], c[1], c[2], 1)
-            });
-        }
-    }
-}
-
 
 
 //void SceneReconstructor::filterVertices()

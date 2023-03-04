@@ -33,9 +33,14 @@
 #endif
 
 
-PointCloudHandler::PointCloudHandler()
-    : _point_cloud(new pcl::PointCloud<pcl::PointXYZ>)
+PointCloudHandler::PointCloudHandler(
+        const std::shared_ptr<mmath::CameraProjector> cam_proj,
+        mmath::cam::ID cam_id)
+    : _cam_proj(cam_proj)
+    , _cam_id(cam_id)
+    , _point_cloud(new pcl::PointCloud<pcl::PointXYZ>)
     , _kd_tree(std::make_shared<pcl::KdTreeFLANN<pcl::PointXYZ>>())
+    , _texture(cv::Mat())
 {
 }
 
@@ -51,6 +56,9 @@ void PointCloudHandler::bindPointCloud(
     _point_cloud = point_cloud;
     PRINT("Initial point size: %zu\n", _point_cloud->size());
     updateKDTreeData();
+
+    // Reset point normal and texture
+    _texture = cv::Mat();
 }
 
 
@@ -60,6 +68,15 @@ void PointCloudHandler::bindPointCloud(const PointCloudXYZ &point_cloud)
     _point_cloud->getMatrixXfMap() = point_cloud.transpose();
     PRINT("Initial point size: %zu\n", _point_cloud->size());
     updateKDTreeData();
+
+    // Reset point normal and texture
+    _texture = cv::Mat();
+}
+
+
+void PointCloudHandler::bindTexture(const cv::Mat &texture)
+{
+    _texture = texture;
 }
 
 
@@ -200,6 +217,90 @@ void PointCloudHandler::statisticalOutliersRemoval(size_t k, float std_thresh)
 }
 
 
+void PointCloudHandler::createMesh(
+        float search_radius, float mu, int max_neighbors,
+        std::vector<mlayer::Vertex3D>& vertices)
+{
+    if(_texture.empty()){
+        PRINT("No texture was binded!\n");
+        std::abort();
+    }
+
+    // MSL for smoothing
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (
+                new pcl::search::KdTree<pcl::PointXYZ>);
+    tree->setInputCloud(_point_cloud);
+
+    pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud_with_normal(
+                new pcl::PointCloud<pcl::PointNormal>);
+    pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointNormal> mls;
+    mls.setComputeNormals(true);
+    mls.setInputCloud(_point_cloud);
+    mls.setPolynomialOrder(2);
+    mls.setSearchMethod(tree);
+    mls.setSearchRadius(search_radius);
+    mls.process(*point_cloud_with_normal);
+    PRINT("Point size after mls: %zu\n", point_cloud_with_normal->size());
+
+
+    // Create search tree
+    pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(
+                new pcl::search::KdTree<pcl::PointNormal>);
+    tree2->setInputCloud(point_cloud_with_normal);
+
+    // ---- Create triangles ---
+    pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
+    gp3.setSearchRadius(search_radius);    // max edge length for every triangle
+    gp3.setMu(mu); // maximum acceptable distance for a point to be considered as a neighbor
+    gp3.setMaximumNearestNeighbors(max_neighbors);
+    gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
+    gp3.setMinimumAngle(M_PI/18.f); // 10 degrees
+    gp3.setMaximumAngle(2*M_PI/3); // 120 degrees
+    gp3.setNormalConsistency(false);
+
+    // Get result
+    pcl::PolygonMesh mesh;
+    gp3.setInputCloud(point_cloud_with_normal);
+    gp3.setSearchMethod(tree2);
+    gp3.reconstruct(mesh);
+
+    // Assign mesh vertices
+    float r, g, b;
+    size_t count = 0;
+    vertices.resize(mesh.polygons.size() * 3);
+    for(size_t i = 0; i < mesh.polygons.size(); i++) {
+        pcl::Vertices vert = mesh.polygons[i];
+
+        for(size_t j = 0; j < vert.vertices.size(); j++) {
+            size_t idx = vert.vertices[j];
+            auto& pt = _point_cloud->at(idx);
+            readPointColor(pt, r, g, b);
+            vertices[count++] = {
+                glm::vec4(pt.x, pt.y, pt.z, 1), glm::vec4(r, g, b, 1)};
+        }
+    }
+    PRINT("Create mesh (size of [%zu]) with [%zu] vertices.\n",
+          mesh.polygons.size(), count);
+}
+
+
+void PointCloudHandler::createVertices(std::vector<mlayer::Vertex3D> &vertices)
+{
+    if(_texture.empty()){
+        PRINT("No texture was binded!\n");
+        std::abort();
+    }
+
+    float r, g, b;
+    vertices.resize(_point_cloud->size());
+    for(size_t i = 0; i < _point_cloud->size(); i++) {
+        auto& pt = _point_cloud->at(i);
+        readPointColor(pt, r, g, b);
+        vertices[i] = {glm::vec4(pt.x, pt.y, pt.z, 1), glm::vec4(r, g, b, 1)};
+    }
+}
+
+
 const pcl::PointCloud<pcl::PointXYZ>::Ptr PointCloudHandler::getCurrentPointCloud() const
 {
     return _point_cloud;
@@ -214,52 +315,23 @@ Eigen::MatrixXf PointCloudHandler::toEigenMatrix() const
 }
 
 
-void PointCloudHandler::createMesh(pcl::PolygonMesh& mesh,
-        float search_radius, float mu, int max_neighbors)
-{
-    pcl::PointCloud<pcl::PointNormal>::Ptr pcl_points_n(
-                new pcl::PointCloud<pcl::PointNormal>);
-
-    // MSL for smoothing
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (
-                new pcl::search::KdTree<pcl::PointXYZ>);
-    tree->setInputCloud(_point_cloud);
-
-    pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointNormal> mls;
-    mls.setComputeNormals(true);
-    mls.setInputCloud(_point_cloud);
-    mls.setPolynomialOrder(2);
-    mls.setSearchMethod(tree);
-    mls.setSearchRadius(search_radius);
-    mls.process(*pcl_points_n);
-    PRINT("Point size after mls: %zu\n", pcl_points_n->size());
-
-
-    // Create search tree
-    pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(
-                new pcl::search::KdTree<pcl::PointNormal>);
-    tree2->setInputCloud(pcl_points_n);
-
-    // ---- Create triangles ---
-    pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
-    gp3.setSearchRadius(search_radius);    // max edge length for every triangle
-    gp3.setMu(mu); // maximum acceptable distance for a point to be considered as a neighbor
-    gp3.setMaximumNearestNeighbors(max_neighbors);
-    gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
-    gp3.setMinimumAngle(M_PI/18.f); // 10 degrees
-    gp3.setMaximumAngle(2*M_PI/3); // 120 degrees
-    gp3.setNormalConsistency(false);
-
-    // Get result
-    gp3.setInputCloud(pcl_points_n);
-    gp3.setSearchMethod(tree2);
-    gp3.reconstruct(mesh);
-}
-
-
 void PointCloudHandler::updateKDTreeData()
 {
     _kd_tree->setInputCloud(_point_cloud);
+}
+
+
+void PointCloudHandler::readPointColor(
+        const pcl::PointXYZ& pt, float &r, float &g, float &b)
+{
+    Eigen::Vector2f pt2d = _cam_proj->cvt3Dto2D(
+                pt.x, pt.y, pt.z, _cam_id);
+    int u = round(pt2d[0]);
+    int v = round(pt2d[1]);
+    const cv::Vec3b& pixel = _texture.at<cv::Vec3b>(v, u);
+    r = 1.f*pixel[0]/255.f;
+    g = 1.f*pixel[1]/255.f;
+    b = 1.f*pixel[2]/255.f;
 }
 
 

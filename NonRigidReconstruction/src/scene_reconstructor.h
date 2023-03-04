@@ -64,7 +64,7 @@ private:
     void cvProcess();
 
 private:
-    mmath::CameraProjector _cam_proj;
+    const std::shared_ptr<mmath::CameraProjector> _cam_proj;
 
     bool _is_seqc;        //!< Wheter create texture for a sequence
 
