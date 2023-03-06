@@ -22,13 +22,24 @@ std::vector<LayerViewPort> createViewPort(uint16_t w, uint16_t h, uint8_t n)
     return vps;
 }
 
+std::string getAutoWindowName()
+{
+    static uint8_t count = 0;
+    char name[32] = "layerRenderer";
+    if(count > 0) {
+        sprintf(name, "%s %d", name, count);
+    }
+    count++;
+    return std::string(name);
+}
+
 }
 
 LayerRenderer::LayerRenderer(
         const gl_util::Projection& proj, LayerRenderMode mode,
         uint16_t window_width, uint16_t window_height, bool is_window_visible)
-    : _window(std::make_unique<gl_util::Window>(window_width, window_height,
-                   "LayerRenderer", is_window_visible))
+    : _window(std::make_shared<gl_util::Window>(window_width, window_height,
+                   getAutoWindowName(), is_window_visible))
     , _projection(proj.mat4())
     , _control_n_viewport(true)
     , _N(std::max(int(mode), 1))
@@ -42,8 +53,8 @@ LayerRenderer::LayerRenderer(
         const gl_util::Projection& proj,
         const std::vector<LayerViewPort>& n_viewport,
         uint16_t window_width, uint16_t window_height, bool is_window_visible)
-    : _window(std::make_unique<gl_util::Window>(window_width, window_height,
-                   "LayerRenderer", is_window_visible))
+    : _window(std::make_shared<gl_util::Window>(window_width, window_height,
+                   getAutoWindowName(), is_window_visible))
     , _projection(proj.mat4())
     , _n_viewport(n_viewport)
     , _control_n_viewport(false)
@@ -155,11 +166,13 @@ void LayerRenderer::render()
 
         _window->refresh();
     }
+    _window->deactivate();
 }
 
 
 const LayerRenderer::WindowShotData& LayerRenderer::getWindowShot()
 {
+    _window->activate();
     _window->clear();
 
     keyboardControlModel(_window->ptr());
@@ -176,8 +189,6 @@ const LayerRenderer::WindowShotData& LayerRenderer::getWindowShot()
     glReadPixels(0, 0, _win_shot.width, _win_shot.height,
                  GL_RGB, GL_FLOAT, _win_shot.rgb_buffer);
     _window->refresh();
-
-//    _window->hidden();
 
     return _win_shot;
 }

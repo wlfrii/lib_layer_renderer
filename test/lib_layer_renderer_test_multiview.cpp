@@ -38,8 +38,14 @@ int main()
                     30, 2, 0.2, 3, glm::vec3(1.0, 1.0, 0.0)), 2);
     renderer.addLayers(std::make_shared<LayerCone>(
                     20, 5, glm::vec3(1.0, 0.3, 0.0), pose), 3);
-
     renderer.render();
+
+
+    LayerRenderer renderer2(gl_proj, mlayer::LAYER_RENDER_LEFT, w, h, true);
+//    renderer2.setModel(model);
+//    renderer2.addLayers(std::make_shared<LayerCylinder>(
+//                    20, 4, glm::vec3(1.0, 0.0, 1.0), pose));
+//    renderer2.render();
 
     return 0;
 }
