@@ -70,8 +70,8 @@ public:
     LayerRenderer(const gl_util::Projection& proj,
                   LayerRenderMode mode,
                   uint16_t window_width = 1920,
-                  uint16_t window_height = 1080
-                  );
+                  uint16_t window_height = 1080,
+                  bool is_window_visible = true);
 
 
     /**
@@ -84,7 +84,8 @@ public:
     LayerRenderer(const gl_util::Projection& proj,
                   const std::vector<LayerViewPort>& n_viewport,
                   uint16_t window_width = 1920,
-                  uint16_t window_height = 1080);
+                  uint16_t window_height = 1080,
+                  bool is_window_visible = true);
     ~LayerRenderer();
 
 
