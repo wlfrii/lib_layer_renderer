@@ -6,6 +6,8 @@
 #include <pcl/search/kdtree.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/common/io.h> // for concatenateFields
+#include <opencv2/opencv.hpp>
+
 
 namespace util {
 
@@ -41,12 +43,23 @@ void voxelDownSampling(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in, float voxel_si
  * @return
  */
 pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr estimateNormal(
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pt_cloud);
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr pt_cloud);
 
 
 pcl::PointCloud<pcl::PointNormal>::Ptr estimateNormal(
-        pcl::PointCloud<pcl::PointXYZ>::Ptr pt_cloud);
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr pt_cloud);
 
+
+
+void estimateImageNormal(const cv::Mat& gray_image, cv::Mat& normal_image);
+
+
+/**
+ * @brief Convert CV_32F/CV_64F to CV_8U
+ * @param image
+ * @return
+ */
+cv::Mat im2uchar(const cv::Mat & image);
 
 } // namespace::util
 

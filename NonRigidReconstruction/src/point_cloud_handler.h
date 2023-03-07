@@ -14,6 +14,7 @@
 #include <opencv2/opencv.hpp>
 #include <lib_math/lib_math.h>
 #include <lib_layer_renderer.h>
+#include "point_cloud_define.h"
 
 
 using PointCloudXYZ = Eigen::Matrix<float, Eigen::Dynamic, 3>;
@@ -139,11 +140,20 @@ public:
 
 
     /**
+     * @brief Get current point cloud with normal
+     * @return
+     */
+    pcl::PointCloud<pcl::PointNormal>::Ptr getCurrentPointCloudWithNormal() const;
+
+
+    /**
      * @brief Convert current point cloud to Eigen::Matrix
      * @return
      */
     Eigen::MatrixXf toEigenMatrix() const;
 
+
+    const Vertices& getVertices();
 
 
 private:
@@ -154,7 +164,8 @@ private:
     const std::shared_ptr<mmath::CameraProjector> _cam_proj;
     const mmath::cam::ID _cam_id;
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr _point_cloud;
+
+    Vertices _vertices;
     std::shared_ptr<pcl::KdTreeFLANN<pcl::PointXYZ>> _kd_tree;
 
     cv::Mat _texture;

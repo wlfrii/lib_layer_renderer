@@ -122,7 +122,7 @@ void voxelDownSampling(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in, float voxel_si
 
 
 pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr estimateNormal(
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr pt_cloud)
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr pt_cloud)
 {
     pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree(
                 new pcl::search::KdTree<pcl::PointXYZRGB>);
@@ -150,7 +150,7 @@ pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr estimateNormal(
 
 
 pcl::PointCloud<pcl::PointNormal>::Ptr estimateNormal(
-        pcl::PointCloud<pcl::PointXYZ>::Ptr pt_cloud)
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr pt_cloud)
 {
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(
                 new pcl::search::KdTree<pcl::PointXYZ>);
@@ -176,6 +176,58 @@ pcl::PointCloud<pcl::PointNormal>::Ptr estimateNormal(
     return cloud_with_normals;
 }
 
+
+void estimateImageNormal(const cv::Mat& gray_image, cv::Mat& normal_image)
+{
+    normal_image = cv::Mat(gray_image.size(), CV_32FC3);
+
+    for(int v = 1; v < gray_image.rows - 1; ++v) {
+        for(int u = 1; u < gray_image.cols - 1; ++u) {
+
+            float dzdx = (gray_image.at<float>(v + 1, u) -
+                          gray_image.at<float>(v - 1, u)) / 2.0;
+            float dzdy = (gray_image.at<float>(v, u + 1) -
+                          gray_image.at<float>(v, u - 1)) / 2.0;
+
+            cv::Vec3f d(-dzdx, -dzdy, 1.0f);
+            cv::Vec3f n = cv::normalize(d);
+
+            normal_image.at<cv::Vec3f>(v, u) = n;
+        }
+    }
+}
+
+cv::Mat im2uchar(const cv::Mat &image)
+{
+    cv::Mat out;
+    if(image.type() == CV_32FC1 || image.type() == CV_64FC1)
+        out = cv::Mat(image.size(), CV_8UC1);
+    else if(image.type() == CV_32FC3 || image.type() == CV_64FC3)
+        out = cv::Mat(image.size(), CV_8UC3);
+
+    if(image.depth() == CV_32F)
+    {
+        for(int i = 0; i < image.rows; i++){
+            const float* row_data_in = image.ptr<float>(i);
+            uchar* row_data_out = out.ptr<uchar>(i);
+            for(int j = 0; j < image.cols * image.channels(); j++){
+                row_data_out[j] = (uchar)MIN(row_data_in[j] * 255.0, 255);
+            }
+        }
+    }
+    else if(image.depth() == CV_64F)
+    {
+        for(int i = 0; i < image.rows; i++){
+            const double* row_data_in = image.ptr<double>(i);
+            uchar* row_data_out = out.ptr<uchar>(i);
+            for(int j = 0; j < image.cols * image.channels(); j++){
+                row_data_out[j] = (uchar)MIN(row_data_in[j] * 255.0, 255);
+            }
+        }
+    }
+
+    return out;
+}
 } // namespace::util
 
 
