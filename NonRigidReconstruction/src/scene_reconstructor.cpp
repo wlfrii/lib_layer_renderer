@@ -9,8 +9,12 @@
 
 
 namespace {
-float VERTICES_DENSITY = 0.5f;
+float VERTICES_DENSITY = 0.3f;
+float MESH_SEARCH_RADIUS = VERTICES_DENSITY + 2.0;
+float MESH_MU = MESH_SEARCH_RADIUS;
+float MESH_NEIGHBORS = 20.f*MESH_SEARCH_RADIUS*MESH_SEARCH_RADIUS;
 }
+
 
 SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
                                        bool is_seqc)
@@ -20,14 +24,13 @@ SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
     , _pyd_times(2)
     , _step(2)
     , _pc_handler(new PointCloudHandler(_cam_proj, mmath::cam::LEFT))
-    , _ed(new EmbeddedDeformation)
+    , _ed(nullptr)
 {
     uint16_t w = cam_proj.cx*2;
     uint16_t h = cam_proj.cy*2;
     gl_util::Projection gl_proj(cam_proj.fxy, cam_proj.cx, cam_proj.cy,
                                 w, h, 0.2, 300);
 
-#if PLOT_ALL
     mlayer::LayerViewPort vp3(0, 0, w / 2, h / 2);
     mlayer::LayerViewPort vp4(w / 2, 0, w / 2, h / 2);
     mlayer::LayerViewPort vp1(0, h / 2, w / 2, h / 2);
@@ -35,16 +38,20 @@ SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
     std::vector<mlayer::LayerViewPort> vps = {vp1, vp2, vp3, vp4};
     _layer_renderer = std::make_shared<mlayer::LayerRenderer>(
                 gl_proj, vps, w, h);
+    glm::mat4 view = glm::rotate(
+                glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
+    view[3][0] += 2.f;
+    _layer_renderer->setView(view, mlayer::LAYER_RENDER_LEFT);
+
     _layer_renderer->setKeyboardOnAllViewports(true);
     _layer_texture3d[0] = std::make_shared<mlayer::LayerTexture3D>();
     _layer_texture3d[1] = std::make_shared<mlayer::LayerTexture3D>();
     _layer_texture3d[2] = std::make_shared<mlayer::LayerTexture3D>();
     _layer_texture3d[3] = std::make_shared<mlayer::LayerTexture3D>();
-#else
-    _layer_renderer = std::make_shared<mlayer::LayerRenderer>(
-                gl_proj, mlayer::LAYER_RENDER_LEFT, w, h);
-    _layer_texture3d = std::make_shared<mlayer::LayerTexture3D>();
-#endif // PLOT_ALL
+    _layer_renderer->addLayers(_layer_texture3d[0], 0);
+    _layer_renderer->addLayers(_layer_texture3d[1], 1);
+    _layer_renderer->addLayers(_layer_texture3d[2], 2);
+    _layer_renderer->addLayers(_layer_texture3d[3], 3);
 }
 
 
@@ -101,64 +108,52 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
         _disparity = (float*)malloc(_width * _height * sizeof(float));
     }
 
+    if(_ed) {
+        // 测试发现，使用点云投影图做关键点匹配效果不好，这是因为点云是进过降采样后的
+        // 3D位置信息，因此直接投影至2D平面后会丢失信息，即便是使用了三角化后的mesh，
+        // 也存在丢失细节的问题，导致特征点匹配效果不好
+//        _ed->projectPointCloud(MESH_SEARCH_RADIUS, MESH_MU,
+//                               MESH_NEIGHBORS, _traingles_3d);
+//        _layer_texture3d[3]->updateVertex3D(_traingles_3d);
+//        cv::Mat ret = getPlotResult();
+//        cv::Mat proj = ret.colRange(960, 1920).rowRange(540, 1080).clone();
+//        cv::Mat prev = util::im2uchar(proj);
+//        cv::resize(prev, prev, cv::Size(1920, 1080));
+
+//        keyPointMatching(prev, l_image);
+    }
 
     // Calculate disparity
     calcDepthMap(l_image, r_image);
     // Filter out the valid texture position
     filterPointCloud();
 
-    //printf("\tVertices.size: %zu\n", vertices.size());
-
-    if(_is_seqc) {
-        //pclProcess();
-        cvProcess();
+    // For the first image, initialize Embedded Deformation
+    if(_ed == nullptr) {
+        _ed = std::make_shared<EmbeddedDeformation>(4.f);
+        _ed->addVertices(_pc_handler->getVertices());
     }
+    else{
+        // Find the correspondence between each two adjacent sequences
+        std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> correspondences =
+                keyPointMatching(_prev_image, l_image);
+
+        // Update ED
+
+    }
+    _prev_image = l_image;
+    _prev_depthmap = _depthmap;
 }
 
 
-#if PLOT_ALL
 void SceneReconstructor::plot()
 {
-    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
-    _layer_renderer->setModel(model);
-    _layer_renderer->render();
-
-//    auto data = _layer_renderer->getWindowShot();
-//    cv::Mat bg(data.height, data.width, CV_32FC3, data.rgb_buffer);
-//    cv::cvtColor(bg, bg, cv::COLOR_RGB2BGR);
-//    cv::flip(bg, bg, 0);
-
-//    cv::imshow("test", bg);
-//    cv::waitKey(0);
-}
-#else
-void SceneReconstructor::plotVertices()
-{
-    _layer_texture3d->updateVertex(_vertices_3d);
-    _layer_renderer->addLayers(_layer_texture3d);
-
-    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
-    _layer_renderer->setModel(model);
     _layer_renderer->render();
 }
 
-
-void SceneReconstructor::plotMesh()
-{
-    _layer_texture3d->updateVertex3D(_traingles_3d);
-    _layer_renderer->addLayers(_layer_texture3d);
-
-    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
-    _layer_renderer->setModel(model);
-    _layer_renderer->render();
-}
-#endif // PLOT_ALL
 
 cv::Mat SceneReconstructor::getPlotResult()
 {
-    glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, 30));
-    _layer_renderer->setModel(model);
-
     auto data = _layer_renderer->getWindowShot();
     cv::Mat bg(data.height, data.width, CV_32FC3, data.rgb_buffer);
     cv::cvtColor(bg, bg, cv::COLOR_RGB2BGR);
@@ -264,139 +259,75 @@ void SceneReconstructor::filterPointCloud()
 
     _pc_handler->bindPointCloud(valid_points);
     _pc_handler->bindTexture(_texture);
-#if PLOT_ALL
+
     _pc_handler->createVertices(_vertices_3d);
     _layer_texture3d[0]->updateVertex(_vertices_3d);
-    _layer_renderer->addLayers(_layer_texture3d[0], 0);
-#endif
+
+
     _pc_handler->voxelDownSampling(VERTICES_DENSITY);
     _pc_handler->rmOutliersByRadius(VERTICES_DENSITY*4, 37);
     _pc_handler->statisticalOutliersRemoval(100, 1.0f);
 //    pthandler.rmOutliersByKNeighbors(20, 2);
 
-#if PLOT_ALL
+
     _pc_handler->createVertices(_vertices_3d);
     _layer_texture3d[1]->updateVertex(_vertices_3d);
-    _layer_renderer->addLayers(_layer_texture3d[1], 1);
-    float radius = VERTICES_DENSITY + 1.5;
-    _pc_handler->createMesh(radius, radius, 20.f*radius*radius, _traingles_3d);
-    _layer_texture3d[2]->updateVertex3D(_traingles_3d);
-    _layer_renderer->addLayers(_layer_texture3d[2], 2);
-#endif
 
+
+    _pc_handler->createMesh(MESH_SEARCH_RADIUS, MESH_MU,
+                            MESH_NEIGHBORS, _traingles_3d);
+    _layer_texture3d[2]->updateVertex3D(_traingles_3d);
 }
 
 
-//void SceneReconstructor::filterVertices()
-//{
-//    _vertices_3d.clear();
-
-//    auto addVertex = [this](const Eigen::Vector3f& pt,
-//            const cv::Vec4f &rgbd) {
-//        mlayer::Vertex3D vertex3d;
-//        vertex3d.position = glm::vec4(pt[0], pt[1], pt[2], 1.f);
-//        vertex3d.color = glm::vec4(rgbd[0], rgbd[1], rgbd[2], 1.f);
-
-//        _vertices_3d.push_back(vertex3d);
-//    };
-
-//    auto to3D = [this](int u, int v, float depth) -> Eigen::Vector3f {
-//        return _cam_proj.cvt2Dto3D(u, v, depth);
-//    };
-
-//    cv::Mat used(_rgbd.size(), CV_8UC1, cv::Scalar(0));
-//    int step = _step;
-//    for (int32_t v = 0; v < _rgbd.rows - 1; v ++) {
-//        for (int32_t u = 0; u < _rgbd.cols - 1; u ++) {
-//            cv::Vec4f rgbd = _rgbd.at<cv::Vec4f>(v, u);
-//            float disp = rgbd[3];
-//            if(disp < 1) continue;
-
-//            cv::Vec4f rgbd_right = _rgbd.at<cv::Vec4f>(v, u + step);
-//            cv::Vec4f rgbd_down = _rgbd.at<cv::Vec4f>(v + step, u);
-//            cv::Vec4f rgbd_right_down = _rgbd.at<cv::Vec4f>(v + step, u + step);
-
-//            Eigen::Vector3f pt = to3D(u, v, rgbd[3]);
-//            Eigen::Vector3f pt_right = to3D(u + step, v, rgbd_right[3]);
-//            Eigen::Vector3f pt_down = to3D(u, v + step, rgbd_down[3]);
-//            Eigen::Vector3f pt_right_down = to3D(u + step, v + step,
-//                                                 rgbd_right_down[3]);
-
-//            bool flag1 = isNear(pt, pt_right, pt_right_down);
-//            bool flag2 = isNear(pt, pt_down, pt_right_down);
-//            printf("flag1: %d, flag2: %d\n", flag1, flag2);
-//            if (flag1) {
-//                if(!_is_seqc) {
-//                    addVertex(pt, rgbd);
-//                    addVertex(pt_right, rgbd_right);
-//                    addVertex(pt_right_down, rgbd_right_down);
-//                }
-
-//                used.at<uchar>(v, u) = 1;
-//                used.at<uchar>(v, u + step) = 1;
-//                used.at<uchar>(v + step, u + step) = 1;
-//            }
-//            if (flag2) {
-//                if(!_is_seqc) {
-//                    addVertex(pt, rgbd);
-//                    addVertex(pt_right_down, rgbd_right_down);
-//                    addVertex(pt_down, rgbd_down);
-//                }
-
-//                used.at<uchar>(v, u) = 1;
-//                used.at<uchar>(v + step, u + step) = 1;
-//                used.at<uchar>(v + step, u) = 1;
-//            }
-//        }
-//    }
-
-    // When sequence object is specified, create PCL point cloud
-//    if(_is_seqc) {
-//        for(int v = 0; v < used.rows - 1; v++) {
-//            for(int u = 0; u < used.cols - 1; u++) {
-//                uchar val = used.at<uchar>(v, u);
-//                if(val == 0) continue;
-
-//                cv::Vec4f rgbd = _rgbd.at<cv::Vec4f>(v, u);
-//                //addVertex(u, v, drgb);
-//            }
-//        }
-//    }
-//}
-
-
-
-
-// ===========================================================================
-std::vector<std::pair<cv::Point2i, cv::Point2i>>
-SceneReconstructor::keyPointMatching(const cv::Mat &left_tex)
+cv::Mat SceneReconstructor::EDProjection()
 {
-    cv::Mat prev_image, curr_image;
-    cv::cvtColor(_texture, prev_image, cv::COLOR_RGB2BGR);
-    cv::cvtColor(left_tex, curr_image, cv::COLOR_RGB2BGR);
+    const Vertices& _vertices = _ed->getVertices();
 
+    std::vector<mlayer::Vertex3D> vertices3d;
+    vertices3d.resize(_vertices.coords->size());
+    for(size_t i = 0; i < _vertices.coords->size(); i++) {
+        const pcl::PointXYZ& p = _vertices.coords->at(i);
+        const Eigen::Vector3f& c = _vertices.colors[i];
+        vertices3d[i] = {glm::vec4(p.x, p.y, p.z, 1),
+                       glm::vec4(c[0], c[1], c[2], 1)};
+    }
+//    _layer_texture3d->updateVertex(vertices3d);
+    auto data = _layer_renderer->getWindowShot();
+    cv::Mat image(data.height, data.width, CV_32FC3, data.rgb_buffer);
+    printf("image size: %dx%d\n", data.width, data.height);
+    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
+    cv::flip(image, image, 0);
+
+    return image;
+}
+
+
+std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>>
+SceneReconstructor::keyPointMatching(
+        const cv::Mat &prev_image, const cv::Mat &curr_image)
+{
     std::vector<cv::KeyPoint> keypoints1, keypoints2;
-    cv::Ptr<cv::ORB> orb = cv::ORB::create();
-    orb->detect(prev_image, keypoints1);
-    orb->detect(curr_image, keypoints2);
-
+    int patch_size = 51;
+    cv::Ptr<cv::ORB> orb = cv::ORB::create(1000, 1.2f, 8, patch_size, 0, 2,
+                                           cv::ORB::HARRIS_SCORE, patch_size);
     cv::Mat descriptors1, descriptors2;
-    orb->compute(prev_image, keypoints1, descriptors1);
-    orb->compute(curr_image, keypoints2, descriptors2);
+    orb->detectAndCompute(curr_image, cv::Mat(), keypoints1, descriptors1);
+    orb->detectAndCompute(prev_image, cv::Mat(), keypoints2, descriptors2);
 
-    // Match the BRIEF of two descriptors by BRMatch with Hamming
+    /* Match the two descriptors by BRMatch with Hamming */
     std::vector<cv::DMatch> matches;
     cv::BFMatcher bf_matcher(cv::NORM_HAMMING, true);
     bf_matcher.match(descriptors1, descriptors2, matches);
     printf("Found matches size: %zu\n", matches.size());
 
-    cv::Mat matched_image;
-    cv::drawMatches(prev_image, keypoints1, curr_image, keypoints2,
-                    matches, matched_image);
-    cv::imshow("BF Match", matched_image);
-    cv::waitKey(0);
+//    cv::Mat matched_image;
+//    cv::drawMatches(prev_image, keypoints1, curr_image, keypoints2,
+//                    matches, matched_image);
+//    cv::imshow("BF Match", matched_image);
+//    cv::waitKey(0);
 
-    // Filter the matched results
+    /* Filter the matched results */
     double min_dis = 1000, max_dis = 0;
     for (size_t i = 0; i < matches.size(); i++) {
         double dis = matches[i].distance;
@@ -404,29 +335,67 @@ SceneReconstructor::keyPointMatching(const cv::Mat &left_tex)
         if (dis > max_dis) max_dis = dis;
     }
     printf("Match distance: [%f, %f]\n", min_dis, max_dis);
-    // When the matches.distance > 2*min_dis, reject the match
+
+    /* Filter the matched results by 2D -> 3D */
+    pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr kd_tree(
+                new pcl::KdTreeFLANN<pcl::PointXYZ>);
+    kd_tree->setInputCloud(_ed->getVertices().coords);
+    pcl::PointXYZ query_point;
+
     std::vector<cv::DMatch> good_matches;
     for (size_t i = 0; i < matches.size(); i++) {
-        if (matches[i].distance <= std::max(2.0 * min_dis, 20.0))
-            good_matches.push_back(matches[i]);
+        // When the matches.distance > 2*min_dis, reject the match
+        if (matches[i].distance > std::max(2.0 * min_dis, 30.0)) continue;
+
+        cv::Point2i curr_pt = keypoints1[matches[i].queryIdx].pt;
+        cv::Point2i prev_pt = keypoints2[matches[i].trainIdx].pt;
+        if(abs(curr_pt.y - prev_pt.y) > 30) continue;
+
+        // When depth value is too small, reject the match
+        float d = _depthmap.at<float>(curr_pt);
+        if(d < 30) continue;
+        d = _prev_depthmap.at<float>(prev_pt);
+        if(d < 30) continue;
+
+        Eigen::Vector3f prev_pt3d = _cam_proj->cvt2Dto3D(
+                    prev_pt.x, prev_pt.y, d, mmath::cam::LEFT);
+        query_point.getVector3fMap() = prev_pt3d;
+        std::vector<int> indices(1);
+        std::vector<float> squared_distances(1);
+        kd_tree->nearestKSearch(query_point, 1, indices, squared_distances);
+        // When no corresponding 3D point is found, reject the match
+        if(sqrt(squared_distances[0]) > VERTICES_DENSITY) continue;
+
+        good_matches.push_back(matches[i]);
     }
     printf("Filtered matches size: %zu\n", good_matches.size());
 
-
-    cv::drawMatches(prev_image, keypoints1, curr_image, keypoints2,
-                    good_matches, matched_image);
-    cv::imshow("Filtered BF Match", matched_image);
-    cv::waitKey(0);
-
-    // Retrive the keypoint locations
-    std::vector<std::pair<cv::Point2i, cv::Point2i>> ret;
+//    cv::drawMatches(prev_image, keypoints1, curr_image, keypoints2,
+//                    good_matches, matched_image);
+//    cv::imshow("Filtered BF Match", matched_image);
+//    cv::waitKey(0);
 
 
-    return ret;
+    // Retrieve the corresponding 3D point and calculate the ICP
+    std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>> correspondences;
+    correspondences.resize(good_matches.size());
+    for (size_t i = 0; i < good_matches.size(); i++) {
+        cv::Point2i curr_pt = keypoints1[good_matches[i].queryIdx].pt;
+        cv::Point2i prev_pt = keypoints2[good_matches[i].trainIdx].pt;
+
+        float d_curr = _depthmap.at<float>(curr_pt);
+        float d_prev = _prev_depthmap.at<float>(prev_pt);
+
+        Eigen::Vector3f curr_pt3d = _cam_proj->cvt2Dto3D(
+                    prev_pt.x, prev_pt.y, d_curr, mmath::cam::LEFT);
+        Eigen::Vector3f prev_pt3d = _cam_proj->cvt2Dto3D(
+                    prev_pt.x, prev_pt.y, d_prev, mmath::cam::LEFT);
+
+        correspondences[i].first.getVector3fMap() = prev_pt3d;
+        correspondences[i].second.getVector3fMap() = curr_pt3d;
+    }
+
+    return correspondences;
 }
 
-void SceneReconstructor::cvProcess()
-{
-
-}
 

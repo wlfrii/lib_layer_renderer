@@ -8,8 +8,6 @@
 #include <pcl/point_cloud.h>
 
 
-#define PLOT_ALL 1
-
 class SGM;
 class PointCloudHandler;
 class EmbeddedDeformation;
@@ -39,29 +37,23 @@ public:
     void reconstruct(const cv::Mat &l_image, const cv::Mat &r_image);
 
 
-#if PLOT_ALL
     void plot();
-#else
-    void plotVertices();
-    void plotMesh();
-#endif // PLOT_ALL
+
     cv::Mat getPlotResult();
 
 private:
     void calcDepthMap(const cv::Mat &l_image, const cv::Mat &r_image);
-
     void filterPointCloud();
-    void createVertices(bool with_mesh);
+
+    std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>>
+    keyPointMatching(const cv::Mat &prev_image, const cv::Mat &curr_image);
+
+    cv::Mat EDProjection();
 
     /**
      * @brief Filter out some points based on point density threshold
      */
 //    void filterVertices();
-
-
-    std::vector<std::pair<cv::Point2i, cv::Point2i>>
-    keyPointMatching(const cv::Mat &left_tex);
-    void cvProcess();
 
 private:
     const std::shared_ptr<mmath::CameraProjector> _cam_proj;
@@ -80,15 +72,14 @@ private:
     uint16_t _u_start;
     uint16_t _u_end;
 
+    cv::Mat _prev_depthmap;
+    cv::Mat _prev_image;
+
     std::vector<mlayer::Vertex3D> _vertices_3d;
     std::vector<mlayer::Vertex3D> _traingles_3d;
 
     std::shared_ptr<mlayer::LayerRenderer>  _layer_renderer;
-#if PLOT_ALL
     std::array<std::shared_ptr<mlayer::LayerTexture3D>, 4> _layer_texture3d;
-#else
-    std::shared_ptr<mlayer::LayerTexture3D> _layer_texture3d;
-#endif // PLOT_ALL
 
     std::shared_ptr<PointCloudHandler> _pc_handler;
     std::shared_ptr<EmbeddedDeformation> _ed;
