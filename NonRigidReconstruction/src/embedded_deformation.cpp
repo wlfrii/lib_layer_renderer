@@ -2,6 +2,7 @@
 #include <vector>
 #include "util.h"
 #include "cost_function.h"
+#include <pcl/surface/gp3.h> // For GreedyProjectionTriangulation
 
 const float w_rot = 1000.f;
 const float w_reg = 10000.f;
@@ -9,7 +10,8 @@ const float w_data = 1.f;
 const float w_corr = 10000.f;
 
 
-EmbeddedDeformation::EmbeddedDeformation(float node_density, int node_connectivity)
+EmbeddedDeformation::EmbeddedDeformation(
+        float node_density, int node_connectivity)
     : _node_density(node_density)
     , _node_connectivity(node_connectivity)
     , _nodes(new pcl::PointCloud<pcl::PointXYZ>)
@@ -25,12 +27,9 @@ EmbeddedDeformation::~EmbeddedDeformation()
 }
 
 
-void EmbeddedDeformation::addVertices(
-        pcl::PointCloud<pcl::PointXYZ>::Ptr coords,
-        const std::vector<Eigen::Vector3f>& colors)
+void EmbeddedDeformation::addVertices(const Vertices& new_vertices)
 {
-    _vertices.coords = coords;
-    _vertices.colors = colors;
+    _vertices = new_vertices;
     util::voxelDownSampling(_vertices.coords, _node_density, _nodes);
     printf("Nodes size: %zu\n", _nodes->size());
 
@@ -44,8 +43,7 @@ void EmbeddedDeformation::addVertices(
 
 
 void EmbeddedDeformation::addVertices(
-        pcl::PointCloud<pcl::PointXYZ>::Ptr coords,
-        const std::vector<Eigen::Vector3f>& colors,
+        const Vertices& new_vertices, const cv::Mat& depthmap,
         const std::vector<
             std::pair<pcl::PointXYZ, pcl::PointXYZ>>& correspondences)
 {
@@ -100,6 +98,19 @@ void EmbeddedDeformation::addVertices(
             CostFunctionReg* cost_func = new CostFunctionReg(w_reg, g_j, g_k);
             problem.AddResidualBlock(cost_func, nullptr, &params[i][0], &params[idx][0]);
         }
+    }
+    /* Add data term, which is the sum of point-to-plane errors
+     * After extracting registered visible points, back-projection approach is
+     * adopted as a model-to-scan registration strategy that penalizes
+     * misalignment of the predicted visible points
+     */
+    // Registrates current point cloud to the ED model and stores the
+    // visible points
+    pcl::PointCloud<pcl::PointNormal>::Ptr visible_points(
+                new pcl::PointCloud<pcl::PointNormal>);
+    depthImageRegistration(depthmap, visible_points);
+    for(size_t i = 0; i < visible_points->size(); i++){
+
     }
     // Add correspondence term
     for(auto& corr : correspondences) {
@@ -183,9 +194,93 @@ const Vertices& EmbeddedDeformation::getVertices() const
 }
 
 
+void EmbeddedDeformation::projectPointCloud(
+        float search_radius, float mu, int max_neighbors,
+        std::vector<mlayer::Vertex3D> &vertices)
+{
+    // Create search tree
+    pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(
+                new pcl::search::KdTree<pcl::PointNormal>);
+    tree2->setInputCloud(_vertices.coords_with_normals);
+
+    // ---- Create triangles ---
+    pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
+    gp3.setSearchRadius(search_radius);    // max edge length for every triangle
+    gp3.setMu(mu); // maximum acceptable distance for a point to be considered as a neighbor
+    gp3.setMaximumNearestNeighbors(max_neighbors);
+    gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
+    gp3.setMinimumAngle(M_PI/18.f); // 10 degrees
+    gp3.setMaximumAngle(2*M_PI/3); // 120 degrees
+    gp3.setNormalConsistency(false);
+
+    // Get result
+    pcl::PolygonMesh mesh;
+    gp3.setInputCloud(_vertices.coords_with_normals);
+    gp3.setSearchMethod(tree2);
+    gp3.reconstruct(mesh);
+
+    // Assign mesh vertices
+    size_t count = 0;
+    vertices.resize(mesh.polygons.size() * 3);
+    for(size_t i = 0; i < mesh.polygons.size(); i++) {
+        pcl::Vertices vert = mesh.polygons[i];
+
+        for(size_t j = 0; j < vert.vertices.size(); j++) {
+            size_t idx = vert.vertices[j];
+
+            const pcl::PointXYZ& pt = _vertices.coords->at(idx);
+            const Eigen::Vector3f& rgb = _vertices.colors[idx];
+            vertices[count++] = {
+                glm::vec4(pt.x, pt.y, pt.z, 1),
+                glm::vec4(rgb[0], rgb[1], rgb[2], 1)};
+        }
+    }
+}
+
+
 void EmbeddedDeformation::updateKdTreeData()
 {
     _kd_tree->setInputCloud(_nodes);
 }
 
 
+void EmbeddedDeformation::depthImageRegistration(const cv::Mat& depthmap,
+        pcl::PointCloud<pcl::PointNormal>::Ptr visible_points)
+{
+    float epsilon_d = 3.f;    // mm
+    float epsilon_n = mmath::deg2radf(10);
+
+    // Get normal for current Depthmap
+    cv::Mat normal_image;
+    util::estimateImageNormal(depthmap, normal_image);
+
+
+    // Model points is stored in ED
+    const pcl::PointCloud<pcl::PointNormal>::Ptr prev_point_cloud =
+            _vertices.coords_with_normals;
+
+    for(size_t i = 0; i < prev_point_cloud->size(); i++) {
+        const Eigen::Vector3f& pt = prev_point_cloud->at(i).getVector3fMap();
+        const Eigen::Vector3f& n = prev_point_cloud->at(i).getNormalVector3fMap();
+
+        Eigen::Vector2f pt2d = _cam_proj->cvt3Dto2D(
+                    pt, mmath::cam::LEFT);
+        int u = round(pt2d[0]);
+        int v = round(pt2d[1]);
+
+        float d = depthmap.at<float>(v, u);
+        if(d > 30) {
+            Eigen::Vector3f pt3d = _cam_proj->cvt2Dto3D(
+                        u, v, d, mmath::cam::LEFT);
+            cv::Vec3f cvnormal = normal_image.at<cv::Vec3f>(v, u);
+            Eigen::Vector3f pixel_normal(cvnormal[0], cvnormal[1], cvnormal[2]);
+
+            if((pt - pt3d).norm() < epsilon_d ||
+                   (n.dot(pixel_normal) < cosf(epsilon_n)) ) {
+                visible_points->push_back(prev_point_cloud->at(i));
+            }
+        }
+    }
+    printf("visible point size: %zu\n", visible_points->size());
+    printf("total point size: %zu\n", prev_point_cloud->size());
+}
