@@ -116,7 +116,7 @@ void LayerRenderer::setView(const glm::mat4& view, uint8_t viewport_idx)
 {
     ASSERTM(viewport_idx < _N,
             "The input index of viewport is out of range [0, %zu]\n", _N - 1)
-    _n_view[viewport_idx] = view; printf("-----\n");
+    _n_view[viewport_idx] = view;
 }
 
 
@@ -166,7 +166,6 @@ void LayerRenderer::render()
 
         _window->refresh();
     }
-    _window->deactivate();
 }
 
 
