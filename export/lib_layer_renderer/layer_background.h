@@ -35,7 +35,9 @@ namespace mlayer{
  */
 struct LayerBackgroundData
 {
-    LayerBackgroundData() : data(nullptr), width(0), height(0), channels(0)
+    LayerBackgroundData(unsigned char* data = nullptr, uint16_t width = 0,
+                        uint16_t height = 0, uint8_t  channels = 0)
+        : data(data), width(width), height(height), channels(channels)
     { }
 
     unsigned char* data; //!< The stereo image data
