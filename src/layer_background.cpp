@@ -3,9 +3,45 @@
 
 namespace mlayer{
 
+LayerBackground::LayerBackground(float bgwidth, float bgheight, float bgdepth)
+    : Layer(LAYER_BACKGROUND)
+{
+    // Load shader
+    bool flag = _shader->load("./shaders/texture3d.vs", "./shaders/texture.fs");
+    if(!flag) printf("LayerBackground3D read shader: %d\n", flag);
+
+    _shader->use();
+    _shader->setInt("image", 0);
+    _shader->setInt("mask", 1);
+
+    float bghwidth = bgwidth / 2.f;
+    float bghheight = bgheight / 2.f;
+    float vertices[] = {
+        // positions          // texture coords
+         bghwidth,  bghheight, bgdepth,   1.0f, 1.0f,  // top right
+         bghwidth, -bghheight, bgdepth,   1.0f, 0.0f,  // bottom right
+        -bghwidth, -bghheight, bgdepth,   0.0f, 0.0f,  // bottom left
+        -bghwidth,  bghheight, bgdepth,   0.0f, 1.0f   // top left
+    };
+    unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    // Bind VAVBEBO
+    _vavbebo->bind(vertices, sizeof(vertices), indices, sizeof(indices));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glGenTextures(1, &_texture);
+    glGenTextures(1, &_texture_mask);
+}
+
+
 LayerBackground::LayerBackground()
     : Layer(LAYER_BACKGROUND)
-    , _transform(glm::mat4(1.f))
 {
     // Load shader
     bool flag = _shader->load("./shaders/texture.vs", "./shaders/texture.fs");
@@ -67,7 +103,6 @@ void LayerBackground::updateMask(const LayerBackgroundData* data)
 void LayerBackground::draw()
 {
     _shader->use();
-    _shader->setMat4f("transform", _transform);
     _vavbebo->bindVertexArray();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _texture);

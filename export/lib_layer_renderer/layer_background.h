@@ -7,9 +7,9 @@
  * modify it to construct your own project. It is wellcome to use this 
  * library in your scientific research work.
  * 
- * @file 		layer_backgrounr.h 
+ * @file 		layer_backgrounrd.h
  * 
- * @brief 		Designed for rendering 2D/3D background
+ * @brief 		Designed for rendering 2D background
  * 
  * @author		Longfei Wang
  * 
@@ -52,6 +52,9 @@ struct LayerBackgroundData
  */
 class LayerBackground : public Layer
 {
+protected:
+    LayerBackground(float bgwidth, float bgheight, float bgdepth);
+
 public:
     using Ptr = std::shared_ptr<LayerBackground>;
 
@@ -75,15 +78,11 @@ public:
 protected:
     void draw() override;
 
-
-private:
     void bindTexture(const uint8_t *data, uint16_t w, uint16_t h, uint8_t c);
     void bindTextureMask(uint8_t *data, uint16_t w, uint16_t h);
 
     GLuint _texture;
     GLuint _texture_mask;
-
-    glm::mat4 _transform;
 };
 
 } // namespace::mlayer
