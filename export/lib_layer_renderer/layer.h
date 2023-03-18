@@ -136,10 +136,13 @@ protected:
      */
     virtual void draw();
 
-    gl_util::Shader*     _shader;       //!< Shader for current layer
-    gl_util::VAVBEBO*    _vavbebo;      //!< VAO,VBO,EBO for current layer
+    gl_util::Shader*  _shader;      //!< Shader for current layer
+    gl_util::VAVBEBO* _vavbebo;     //!< VAO,VBO,EBO for current layer
 
-    glm::mat4 _global;
+    glm::mat4 _global;              //!< Global matrix (world frame)
+    glm::mat4 _model;               //!< Model matrix
+    glm::mat4 _projection;          //!< Projection matrix
+    glm::mat4 _view;                //!< View matrix
 };
 
 } // namespace::mlayer

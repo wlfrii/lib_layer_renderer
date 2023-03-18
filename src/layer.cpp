@@ -8,6 +8,9 @@ Layer::Layer(LayerType type)
     , _shader(new gl_util::Shader())
     , _vavbebo(new gl_util::VAVBEBO())
     , _global(glm::mat4(1.0))
+    , _model(glm::mat4(1.f))
+    , _projection(glm::mat4(1.f))
+    , _view(glm::mat4(1.f))
 {
 
 }
