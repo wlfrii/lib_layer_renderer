@@ -51,4 +51,23 @@ void LayerCylinder::setProperty(float length)
     setProperty(length, _radius, _pose);
 }
 
+
+void LayerCylinder::setScaleFactors(float xscale, float yscale, float zscale)
+{
+    CylinderGenerator cg(_length, _radius, _pose);
+    auto data = cg.vertices();
+    for(auto& vert : data) {
+        vert.position.x *= xscale;
+        vert.position.y *= yscale;
+        vert.position.z *= zscale;
+    }
+
+    _vavbebo->bind(&data[0].position.x, data.size() * sizeof(Vertex));
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(4 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    _vert_num = data.size();
+}
+
 } // namespace::mlayer

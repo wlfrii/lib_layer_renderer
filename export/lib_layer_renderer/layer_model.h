@@ -78,15 +78,28 @@ public:
     void setColor(const glm::vec3 &object_color);
 
 
+    /**
+     * @brief Set isotropic scale factor
+     * @param scale  For x, y, and z direction
+     */
+    void setScaleFactors(float scale);
+
+
+    /**
+     * @brief Set scale factors
+     * @param xscale  For x direction
+     * @param yscale  For y direction
+     * @param zscale  For z direction
+     */
+    virtual void setScaleFactors(float xscale, float yscale, float zscale);
+
+
+
 protected:
     /* Draw the vertices */
     virtual void draw() override;
 
     size_t     _vert_num;               //!< The number of vertex
-
-    glm::mat4  _model;                  //!< Model matrix
-    glm::mat4  _projection;             //!< Projection matrix
-    glm::mat4  _view;                   //!< View matrix
 
     glm::vec3  _object_color;           //!< Color of the model
     glm::vec3  _light_color;            //!< Color of the light source

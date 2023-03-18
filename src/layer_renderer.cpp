@@ -40,12 +40,11 @@ LayerRenderer::LayerRenderer(
         uint16_t window_width, uint16_t window_height, bool is_window_visible)
     : _window(std::make_shared<gl_util::Window>(window_width, window_height,
                    getAutoWindowName(), is_window_visible))
-    , _projection(proj.mat4())
-    , _control_n_viewport(true)
     , _N(std::max(int(mode), 1))
+    , _control_n_viewport(true)
 {
     _n_viewport = createViewPort( window_width, window_height, _N);
-    init();
+    init(proj.mat4());
 }
 
 
@@ -55,24 +54,26 @@ LayerRenderer::LayerRenderer(
         uint16_t window_width, uint16_t window_height, bool is_window_visible)
     : _window(std::make_shared<gl_util::Window>(window_width, window_height,
                    getAutoWindowName(), is_window_visible))
-    , _projection(proj.mat4())
-    , _n_viewport(n_viewport)
-    , _control_n_viewport(false)
     , _N(n_viewport.size())
+    , _control_n_viewport(false)
+    , _n_viewport(n_viewport)
+
 {
-    init();
+    init(proj.mat4());
 }
 
 
-void LayerRenderer::init()
+void LayerRenderer::init(const glm::mat4& projection)
 {
     _window->enableDepthTest();
 
     _n_global.resize(_N);
     _n_view.resize(_N);
+    _n_projection.resize(_N);
     for(size_t i = 0; i < _N; i++) {
         _n_global[i] = glm::mat4(1.0f);
         _n_view[i] = default_camera_view;
+        _n_projection[i] = projection;
     }
     _n_layers.resize(_N);
 
@@ -120,6 +121,14 @@ void LayerRenderer::setView(const glm::mat4& view, uint8_t viewport_idx)
 }
 
 
+void LayerRenderer::setProjection(const glm::mat4& projection, uint8_t viewport_idx)
+{
+    ASSERTM(viewport_idx < _N,
+            "The input index of viewport is out of range [0, %zu]\n", _N - 1)
+    _n_projection[viewport_idx] = projection;
+}
+
+
 void LayerRenderer::addLayers(std::shared_ptr<Layer> layer)
 {
     for(auto& layers : _n_layers) layers.push_back(layer);
@@ -157,7 +166,7 @@ void LayerRenderer::render()
         for(size_t i = 0; i < _N; i++) {
             auto& layers = _n_layers[i];
             for(auto& layer : layers) {
-                layer->setProjection(_projection);
+                layer->setProjection(_n_projection[i]);
                 layer->setView(_n_view[i]);
                 layer->setGlobal(_n_global[i]);
                 layer->render(_n_viewport[i]);
@@ -179,7 +188,7 @@ const LayerRenderer::WindowShotData& LayerRenderer::getWindowShot()
     for(size_t i = 0; i < _N; i++) {
         auto& layers = _n_layers[i];
         for(auto& layer : layers) {
-            layer->setProjection(_projection);
+            layer->setProjection(_n_projection[i]);
             layer->setView(_n_view[i]);
             layer->setGlobal(_n_global[i]);
             layer->render(_n_viewport[i]);

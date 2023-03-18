@@ -120,6 +120,14 @@ public:
 
 
     /**
+     * @brief Set projection for the specified viewport
+     * @param projection
+     * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
+     */
+    void setProjection(const glm::mat4& projection, uint8_t viewport_idx);
+
+
+    /**
      * @brief Add the save layer for each viewport
      * @param layer
      */
@@ -164,20 +172,19 @@ public:
 
 
 private:
-    void init();
+    void init(const glm::mat4& projection);
     void keyboardControlModel(GLFWwindow* window);
 
 
     std::shared_ptr<gl_util::Window> _window; // The window for rendering
 
-    glm::mat4 _projection;                    // The projection matrix
-    std::vector<LayerViewPort> _n_viewport;   // N viewport
-    bool _control_n_viewport;
-
     size_t _N;                       // The number of viewport
+    bool _control_n_viewport;        // Keyboard control
 
-    std::vector<glm::mat4> _n_global; // N local frames for each viewport
-    std::vector<glm::mat4> _n_view;  // N local views for each viewport
+    std::vector<LayerViewPort> _n_viewport; // N viewport
+    std::vector<glm::mat4> _n_global;       // N local frames for each viewport
+    std::vector<glm::mat4> _n_view;         // N local views for each viewport
+    std::vector<glm::mat4> _n_projection;   // The projection matrix
 
     std::vector<std::vector<std::shared_ptr<Layer>>> _n_layers;
 

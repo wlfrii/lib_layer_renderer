@@ -75,6 +75,16 @@ public:
      */
     void setProperty(float length);
 
+
+    /**
+     * @brief Set scale factors
+     * @param xscale  For x direction
+     * @param yscale  For y direction
+     * @param zscale  For z direction
+     */
+    void setScaleFactors(float xscale, float yscale, float zscale) override;
+
+
 private:
     glm::mat4 _pose;      //!< The origin of the cylinder
     float     _length;    //!< The length of the cylinder

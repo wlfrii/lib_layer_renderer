@@ -5,9 +5,6 @@ namespace mlayer{
 
 LayerModel::LayerModel(LayerType type, const glm::vec3 &color)
     : Layer(type)
-    , _model(glm::mat4(1.f))
-    , _projection(glm::mat4(1.f))
-    , _view(glm::mat4(1.f))
     , _object_color(color)
     , _light_color(glm::vec3(1.f, 1.f, 1.f))
     , _light_pos(glm::vec3(0.f, 0.f, 0.f))
@@ -58,6 +55,18 @@ void LayerModel::setColor(const glm::vec3 &object_color)
 
     _shader->use();
     _shader->setVec3f("object_color", _object_color);
+}
+
+
+void LayerModel::setScaleFactors(float scale)
+{
+    setScaleFactors(scale, scale, scale);
+}
+
+
+void LayerModel::setScaleFactors(float xscale, float yscale, float zscale)
+{
+
 }
 
 
