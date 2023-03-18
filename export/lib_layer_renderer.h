@@ -42,6 +42,7 @@
 
 // 2D texture Layer
 #include "lib_layer_renderer/layer_background.h"
+#include "lib_layer_renderer/layer_background3d.h"
 
 // 3D texture Layer
 #include "lib_layer_renderer/layer_texture3d.h"
