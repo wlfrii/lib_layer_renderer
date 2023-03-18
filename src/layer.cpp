@@ -7,6 +7,7 @@ Layer::Layer(LayerType type)
     : type(type)
     , _shader(new gl_util::Shader())
     , _vavbebo(new gl_util::VAVBEBO())
+    , _global(glm::mat4(1.0))
 {
 
 }
@@ -41,7 +42,7 @@ void Layer::setModel(const glm::mat4&)
 }
 
 
-void Layer::setView(const glm::mat4& )
+void Layer::setView(const glm::mat4&)
 {
 
 }
@@ -50,6 +51,12 @@ void Layer::setView(const glm::mat4& )
 void Layer::setProjection(const glm::mat4&)
 {
 
+}
+
+
+void Layer::setGlobal(const glm::mat4& global)
+{
+    _global = global;
 }
 
 

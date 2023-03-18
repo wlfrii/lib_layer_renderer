@@ -35,6 +35,9 @@ namespace mlayer{
 class LayerCylinder : public LayerModel
 {
 public:
+    using Ptr = std::shared_ptr<LayerCylinder>;
+
+
     /**
      * @brief Constructor of class LayerCylinder.
      * @param length  The length of the cylinder

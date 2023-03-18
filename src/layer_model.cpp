@@ -5,6 +5,7 @@ namespace mlayer{
 
 LayerModel::LayerModel(LayerType type, const glm::vec3 &color)
     : Layer(type)
+    , _model(glm::mat4(1.f))
     , _projection(glm::mat4(1.f))
     , _view(glm::mat4(1.f))
     , _object_color(color)
@@ -45,9 +46,9 @@ void LayerModel::setView(const glm::mat4& view)
 }
 
 
-void LayerModel::setProjection(const glm::mat4& proj)
+void LayerModel::setProjection(const glm::mat4& projection)
 {
-    _projection = proj;
+    _projection = projection;
 }
 
 
@@ -64,7 +65,7 @@ void LayerModel::draw()
 {
     _shader->use();
     _shader->setMat4f("projection", _projection);
-    _shader->setMat4f("model", _model);
+    _shader->setMat4f("model", _global * _model);
     _shader->setMat4f("view", _view);
     auto &view = _view;
     _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));

@@ -87,6 +87,9 @@ protected:
     Layer(LayerType type);
 
 public:
+    using Ptr = std::shared_ptr<Layer>;
+
+
     virtual ~Layer();
 
     /**
@@ -116,6 +119,13 @@ public:
     virtual void setProjection(const glm::mat4& proj);
 
 
+    /**
+     * @brief Get global transform
+     * @return
+     */
+    virtual void setGlobal(const glm::mat4& global);
+
+
     const LayerType       type;         //!< Type of current layer
 
 
@@ -128,6 +138,8 @@ protected:
 
     gl_util::Shader*     _shader;       //!< Shader for current layer
     gl_util::VAVBEBO*    _vavbebo;      //!< VAO,VBO,EBO for current layer
+
+    glm::mat4 _global;
 };
 
 } // namespace::mlayer

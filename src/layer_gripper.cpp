@@ -53,16 +53,18 @@ LayerGripper::~LayerGripper()
 
 void LayerGripper::draw()
 {
+    glm::mat4 model = _global * _model;
+
     // Draw main part
     _shader->use();
     _shader->setMat4f("projection", _projection);
-    _shader->setMat4f("model", _model);
+    _shader->setMat4f("model", model);
     _shader->setMat4f("view", _view);
     _vavbebo->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num);
 
     // Draw active part
-    glm::mat4 mat = _model;
+    glm::mat4 mat = model;
     mat = glm::translate(mat, _active_part.p);
     mat = glm::rotate(mat, _active_part.angle, _active_part.axis);
     mat = glm::translate(mat, -_active_part.p);
@@ -83,7 +85,7 @@ void LayerGripper::draw()
     // Draw ignored part
     _shader_ignore->use();
     _shader_ignore->setMat4f("projection", _projection);
-    _shader_ignore->setMat4f("model", _model);
+    _shader_ignore->setMat4f("model", model);
     _shader_ignore->setMat4f("view", _view);
     _vavbo_ignore->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num_ignore);

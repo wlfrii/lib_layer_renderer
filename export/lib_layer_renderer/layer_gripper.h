@@ -47,6 +47,9 @@ enum GripperType
 class LayerGripper : public LayerModel
 {
 public:
+    using Ptr = std::shared_ptr<LayerGripper>;
+
+
     /**
      * @brief Constructor of class LayerGripper.
      * @param color  The color of the gripper.

@@ -5,6 +5,7 @@ namespace mlayer{
 
 LayerBackground::LayerBackground()
     : Layer(LAYER_BACKGROUND)
+    , _transform(glm::mat4(1.f))
 {
     // Load shader
     bool flag = _shader->load("./shaders/texture.vs", "./shaders/texture.fs");
@@ -66,6 +67,7 @@ void LayerBackground::updateMask(const LayerBackgroundData* data)
 void LayerBackground::draw()
 {
     _shader->use();
+    _shader->setMat4f("transform", _transform);
     _vavbebo->bindVertexArray();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _texture);

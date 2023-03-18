@@ -56,7 +56,7 @@ void LayerTexture3D::draw()
 {
     _shader->use();
     _shader->setMat4f("projection", _projection);
-    _shader->setMat4f("model", _model);
+    _shader->setMat4f("model", _global * _model);
     _shader->setMat4f("view", _view);
     auto &view = _view;
     _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));

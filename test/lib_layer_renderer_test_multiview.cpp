@@ -20,7 +20,7 @@ int main()
     std::vector<LayerViewPort> vps = {vp1, vp2, vp3, vp4};
 
     LayerRenderer renderer(gl_proj, vps, w, h);
-    renderer.setModel(model);
+    renderer.setGlobal(model);
 
     // Create object
     std::shared_ptr<LayerModel> layer_coord = nullptr;

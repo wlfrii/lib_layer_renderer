@@ -36,6 +36,9 @@ namespace mlayer{
 class LayerSegment : public LayerModel
 {
 public:
+    using Ptr = std::shared_ptr<LayerSegment>;
+
+
     /**
      * @brief Constructor of class LayerSegment.
      * @param length  The length of continuum segment.

@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
         view[3][0] -= 4.f;
         renderer.setView(view, LAYER_RENDER_RIGHT);
     }
-    renderer.setModel(model);
+    renderer.setGlobal(model);
 
     // Create object
     std::shared_ptr<LayerModel> layer_obj = nullptr;

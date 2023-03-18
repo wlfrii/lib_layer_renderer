@@ -35,6 +35,9 @@ namespace mlayer{
 class LayerCircle : public LayerModel
 {
 public:
+    using Ptr = std::shared_ptr<LayerCircle>;
+
+
     /**
      * @brief Constructor of class LayerCircle.
      * @param pose    The pose of the circle

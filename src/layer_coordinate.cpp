@@ -58,11 +58,12 @@ LayerCoordinate::~LayerCoordinate()
 void LayerCoordinate::draw()
 {
     auto &view = _view;
+    glm::mat4 model = _global * _model;
 
     // Draw z-axis
     _shader->use();
     _shader->setMat4f("projection", _projection);
-    _shader->setMat4f("model", _model);
+    _shader->setMat4f("model", model);
     _shader->setMat4f("view", view);
     _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbebo->bindVertexArray();
@@ -71,7 +72,7 @@ void LayerCoordinate::draw()
     // Draw x-axis
     _shader_x->use();
     _shader_x->setMat4f("projection", _projection);
-    _shader_x->setMat4f("model", _model);
+    _shader_x->setMat4f("model", model);
     _shader_x->setMat4f("view", view);
     _shader_x->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbo_x->bindVertexArray();
@@ -80,7 +81,7 @@ void LayerCoordinate::draw()
     // Draw y-axis
     _shader_y->use();
     _shader_y->setMat4f("projection", _projection);
-    _shader_y->setMat4f("model", _model);
+    _shader_y->setMat4f("model", model);
     _shader_y->setMat4f("view", view);
     _shader_y->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbo_y->bindVertexArray();

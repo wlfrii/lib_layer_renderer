@@ -68,10 +68,10 @@ void LayerRenderer::init()
 {
     _window->enableDepthTest();
 
-    _n_model.resize(_N);
+    _n_global.resize(_N);
     _n_view.resize(_N);
     for(size_t i = 0; i < _N; i++) {
-        _n_model[i] = glm::mat4(1.0f);
+        _n_global[i] = glm::mat4(1.0f);
         _n_view[i] = default_camera_view;
     }
     _n_layers.resize(_N);
@@ -92,17 +92,17 @@ LayerRenderer::~LayerRenderer()
 }
 
 
-void LayerRenderer::setModel(const glm::mat4& model)
+void LayerRenderer::setGlobal(const glm::mat4& global)
 {
-    for(auto& m : _n_model) m = model;
+    for(auto& m : _n_global) m = global;
 }
 
 
-void LayerRenderer::setModel(const glm::mat4& model, uint8_t viewport_idx)
+void LayerRenderer::setGlobal(const glm::mat4& global, uint8_t viewport_idx)
 {
     ASSERTM(viewport_idx < _N,
             "The input index of viewport is out of range [0, %zu]\n", _N - 1)
-    _n_model[viewport_idx] = model;
+    _n_global[viewport_idx] = global;
 }
 
 
@@ -159,7 +159,7 @@ void LayerRenderer::render()
             for(auto& layer : layers) {
                 layer->setProjection(_projection);
                 layer->setView(_n_view[i]);
-                layer->setModel(_n_model[i]);
+                layer->setGlobal(_n_global[i]);
                 layer->render(_n_viewport[i]);
             }
         }
@@ -181,7 +181,7 @@ const LayerRenderer::WindowShotData& LayerRenderer::getWindowShot()
         for(auto& layer : layers) {
             layer->setProjection(_projection);
             layer->setView(_n_view[i]);
-            layer->setModel(_n_model[i]);
+            layer->setGlobal(_n_global[i]);
             layer->render(_n_viewport[i]);
         }
     }
@@ -199,46 +199,46 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
 
     static size_t n = 0;
     float step = 1.f;
-    glm::mat4& model = _n_model[n];
+    glm::mat4& pose = _n_global[n];
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
     }
     else if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-        model = glm::translate(model, glm::vec3(0.f, step, 0.f));
+        pose = glm::translate(pose, glm::vec3(0.f, step, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-        model = glm::translate(model, glm::vec3(0.f, -step, 0.f));
+        pose = glm::translate(pose, glm::vec3(0.f, -step, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-        model = glm::translate(model, glm::vec3(-step, 0.f, 0.f));
+        pose = glm::translate(pose, glm::vec3(-step, 0.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        model = glm::translate(model, glm::vec3(step, 0.f, 0.f));
+        pose = glm::translate(pose, glm::vec3(step, 0.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
-        model = glm::translate(model, glm::vec3(0.f, 0.f, step));
+        pose = glm::translate(pose, glm::vec3(0.f, 0.f, step));
     }
     else if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS){
-        model = glm::translate(model, glm::vec3(0.f, 0.f, -step));
+        pose = glm::translate(pose, glm::vec3(0.f, 0.f, -step));
     }
     else if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
-        model = glm::rotate(model, glm::radians(-2.f), glm::vec3(1.f, 0.f, 0.f));
+        pose = glm::rotate(pose, glm::radians(-2.f), glm::vec3(1.f, 0.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
-        model = glm::rotate(model, glm::radians(2.f), glm::vec3(1.f, 0.f, 0.f));
+        pose = glm::rotate(pose, glm::radians(2.f), glm::vec3(1.f, 0.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
-        model = glm::rotate(model, glm::radians(-2.f), glm::vec3(0.f, 1.f, 0.f));
+        pose = glm::rotate(pose, glm::radians(-2.f), glm::vec3(0.f, 1.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
-        model = glm::rotate(model, glm::radians(2.f), glm::vec3(0.f, 1.f, 0.f));
+        pose = glm::rotate(pose, glm::radians(2.f), glm::vec3(0.f, 1.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS){
-        model = glm::rotate(model, glm::radians(-2.f), glm::vec3(0.f, 0.f, 1.f));
+        pose = glm::rotate(pose, glm::radians(-2.f), glm::vec3(0.f, 0.f, 1.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS){
-        model = glm::rotate(model, glm::radians(2.f), glm::vec3(0.f, 0.f, 1.f));
+        pose = glm::rotate(pose, glm::radians(2.f), glm::vec3(0.f, 0.f, 1.f));
     }
     else if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
         if(_N > 1 && _control_n_viewport == false){
@@ -254,11 +254,11 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
         }
     }
     else if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
-        gl_util::print("Model", model);
+        gl_util::print("Model", pose);
     }
 
     if(_control_n_viewport) {
-        setModel(model);
+        setGlobal(pose);
     }
 }
 

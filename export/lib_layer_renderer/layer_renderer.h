@@ -90,18 +90,18 @@ public:
 
 
     /**
-     * @brief Set the same model for each viewport
+     * @brief Set the same global transform for each viewport
      * @param model
      */
-    void setModel(const glm::mat4& model);
+    void setGlobal(const glm::mat4& global);
 
 
     /**
-     * @brief Set model for the specified viewport
+     * @brief Set global transform for the specified viewport
      * @param model
      * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
      */
-    void setModel(const glm::mat4& model, uint8_t viewport_idx);
+    void setGlobal(const glm::mat4& global, uint8_t viewport_idx);
 
 
     /**
@@ -176,7 +176,7 @@ private:
 
     size_t _N;                       // The number of viewport
 
-    std::vector<glm::mat4> _n_model; // N local frames for each viewport
+    std::vector<glm::mat4> _n_global; // N local frames for each viewport
     std::vector<glm::mat4> _n_view;  // N local views for each viewport
 
     std::vector<std::vector<std::shared_ptr<Layer>>> _n_layers;

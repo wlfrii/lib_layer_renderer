@@ -35,6 +35,9 @@ namespace mlayer{
 class LayerCoordinate : public LayerModel
 {
 public:
+    using Ptr = std::shared_ptr<LayerCoordinate>;
+
+
     /**
      * @brief Constructor of class LayerCone.
      * @param length  The length of the coordinate axis

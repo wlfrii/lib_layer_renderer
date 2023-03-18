@@ -44,7 +44,11 @@ protected:
     LayerModel(LayerType type, const glm::vec3 &color);
 
 public:
+    using Ptr = std::shared_ptr<LayerModel>;
+
+
     virtual ~LayerModel();
+
 
     /**
      * @brief Set Model matrix
@@ -78,12 +82,12 @@ protected:
     /* Draw the vertices */
     virtual void draw() override;
 
-    glm::mat4  _projection;             //!< Projection matrix
-    glm::mat4  _view;                   //!< View matrix
-
     size_t     _vert_num;               //!< The number of vertex
 
     glm::mat4  _model;                  //!< Model matrix
+    glm::mat4  _projection;             //!< Projection matrix
+    glm::mat4  _view;                   //!< View matrix
+
     glm::vec3  _object_color;           //!< Color of the model
     glm::vec3  _light_color;            //!< Color of the light source
     glm::vec3  _light_pos;              //!< Position of the light source

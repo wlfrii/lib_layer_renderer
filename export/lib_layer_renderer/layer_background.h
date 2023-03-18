@@ -53,6 +53,9 @@ struct LayerBackgroundData
 class LayerBackground : public Layer
 {
 public:
+    using Ptr = std::shared_ptr<LayerBackground>;
+
+
     LayerBackground();
     ~LayerBackground();
 
@@ -79,6 +82,8 @@ private:
 
     GLuint _texture;
     GLuint _texture_mask;
+
+    glm::mat4 _transform;
 };
 
 } // namespace::mlayer

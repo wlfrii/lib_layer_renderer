@@ -46,6 +46,9 @@ struct Vertex3D
 class LayerTexture3D : public LayerModel
 {
 public:
+    using Ptr = std::shared_ptr<LayerTexture3D>;
+
+
     /**
      * @brief Constructor of class LayerTexture3D.
      */

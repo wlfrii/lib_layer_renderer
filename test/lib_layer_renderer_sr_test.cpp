@@ -15,28 +15,39 @@ int main(int argc, char* argv[])
         printf("Please select a gripper.\n");
         std::exit(EXIT_FAILURE);
     }
+    else if(argc >= 3) {
+        model[3][2] = std::stof(argv[2]);
+    }
 
     using namespace mlayer;
 
-    LayerRenderMode mode = LAYER_RENDER_STEREO;
-    gl_util::Projection gl_proj(1120, 960, 540, 1920, 1080, 0.2, 150);
-    LayerRenderer renderer(gl_proj, mode);
+    uint16_t w = 1920, h = 1080;
+    LayerViewPort vp1(0, 0, w / 2, h / 2);          // AR left
+    LayerViewPort vp2(w / 2, 0, w / 2, h / 2);      // AR right
+    LayerViewPort vp3(0, h / 2, w / 2, h / 2);      // cam left
+    LayerViewPort vp4(w / 2, h / 2, w / 2, h / 2);  // cam right
+    std::vector<LayerViewPort> vps = {vp1, vp2, vp3, vp4};
 
-    renderer.setModel(model);
+    gl_util::Projection gl_proj(1120, 960, 540, 1920, 1080, 0.2, 150);
+    LayerRenderer renderer(gl_proj, vps);
+
 
     glm::mat4 view = glm::rotate(glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
     view[3][0] += 2.f;
-    renderer.setView(view, LAYER_RENDER_LEFT);
+    renderer.setView(view, 2);
     view[3][0] -= 4.f;
-    renderer.setView(view, LAYER_RENDER_RIGHT);
+    renderer.setView(view, 3);
 
 
     // Create coordinate
     glm::mat4 pose(1.f);
-    std::shared_ptr<LayerModel> layer_coord(new LayerCoordinate(20, 0.2, pose));
+    LayerCoordinate::Ptr layer_coord(new LayerCoordinate(20, 0.2, pose));
+    layer_coord->setModel(model);
+    renderer.addLayers(layer_coord, 2);
+    renderer.addLayers(layer_coord, 3);
 
     // --------------------------- Prase inputs -----------------------------
-    std::shared_ptr<LayerModel> layer_obj = nullptr;
+    LayerGripper::Ptr layer_obj = nullptr;
     unsigned char type = std::stoi(argv[1]);
     switch(type){
     case 11:
@@ -48,14 +59,17 @@ int main(int argc, char* argv[])
         printf("Example - Render gripper - bipolar grasping forceps\n");
         layer_obj = std::make_shared<LayerGripper>(
                     glm::vec3(0.1, 0.8, 1.0), GRIPPER_BIPOLAR_GRASPING_FORCEPS);
+        break;
     default:
         printf("Example - Render gripper - needle holder\n");
         layer_obj = std::make_shared<LayerGripper>(
                     glm::vec3(0.1, 0.8, 1.0), GRIPPER_NEEDLE_HOLDER);
         break;
     }
-    renderer.addLayers(layer_coord);
-    renderer.addLayers(layer_obj);
+    layer_obj->setModel(model);
+    layer_obj->setAngle(0.5);
+    renderer.addLayers(layer_obj, 2);
+    renderer.addLayers(layer_obj, 3);
 
     // Add background
     std::string path = "../data/bg_025.bmp";
@@ -71,13 +85,23 @@ int main(int argc, char* argv[])
     LayerBackgroundData rdata(r_image.data, r_image.cols, r_image.rows,
                               r_image.channels());
 
-    std::shared_ptr<LayerBackground> layer_bg_l(new LayerBackground);
-    std::shared_ptr<LayerBackground> layer_bg_r(new LayerBackground);
+    LayerBackground::Ptr layer_bg_l(new LayerBackground);
+    LayerBackground::Ptr layer_bg_r(new LayerBackground);
     layer_bg_l->updateData(&ldata);
     layer_bg_r->updateData(&rdata);
+//    layer_bg_l->setModel(model);
 
-    renderer.addLayers(layer_bg_l, LAYER_RENDER_LEFT);
-    renderer.addLayers(layer_bg_r, LAYER_RENDER_RIGHT);
+    renderer.addLayers(layer_bg_l, 2);
+    renderer.addLayers(layer_bg_r, 3);
+
+//    mlayer::LayerRenderer::WindowShotData data = renderer.getWindowShot();
+//    cv::Mat bg(data.height, data.width, CV_32FC3, data.rgb_buffer);
+//    cv::cvtColor(bg, bg, cv::COLOR_RGB2BGR);
+//    cv::flip(bg, bg, 0);
+//    cv::imshow("bg", bg);
+//    cv::waitKey(0);
+
+
 
 
     renderer.render();

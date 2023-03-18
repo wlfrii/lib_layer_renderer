@@ -35,6 +35,9 @@ namespace mlayer{
 class LayerCone : public LayerModel
 {
 public:
+    using Ptr = std::shared_ptr<LayerCone>;
+
+
     /**
      * @brief Constructor of class LayerCone.
      * @param height  The radius of the cone
