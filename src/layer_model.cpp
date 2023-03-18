@@ -64,7 +64,7 @@ void LayerModel::setScaleFactors(float scale)
 }
 
 
-void LayerModel::setScaleFactors(float xscale, float yscale, float zscale)
+void LayerModel::setScaleFactors(float, float, float)
 {
 
 }
