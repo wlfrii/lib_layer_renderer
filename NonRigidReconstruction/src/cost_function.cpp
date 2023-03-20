@@ -307,18 +307,50 @@ bool CostFunctionReg::Evaluate(double const* const* parameters,
 /*                           class CostFunctionData                           */
 /* -------------------------------------------------------------------------- */
 
-CostFunctionData::CostFunctionData(double cost_function_weight)
+CostFunctionData::CostFunctionData(double cost_function_weight,
+        const Eigen::Vector3d& visible_point,
+        const Eigen::Vector3d& visible_point_normal,
+        const std::vector<Eigen::Vector3d>& neighbor_nodes,
+        const Eigen::VectorXd& w_j,
+        float fxy, float cx, float cy, float t,
+        const cv::Mat& depthmap,
+        const Eigen::Matrix3d& global_R, const Eigen::Vector3d& global_t)
     : _cost_func_weight(cost_function_weight)
+    , _visible_point(visible_point)
+    , _visible_point_normal(visible_point_normal)
+    , _neighbor_nodes(neighbor_nodes)
+    , _w_j(w_j)
+    , _fxy(fxy), _cx(cx), _cy(cy), _t(t)
+    , _global_R(global_R), _global_t(global_t)
 {
-
+    _grid.reset(new ceres::Grid2D<float, 1>(
+                    depthmap.ptr<float>(0), 0, depthmap.rows, 0, depthmap.cols));
+    _depth.reset(new ceres::BiCubicInterpolator<ceres::Grid2D<float, 1>>(*_grid));
 }
 
 
-bool CostFunctionData::Evaluate(double const* const* parameters,
-                               double *residuals, double **jacobians) const
+ceres::CostFunction* CostFunctionData::create(
+        double cost_function_weight,
+        const Eigen::Vector3d &visible_points,
+        const Eigen::Vector3d& visible_points_normal,
+        const std::vector<Eigen::Vector3d> &neighbor_nodes,
+        const Eigen::VectorXd &w_j,
+        float fxy, float cx, float cy, float t,
+        const cv::Mat& depthmap,
+        const Eigen::Matrix3d& global_R,
+        const Eigen::Vector3d& global_t)
 {
+    auto cost_func = new ceres::DynamicAutoDiffCostFunction<CostFunctionData>
+            (new CostFunctionData(cost_function_weight, visible_points,
+                                  visible_points_normal, neighbor_nodes,
+                                  w_j, fxy, cx, cy, t, depthmap,
+                                  global_R, global_t));
+    for (size_t i = 0; i < neighbor_nodes.size(); ++i){
+        cost_func->AddParameterBlock(12);
+    }
+    cost_func->SetNumResiduals(1);
 
-    return true;
+    return cost_func;
 }
 
 
@@ -330,12 +362,15 @@ CostFunctionCorr::CostFunctionCorr(
         double cost_function_weight, const Eigen::Vector3d& v_prev,
         const std::vector<Eigen::Vector3d>& neighbor_nodes,
         const Eigen::VectorXd& w_j,
-        const Eigen::Vector3d& v_curr)
+        const Eigen::Vector3d& v_curr,
+        const Eigen::Matrix3d& global_R,
+        const Eigen::Vector3d& global_t)
     : _cost_func_weight(cost_function_weight)
     , _v_prev(v_prev)
     , _neighbor_nodes(neighbor_nodes)
     , _w_j(w_j)
     , _v_curr(v_curr)
+    , _global_R(global_R), _global_t(global_t)
 {
     std::vector<int>* block_sizes =  mutable_parameter_block_sizes();
     for (size_t i = 0; i < neighbor_nodes.size(); ++i){
@@ -357,6 +392,8 @@ bool CostFunctionCorr::Evaluate(double const* const* parameters,
         new_vert += _w_j[i] * (R_j * (_v_prev - _neighbor_nodes[i]) +
                                _neighbor_nodes[i] + t_j);
     }
+    new_vert = _global_R * new_vert + _global_t;
+
     E = _cost_func_weight * (new_vert - _v_curr);
 
     if (jacobians != nullptr){
@@ -365,45 +402,48 @@ bool CostFunctionCorr::Evaluate(double const* const* parameters,
             {
                 double coeff = _cost_func_weight * _w_j[i];
                 auto& node = _neighbor_nodes[i];
+                float tx = _v_prev[0] - node[0];
+                float ty = _v_prev[1] - node[1];
+                float tz = _v_prev[2] - node[2];
 
-                jacobians[i][ 0] = coeff * (_v_prev[0] - node[0]);
-                jacobians[i][ 1] = 0;
-                jacobians[i][ 2] = 0;
-                jacobians[i][ 3] = coeff * (_v_prev[1] - node[1]);
-                jacobians[i][ 4] = 0;
-                jacobians[i][ 5] = 0;
-                jacobians[i][ 6] = coeff * (_v_prev[2] - node[2]);
-                jacobians[i][ 7] = 0;
-                jacobians[i][ 8] = 0;
-                jacobians[i][ 9] = coeff;
-                jacobians[i][10] = 0;
-                jacobians[i][11] = 0;
+                jacobians[i][ 0] = coeff * _global_R(0,0) * tx;
+                jacobians[i][ 1] = coeff * _global_R(0,1) * tx;
+                jacobians[i][ 2] = coeff * _global_R(0,2) * tx;
+                jacobians[i][ 3] = coeff * _global_R(0,0) * ty;
+                jacobians[i][ 4] = coeff * _global_R(0,1) * ty;
+                jacobians[i][ 5] = coeff * _global_R(0,2) * ty;
+                jacobians[i][ 6] = coeff * _global_R(0,0) * tz;
+                jacobians[i][ 7] = coeff * _global_R(0,1) * tz;
+                jacobians[i][ 8] = coeff * _global_R(0,2) * tz;
+                jacobians[i][ 9] = coeff * _global_R(0,0);
+                jacobians[i][10] = coeff * _global_R(0,1);
+                jacobians[i][11] = coeff * _global_R(0,2);
 
-                jacobians[i][ 0 + 12] = 0;
-                jacobians[i][ 1 + 12] = coeff * (_v_prev[0] - node[0]);
-                jacobians[i][ 2 + 12] = 0;
-                jacobians[i][ 3 + 12] = 0;
-                jacobians[i][ 4 + 12] = coeff * (_v_prev[1] - node[1]);
-                jacobians[i][ 5 + 12] = 0;
-                jacobians[i][ 6 + 12] = 0;
-                jacobians[i][ 7 + 12] = coeff * (_v_prev[2] - node[2]);
-                jacobians[i][ 8 + 12] = 0;
-                jacobians[i][ 9 + 12] = 0;
-                jacobians[i][10 + 12] = coeff;
-                jacobians[i][11 + 12] = 0;
+                jacobians[i][ 0 + 12] = coeff * _global_R(1,0) * tx;
+                jacobians[i][ 1 + 12] = coeff * _global_R(1,1) * tx;
+                jacobians[i][ 2 + 12] = coeff * _global_R(1,2) * tx;
+                jacobians[i][ 3 + 12] = coeff * _global_R(1,0) * ty;
+                jacobians[i][ 4 + 12] = coeff * _global_R(1,1) * ty;
+                jacobians[i][ 5 + 12] = coeff * _global_R(1,2) * ty;
+                jacobians[i][ 6 + 12] = coeff * _global_R(1,0) * tz;
+                jacobians[i][ 7 + 12] = coeff * _global_R(1,1) * tz;
+                jacobians[i][ 8 + 12] = coeff * _global_R(1,2) * tz;
+                jacobians[i][ 9 + 12] = coeff * _global_R(1,0);
+                jacobians[i][10 + 12] = coeff * _global_R(1,1);
+                jacobians[i][11 + 12] = coeff * _global_R(1,2);
 
-                jacobians[i][ 0 + 12*2] = 0;
-                jacobians[i][ 1 + 12*2] = 0;
-                jacobians[i][ 2 + 12*2] = coeff * (_v_prev[0] - node[0]);
-                jacobians[i][ 3 + 12*2] = 0;
-                jacobians[i][ 4 + 12*2] = 0;
-                jacobians[i][ 5 + 12*2] = coeff * (_v_prev[1] - node[1]);
-                jacobians[i][ 6 + 12*2] = 0;
-                jacobians[i][ 7 + 12*2] = 0;
-                jacobians[i][ 8 + 12*2] = coeff * (_v_prev[2] - node[2]);
-                jacobians[i][ 9 + 12*2] = 0;
-                jacobians[i][10 + 12*2] = 0;
-                jacobians[i][11 + 12*2] = coeff;
+                jacobians[i][ 0 + 12*2] = coeff * _global_R(2,0) * tx;
+                jacobians[i][ 1 + 12*2] = coeff * _global_R(2,1) * tx;
+                jacobians[i][ 2 + 12*2] = coeff * _global_R(2,2) * tx;
+                jacobians[i][ 3 + 12*2] = coeff * _global_R(2,0) * ty;
+                jacobians[i][ 4 + 12*2] = coeff * _global_R(2,1) * ty;
+                jacobians[i][ 5 + 12*2] = coeff * _global_R(2,2) * ty;
+                jacobians[i][ 6 + 12*2] = coeff * _global_R(2,0) * tz;
+                jacobians[i][ 7 + 12*2] = coeff * _global_R(2,1) * tz;
+                jacobians[i][ 8 + 12*2] = coeff * _global_R(2,2) * tz;
+                jacobians[i][ 9 + 12*2] = coeff * _global_R(2,0);
+                jacobians[i][10 + 12*2] = coeff * _global_R(2,1);
+                jacobians[i][11 + 12*2] = coeff * _global_R(2,2);
             }
         }
     }
