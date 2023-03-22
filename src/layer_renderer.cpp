@@ -208,6 +208,7 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
 
     static size_t n = 0;
     float step = 1.f;
+    float astep = glm::radians(1.5 * step);
     glm::mat4& pose = _n_global[n];
 
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
@@ -232,22 +233,22 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
         pose = glm::translate(pose, glm::vec3(0.f, 0.f, -step));
     }
     else if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS){
-        pose = glm::rotate(pose, glm::radians(-2.f), glm::vec3(1.f, 0.f, 0.f));
+        pose = glm::rotate(pose, -astep, glm::vec3(1.f, 0.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS){
-        pose = glm::rotate(pose, glm::radians(2.f), glm::vec3(1.f, 0.f, 0.f));
+        pose = glm::rotate(pose, astep, glm::vec3(1.f, 0.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS){
-        pose = glm::rotate(pose, glm::radians(-2.f), glm::vec3(0.f, 1.f, 0.f));
+        pose = glm::rotate(pose, -astep, glm::vec3(0.f, 1.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS){
-        pose = glm::rotate(pose, glm::radians(2.f), glm::vec3(0.f, 1.f, 0.f));
+        pose = glm::rotate(pose, astep, glm::vec3(0.f, 1.f, 0.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_COMMA) == GLFW_PRESS){
-        pose = glm::rotate(pose, glm::radians(-2.f), glm::vec3(0.f, 0.f, 1.f));
+        pose = glm::rotate(pose, -astep, glm::vec3(0.f, 0.f, 1.f));
     }
     else if (glfwGetKey(window, GLFW_KEY_PERIOD) == GLFW_PRESS){
-        pose = glm::rotate(pose, glm::radians(2.f), glm::vec3(0.f, 0.f, 1.f));
+        pose = glm::rotate(pose, astep, glm::vec3(0.f, 0.f, 1.f));
     }
     else if(glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS){
         if(_N > 1 && _control_n_viewport == false){
