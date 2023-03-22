@@ -19,6 +19,15 @@ public:
 
 
     /**
+     * @brief Constructor of class CircleGenerator
+     * @param radius     The radius of the circle
+     * @param points_num The number of points in the circle
+     * @param pose       The pose of the circle
+     */
+    CircleGenerator(float radius, int points_num, const glm::mat4& pose);
+
+
+    /**
      * @brief Return the vertex positions of the circle
      * @return
      */
@@ -34,7 +43,7 @@ public:
 
 private:
     /* Create the circle vertices */
-    void createVertices(float radius, const glm::mat4 &pose);
+    void createVertices(float radius, int points_num, const glm::mat4 &pose);
 
     VertexPositions   _vert_positions;  //!< vertex positions of the circle
 };

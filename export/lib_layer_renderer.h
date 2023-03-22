@@ -39,6 +39,7 @@
 #include "lib_layer_renderer/layer_cylinder.h"
 #include "lib_layer_renderer/layer_gripper.h"
 #include "lib_layer_renderer/layer_segment.h"
+#include "lib_layer_renderer/layer_sphere.h"
 
 // 2D texture Layer
 #include "lib_layer_renderer/layer_background.h"

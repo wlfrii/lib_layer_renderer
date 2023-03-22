@@ -11,7 +11,18 @@ const float CIRCLE_PRECISION = 0.5;
 
 CircleGenerator::CircleGenerator(float radius, const glm::mat4& pose)
 {
-    createVertices(radius, pose);
+    int points_num = (int)radius*3.1415926*2 / CIRCLE_PRECISION;
+    if (points_num < MIN_POINTS_NUM){
+        points_num = MIN_POINTS_NUM;
+    }
+    createVertices(radius, points_num, pose);
+}
+
+
+CircleGenerator::CircleGenerator(float radius, int points_num,
+                                 const glm::mat4 &pose)
+{
+    createVertices(radius, points_num, pose);
 }
 
 
@@ -32,13 +43,9 @@ Vertices CircleGenerator::normalFlippedVertices() const
 }
 
 
-void CircleGenerator::createVertices(float radius, const glm::mat4 &pose)
+void CircleGenerator::createVertices(float radius, int points_num,
+                                     const glm::mat4 &pose)
 {
-    int points_num = (int)radius*3.1415926*2 / CIRCLE_PRECISION;
-    if (points_num < MIN_POINTS_NUM){
-        points_num = MIN_POINTS_NUM;
-    }
-
     // Create positions
     _vert_positions.resize(points_num);
     double angle = 2.0*M_PI / points_num;
