@@ -58,6 +58,15 @@ if(PCL_FOUND)
     # message(STATUS "  Definitions: ${PCL_DEFINITIONS}")
 endif()
 
+# Add Ceres
+find_package(Ceres REQUIRED)
+if(${Ceres_FOUND})
+    message(STATUS "Ceres found: ${CERES_INCLUDE_DIRS}")
+else()
+    message(ERROR "Cannot find Ceres")
+endif()
+
+
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty
 )
@@ -73,6 +82,7 @@ target_include_directories(${PROJECT_NAME}
         $<BUILD_INTERFACE:${EIGEN3_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${lib_math_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${CERES_INCLUDE_DIRS}>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/../export
@@ -83,4 +93,5 @@ target_link_libraries(${PROJECT_NAME}
     ${lib_math_LIBRARIES}
     lib_layer_renderer
     ${PCL_LIBRARIES}
+    ${CERES_LIBRARIES}
 )

@@ -65,10 +65,10 @@ public:
 
     /**
      * @brief Bind texture for the binded point cloud
-     * @param (in) texture  The left image in the stereo images
-     * @param (in) cam_proj  The camera projector for binocular
+     * @param texture  The left image in the stereo images
+     * @param normals  The pixel normals based on depthmap
      */
-    void bindTexture(const cv::Mat& texture);
+    void bindTextureAndNormals(const cv::Mat& texture, const cv::Mat& normals);
 
 
     /**
@@ -153,7 +153,10 @@ public:
     Eigen::MatrixXf toEigenMatrix() const;
 
 
-    const Vertices& getVertices();
+    Vertices createVertices();
+
+
+    cv::Mat projectVerticesToDepthmap() const;
 
 
 private:
@@ -165,10 +168,11 @@ private:
     const mmath::cam::ID _cam_id;
 
 
-    Vertices _vertices;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr _coords;
     std::shared_ptr<pcl::KdTreeFLANN<pcl::PointXYZ>> _kd_tree;
 
     cv::Mat _texture;
+    cv::Mat _normals;
 };
 
 

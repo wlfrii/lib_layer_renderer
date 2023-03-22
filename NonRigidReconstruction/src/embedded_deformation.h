@@ -19,12 +19,16 @@
 class EmbeddedDeformation
 {
 public:
-    EmbeddedDeformation(float node_density = 5.f, int node_connectivity = 6);
+    EmbeddedDeformation(const std::shared_ptr<mmath::CameraProjector> cam_proj,
+                        const mmath::cam::ID cam_id,
+                        float vertex_density,
+                        float node_density = 4.f, int node_connectivity = 6);
     ~EmbeddedDeformation();
 
     void addVertices(const Vertices& new_vertices);
 
-    void addVertices(const Vertices& new_vertices, const cv::Mat& depthmap,
+    void addVertices(const Vertices& new_vertices,
+                     const cv::Mat& depthmap, const cv::Mat& texture,
                      const std::vector<
                         std::pair<pcl::PointXYZ, pcl::PointXYZ>
                             >& correspondences);
@@ -33,27 +37,49 @@ public:
 
     void projectPointCloud(float search_radius, float mu, int max_neighbors,
                            std::vector<mlayer::Vertex3D>& vertices);
+    void projectPointCloud(std::vector<mlayer::Vertex3D>& vertices);
 
 private:
-    void updateKdTreeData();
+    void regenerateNodes();
 
-    void depthImageRegistration(const cv::Mat& depthmap,
-            pcl::PointCloud<pcl::PointNormal>::Ptr visible_points);
+
+    /**
+     * @brief depthImageRegistration
+     * @param R  The rotation from previous camera frame to current
+     * @param t  The translation from previous camera frame to current
+     * @param depthmap
+     * @param visible_points
+     */
+    void depthImageRegistration(
+            const Eigen::Matrix3f& R, const Eigen::Vector3f& t,
+            const cv::Mat& depthmap, Vertices& visible_points);
+
+
+    void fusionVertices(const Vertices& new_vertices,
+                        const cv::Mat& depthmap, const cv::Mat& texture);
 
 
     const std::shared_ptr<mmath::CameraProjector> _cam_proj;
+    const mmath::cam::ID _cam_id;
 
+    float _vertex_density;
     float _node_density;        // Density of ED nodes
-    float _node_connectivity;   // The max node neighbors for each vertex
+    int   _node_connectivity;   // The max node neighbors for each vertex
+    int   _K;                   // Number of neighbors
+    float _neighbor_dis_thresh; // Maximum distance for a node to be a neighbor
 
     Vertices _vertices;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr _nodes;
-
-    std::vector<Eigen::Matrix3d> _Rs; // rotation matrics
-    std::vector<Eigen::Vector3d> _ts; // translations
-
     std::shared_ptr<pcl::KdTreeFLANN<pcl::PointXYZ>> _kd_tree;
+
+    /* In this project, Global Rt is w.r.t the first image, and denotes the
+     * camera movement.
+     */
+//    Eigen::Matrix3f _R; // Global R
+//    Eigen::Vector3f _t; // Global t;
+
+    size_t   _timestamp;       // Tag each group of new vertices
 };
 
 #endif // EMBEDDED_DEFORMATION_H_LF

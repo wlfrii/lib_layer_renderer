@@ -6,10 +6,10 @@
 #include <vector>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include "point_cloud_handler.h"
 
 
 class SGM;
-class PointCloudHandler;
 class EmbeddedDeformation;
 
 class SceneReconstructor
@@ -43,12 +43,12 @@ public:
 
 private:
     void calcDepthMap(const cv::Mat &l_image, const cv::Mat &r_image);
+
     void filterPointCloud();
 
     std::vector<std::pair<pcl::PointXYZ, pcl::PointXYZ>>
     keyPointMatching(const cv::Mat &prev_image, const cv::Mat &curr_image);
 
-    cv::Mat EDProjection();
 
     /**
      * @brief Filter out some points based on point density threshold
@@ -57,6 +57,7 @@ private:
 
 private:
     const std::shared_ptr<mmath::CameraProjector> _cam_proj;
+    const mmath::cam::ID _cam_id;
 
     bool _is_seqc;        //!< Wheter create texture for a sequence
 
@@ -79,7 +80,9 @@ private:
     std::vector<mlayer::Vertex3D> _traingles_3d;
 
     std::shared_ptr<mlayer::LayerRenderer>  _layer_renderer;
-    std::array<std::shared_ptr<mlayer::LayerTexture3D>, 4> _layer_texture3d;
+    std::array<mlayer::LayerTexture3D::Ptr, 4> _layer_texture3d;
+    mlayer::LayerBackground::Ptr _layer_l_image;
+    mlayer::LayerBackground::Ptr _layer_r_image;
 
     std::shared_ptr<PointCloudHandler> _pc_handler;
     std::shared_ptr<EmbeddedDeformation> _ed;

@@ -123,7 +123,7 @@ public:
         }
         //deformed_n.normalize();
         T n_norm = sqrt(deformed_n[0]*deformed_n[0] +
-                deformed_n[1]*deformed_n[1] + deformed_n[1]*deformed_n[1]);
+                deformed_n[1]*deformed_n[1] + deformed_n[2]*deformed_n[2]);
         deformed_n[0] /= n_norm;
         deformed_n[1] /= n_norm;
         deformed_n[2] /= n_norm;

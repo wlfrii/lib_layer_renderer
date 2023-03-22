@@ -36,6 +36,11 @@ void voxelDownSampling(pcl::PointCloud<pcl::PointXYZ>::Ptr in, float voxel_size,
 void voxelDownSampling(pcl::PointCloud<pcl::PointXYZRGB>::Ptr in, float voxel_size,
                        pcl::PointCloud<pcl::PointXYZ>::Ptr out);
 
+void voxelDownSampling(pcl::PointCloud<pcl::PointNormal>::Ptr in, float voxel_size,
+                       pcl::PointCloud<pcl::PointNormal>::Ptr out);
+
+void voxelDownSampling(const Vertices& in, float voxel_size, Vertices& out);
+
 
 /**
  * @brief Estimate normal for the given point cloud
@@ -60,6 +65,18 @@ void estimateImageNormal(const cv::Mat& gray_image, cv::Mat& normal_image);
  * @return
  */
 cv::Mat im2uchar(const cv::Mat & image);
+
+
+void estimateTransform(
+        const std::vector<
+        std::pair<pcl::PointXYZ, pcl::PointXYZ>>& correspondences,
+        Eigen::Matrix4f& transform);
+
+void estimateTransform(
+        const std::vector<
+        std::pair<pcl::PointXYZ, pcl::PointXYZ>>& correspondences,
+        Eigen::Matrix3f& R, Eigen::Vector3f& t);
+
 
 } // namespace::util
 

@@ -23,8 +23,9 @@
 #include <pcl/surface/mls.h> // For MovingLeastSquares
 #include <pcl/surface/gp3.h> // For GreedyProjectionTriangulation
 #include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/common/io.h>
 
-#define PRINT_INFO 1
+#define PRINT_INFO 0
 #if PRINT_INFO
 #define PRINT(fmt, ...) \
     printf("PointCloudHandler: " fmt, ##__VA_ARGS__)
@@ -52,8 +53,8 @@ PointCloudHandler::~PointCloudHandler()
 void PointCloudHandler::bindPointCloud(
         const pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud)
 {
-    _vertices.coords = point_cloud;
-    PRINT("Initial point size: %zu\n", _vertices.coords->size());
+    _coords = point_cloud;
+    PRINT("Initial point cloud size: %zu\n", _coords->size());
     updateKDTreeData();
 
     // Reset point normal and texture
@@ -63,9 +64,9 @@ void PointCloudHandler::bindPointCloud(
 
 void PointCloudHandler::bindPointCloud(const PointCloudXYZ &point_cloud)
 {
-    _vertices.coords->resize(point_cloud.rows());
-    _vertices.coords->getMatrixXfMap() = point_cloud.transpose();
-    PRINT("Initial point size: %zu\n", _vertices.coords->size());
+    _coords->resize(point_cloud.rows());
+    _coords->getMatrixXfMap() = point_cloud.transpose();
+    PRINT("Initial point cloud size: %zu\n", _coords->size());
     updateKDTreeData();
 
     // Reset point normal and texture
@@ -73,16 +74,18 @@ void PointCloudHandler::bindPointCloud(const PointCloudXYZ &point_cloud)
 }
 
 
-void PointCloudHandler::bindTexture(const cv::Mat &texture)
+void PointCloudHandler::bindTextureAndNormals(
+        const cv::Mat &texture, const cv::Mat &normals)
 {
     _texture = texture;
+    _normals = normals;
 }
 
 
 void PointCloudHandler::voxelDownSampling(float voxel_size)
 {
-    voxelDownSampling(voxel_size, _vertices.coords);
-    PRINT("Point size after voxel downsampled: %zu\n", _vertices.coords->size());
+    voxelDownSampling(voxel_size, _coords);
+    PRINT("Point cloud size after voxel downsampled: %zu\n", _coords->size());
     updateKDTreeData();
 }
 
@@ -95,7 +98,7 @@ struct PointWithOccurrences {
 void PointCloudHandler::voxelDownSampling(
         float voxel_size, pcl::PointCloud<pcl::PointXYZ>::Ptr point_cloud)
 {
-    auto _point_cloud = _vertices.coords;
+    auto _point_cloud = _coords;
 
     Eigen::Vector3f max_xyzf(0, 0, 0);
     Eigen::Vector3f min_xyzf(1000, 1000, 1000);
@@ -153,8 +156,8 @@ void PointCloudHandler::voxelDownSampling(
 void PointCloudHandler::rmOutliersByRadius(float radius, int min_neighbor_num)
 {
     std::vector<size_t> indices_to_be_errased;
-    for(size_t i = 0; i < _vertices.coords->size(); i++){
-        const pcl::PointXYZ& query_point = _vertices.coords->at(i);
+    for(size_t i = 0; i < _coords->size(); i++){
+        const pcl::PointXYZ& query_point = _coords->at(i);
 
         std::vector<int> indices;
         std::vector<float> squared_distances;
@@ -164,13 +167,13 @@ void PointCloudHandler::rmOutliersByRadius(float radius, int min_neighbor_num)
             indices_to_be_errased.push_back(i);
         }
     }
-    pcl::PointCloud<pcl::PointXYZ>::iterator it = _vertices.coords->begin();
+    pcl::PointCloud<pcl::PointXYZ>::iterator it = _coords->begin();
     size_t count = 0;
     for(size_t idx : indices_to_be_errased) {
-        _vertices.coords->erase(it + idx - count);
+        _coords->erase(it + idx - count);
         count++;
     }
-    PRINT("Point size after radius-filter: %zu\n", _vertices.coords->size());
+    PRINT("Point size after radius-filter: %zu\n", _coords->size());
     updateKDTreeData();
 }
 
@@ -178,8 +181,8 @@ void PointCloudHandler::rmOutliersByRadius(float radius, int min_neighbor_num)
 void PointCloudHandler::rmOutliersByKNeighbors(int k, float max_neighbor_dis)
 {
     std::vector<size_t> indices_to_be_errased;
-    for(size_t i = 0; i < _vertices.coords->size(); i++){
-        const pcl::PointXYZ& query_point = _vertices.coords->at(i);
+    for(size_t i = 0; i < _coords->size(); i++){
+        const pcl::PointXYZ& query_point = _coords->at(i);
 
         std::vector<int> indices(k);
         std::vector<float> squared_distances(k);
@@ -194,13 +197,13 @@ void PointCloudHandler::rmOutliersByKNeighbors(int k, float max_neighbor_dis)
             }
         }
     }
-    pcl::PointCloud<pcl::PointXYZ>::iterator it = _vertices.coords->begin();
+    pcl::PointCloud<pcl::PointXYZ>::iterator it = _coords->begin();
     size_t count = 0;
     for(size_t idx : indices_to_be_errased) {
-        _vertices.coords->erase(it + idx - count);
+        _coords->erase(it + idx - count);
         count++;
     }
-    PRINT("Point size after k-neighbors-filter: %zu\n", _vertices.coords->size());
+    PRINT("Point size after k-neighbors-filter: %zu\n", _coords->size());
     updateKDTreeData();
 }
 
@@ -208,12 +211,12 @@ void PointCloudHandler::rmOutliersByKNeighbors(int k, float max_neighbor_dis)
 void PointCloudHandler::statisticalOutliersRemoval(size_t k, float std_thresh)
 {
     pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-    sor.setInputCloud(_vertices.coords);
+    sor.setInputCloud(_coords);
     sor.setMeanK(k);
     sor.setStddevMulThresh(std_thresh);
-    sor.filter(*_vertices.coords);
+    sor.filter(*_coords);
 
-    PRINT("Point size after statistical-filter: %zu\n", _vertices.coords->size());
+    PRINT("Point size after statistical-filter: %zu\n", _coords->size());
     updateKDTreeData();
 }
 
@@ -230,13 +233,13 @@ void PointCloudHandler::createMesh(
     // MSL for smoothing
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (
                 new pcl::search::KdTree<pcl::PointXYZ>);
-    tree->setInputCloud(_vertices.coords);
+    tree->setInputCloud(_coords);
 
     pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud_with_normal(
                 new pcl::PointCloud<pcl::PointNormal>);
     pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointNormal> mls;
     mls.setComputeNormals(true);
-    mls.setInputCloud(_vertices.coords);
+    mls.setInputCloud(_coords);
     mls.setPolynomialOrder(2);
     mls.setSearchMethod(tree);
     mls.setSearchRadius(search_radius);
@@ -274,7 +277,7 @@ void PointCloudHandler::createMesh(
 
         for(size_t j = 0; j < vert.vertices.size(); j++) {
             size_t idx = vert.vertices[j];
-            auto& pt = _vertices.coords->at(idx);
+            auto& pt = _coords->at(idx);
             readPointColor(pt, r, g, b);
             vertices[count++] = {
                 glm::vec4(pt.x, pt.y, pt.z, 1), glm::vec4(r, g, b, 1)};
@@ -293,9 +296,9 @@ void PointCloudHandler::createVertices(std::vector<mlayer::Vertex3D> &vertices)
     }
 
     float r, g, b;
-    vertices.resize(_vertices.coords->size());
-    for(size_t i = 0; i < _vertices.coords->size(); i++) {
-        auto& pt = _vertices.coords->at(i);
+    vertices.resize(_coords->size());
+    for(size_t i = 0; i < _coords->size(); i++) {
+        auto& pt = _coords->at(i);
         readPointColor(pt, r, g, b);
         vertices[i] = {glm::vec4(pt.x, pt.y, pt.z, 1), glm::vec4(r, g, b, 1)};
     }
@@ -304,7 +307,7 @@ void PointCloudHandler::createVertices(std::vector<mlayer::Vertex3D> &vertices)
 
 const pcl::PointCloud<pcl::PointXYZ>::Ptr PointCloudHandler::getCurrentPointCloud() const
 {
-    return _vertices.coords;
+    return _coords;
 }
 
 
@@ -312,52 +315,99 @@ pcl::PointCloud<pcl::PointNormal>::Ptr
 PointCloudHandler::getCurrentPointCloudWithNormal() const
 {
     pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud_with_normal
-            = util::estimateNormal(_vertices.coords);
+            = util::estimateNormal(_coords);
     return point_cloud_with_normal;
 }
 
 
 Eigen::MatrixXf PointCloudHandler::toEigenMatrix() const
 {
-    Eigen::MatrixXf mat(_vertices.coords->size(), 3);
-    mat = _vertices.coords->getMatrixXfMap().transpose();
+    Eigen::MatrixXf mat(_coords->size(), 3);
+    mat = _coords->getMatrixXfMap().transpose();
     return mat;
 }
 
 
-const Vertices& PointCloudHandler::getVertices()
+Vertices PointCloudHandler::createVertices()
 {
+    if(_texture.empty() || _normals.empty()){
+        PRINT("No texture and normals was binded!\n");
+        std::abort();
+    }
+
+    Vertices vertices;
+    vertices.resize(_coords->size());
+#if 0
     // MSL for smoothing
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (
                 new pcl::search::KdTree<pcl::PointXYZ>);
-    tree->setInputCloud(_vertices.coords);
+    tree->setInputCloud(_coords);
 
     pcl::PointCloud<pcl::PointNormal>::Ptr point_cloud_with_normal(
                 new pcl::PointCloud<pcl::PointNormal>);
     pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointNormal> mls;
     mls.setComputeNormals(true);
-    mls.setInputCloud(_vertices.coords);
+    mls.setInputCloud(_coords);
     mls.setPolynomialOrder(2);
     mls.setSearchMethod(tree);
     mls.setSearchRadius(3);
     mls.process(*point_cloud_with_normal);
 
-    _vertices.coords_with_normals = point_cloud_with_normal;
-
-    _vertices.colors.resize(_vertices.coords->size());
     float r, g, b;
-    for(size_t i = 0; i < _vertices.coords->size(); i++) {
-        auto& pt = _vertices.coords->at(i);
+    for(size_t i = 0; i < _coords->size(); i++) {
+        vertices.coords->at(i).getVector3fMap() =
+                point_cloud_with_normal->at(i).getVector3fMap();
+        vertices.normals[i] = point_cloud_with_normal->at(i).getNormalVector3fMap();
+
+        auto& pt = vertices.coords->at(i);
         readPointColor(pt, r, g, b);
-        _vertices.colors[i] = {r, g, b};
+        vertices.colors[i] = {r, g, b};
     }
-    return _vertices;
+#else
+    float r, g, b;
+    for(size_t i = 0; i < _coords->size(); i++) {
+        auto& pt = _coords->at(i);
+        Eigen::Vector2f pt2d = _cam_proj->cvt3Dto2D(pt.x, pt.y, pt.z, _cam_id);
+        int u = round(pt2d[0]);
+        int v = round(pt2d[1]);
+        const cv::Vec3b& pixel = _texture.at<cv::Vec3b>(v, u);
+        r = 1.f*pixel[0]/255.f;
+        g = 1.f*pixel[1]/255.f;
+        b = 1.f*pixel[2]/255.f;
+        cv::Vec3f cvnormal = _normals.at<cv::Vec3f>(v, u);
+
+        vertices.coords->at(i) = pt;
+        vertices.normals[i] = {cvnormal[0], cvnormal[1], cvnormal[2]};
+        vertices.colors[i] = {r, g, b};
+    }
+#endif
+    vertices.weights = std::vector<float>(vertices.colors.size(), 1);
+    // Below two terms will be initialized in fusion step in ED procudure.
+    vertices.timestamps = std::vector<size_t>(vertices.colors.size(), 0);
+    vertices.stabilitys = std::vector<bool>(vertices.colors.size(), 0);
+
+    return vertices;
+}
+
+
+cv::Mat PointCloudHandler::projectVerticesToDepthmap() const
+{
+    cv::Mat depthmap(_texture.size(), CV_32FC1, cv::Scalar(0));
+    for(size_t i = 0; i < _coords->size(); i++) {
+        const Eigen::Vector3f& pt = _coords->at(i).getVector3fMap();
+        Eigen::Vector2f pt2d = _cam_proj->cvt3Dto2D(pt, _cam_id);
+        int u = round(pt2d[0]);
+        int v = round(pt2d[1]);
+        depthmap.at<float>(v, u) = pt[2];
+    }
+
+    return depthmap;
 }
 
 
 void PointCloudHandler::updateKDTreeData()
 {
-    _kd_tree->setInputCloud(_vertices.coords);
+    _kd_tree->setInputCloud(_coords);
 }
 
 

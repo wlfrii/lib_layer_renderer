@@ -6,11 +6,12 @@
 #include "util.h"
 #include "point_cloud_handler.h"
 #include "embedded_deformation.h"
+#include "logger.h"
 
+#define SHOW_BG 1
 
 namespace {
-float VERTICES_DENSITY = 0.3f;
-float MESH_SEARCH_RADIUS = VERTICES_DENSITY + 2.0;
+float MESH_SEARCH_RADIUS = VERTEX_DENSITY + 2.0;
 float MESH_MU = MESH_SEARCH_RADIUS;
 float MESH_NEIGHBORS = 20.f*MESH_SEARCH_RADIUS*MESH_SEARCH_RADIUS;
 }
@@ -19,6 +20,7 @@ float MESH_NEIGHBORS = 20.f*MESH_SEARCH_RADIUS*MESH_SEARCH_RADIUS;
 SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
                                        bool is_seqc)
     : _cam_proj(new mmath::CameraProjector(cam_proj))
+    , _cam_id(mmath::cam::LEFT)
     , _is_seqc(is_seqc)
     , _sgm(nullptr)
     , _pyd_times(2)
@@ -40,18 +42,28 @@ SceneReconstructor::SceneReconstructor(const mmath::CameraProjector& cam_proj,
                 gl_proj, vps, w, h);
     glm::mat4 view = glm::rotate(
                 glm::mat4(1.0), glm::radians(180.f), glm::vec3(1.f,0.f,0.f));
-    view[3][0] += 2.f;
-    _layer_renderer->setView(view, mlayer::LAYER_RENDER_LEFT);
+    _layer_renderer->setView(view);
 
     _layer_renderer->setKeyboardOnAllViewports(true);
     _layer_texture3d[0] = std::make_shared<mlayer::LayerTexture3D>();
     _layer_texture3d[1] = std::make_shared<mlayer::LayerTexture3D>();
     _layer_texture3d[2] = std::make_shared<mlayer::LayerTexture3D>();
     _layer_texture3d[3] = std::make_shared<mlayer::LayerTexture3D>();
+    _layer_l_image = std::make_shared<mlayer::LayerBackground>();
+    _layer_r_image = std::make_shared<mlayer::LayerBackground>();
+#if SHOW_BG
+    _layer_renderer->addLayers(_layer_l_image, 0);
+    _layer_renderer->addLayers(_layer_r_image, 1);
+#else
     _layer_renderer->addLayers(_layer_texture3d[0], 0);
     _layer_renderer->addLayers(_layer_texture3d[1], 1);
-    _layer_renderer->addLayers(_layer_texture3d[2], 2);
+#endif
+//    _layer_renderer->addLayers(_layer_texture3d[2], 2);
     _layer_renderer->addLayers(_layer_texture3d[3], 3);
+
+    glm::mat4 model(1.0);
+    model[3][2] += 30;
+    _layer_renderer->setGlobal(model);
 }
 
 
@@ -70,9 +82,20 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
 {
     if(l_image.cols != r_image.cols || l_image.rows != r_image.rows ||
             l_image.channels() != r_image.channels()) {
-        printf("The sizes of left image and right image is different!!!\n");
+        WLF_LOG("The sizes of left image and right image is different!!!\n");
         std::abort();
     }
+
+    cv::Mat l_rgb, r_rgb;
+    cv::cvtColor(l_image, l_rgb, cv::COLOR_BGR2RGB); cv::flip(l_rgb, l_rgb, 0);
+    cv::cvtColor(r_image, r_rgb, cv::COLOR_BGR2RGB); cv::flip(r_rgb, r_rgb, 0);
+    mlayer::LayerBackgroundData ldata(l_rgb.data, l_rgb.cols, l_rgb.rows,
+                                      l_rgb.channels());
+    mlayer::LayerBackgroundData rdata(r_rgb.data, r_rgb.cols, r_rgb.rows,
+                                      r_rgb.channels());
+    _layer_l_image->updateData(&ldata);
+    _layer_r_image->updateData(&rdata);
+
 
     if(!_sgm) {
         _sgm = new SGM();
@@ -100,7 +123,7 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
         sgm_option.is_fill_holes = false;
         bool flag = _sgm->initialize(_width, _height, sgm_option);
         if(!flag) {
-            printf("Initialized SGM failed\n");
+            WLF_LOG("Initialized SGM failed\n");
             delete _sgm;
             _sgm = nullptr;
             return;
@@ -130,8 +153,9 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
 
     // For the first image, initialize Embedded Deformation
     if(_ed == nullptr) {
-        _ed = std::make_shared<EmbeddedDeformation>(4.f);
-        _ed->addVertices(_pc_handler->getVertices());
+        _ed = std::make_shared<EmbeddedDeformation>(
+                    _cam_proj, _cam_id, VERTEX_DENSITY, 4.f, 8);
+        _ed->addVertices(_pc_handler->createVertices());
     }
     else{
         // Find the correspondence between each two adjacent sequences
@@ -139,8 +163,15 @@ void SceneReconstructor::reconstruct(const cv::Mat &l_image,
                 keyPointMatching(_prev_image, l_image);
 
         // Update ED
-
+        _ed->addVertices(_pc_handler->createVertices(),
+                    _depthmap, _texture, correspondences);
     }
+//    _ed->projectPointCloud(MESH_SEARCH_RADIUS, MESH_MU,
+//                           MESH_NEIGHBORS * 8, _traingles_3d);
+//    _layer_texture3d[3]->updateVertex3D(_traingles_3d);
+    _ed->projectPointCloud(_vertices_3d);
+    _layer_texture3d[3]->updateVertex(_vertices_3d);
+
     _prev_image = l_image;
     _prev_depthmap = _depthmap;
 }
@@ -168,7 +199,7 @@ void SceneReconstructor::calcDepthMap(const cv::Mat &l_image,
 {
     if(l_image.cols != r_image.cols || l_image.rows != r_image.rows ||
             l_image.channels() != r_image.channels()) {
-        printf("The sizes of left image and right image is different!!!\n");
+        WLF_LOG("The sizes of left image and right image is different!!!\n");
         std::abort();
     }
 
@@ -186,7 +217,7 @@ void SceneReconstructor::calcDepthMap(const cv::Mat &l_image,
 //    cv::boxFilter(right_gray, right_gray, -1, cv::Size(9,9));
 
     if(!_sgm->match(left_gray.data, right_gray.data, _disparity)){
-        printf("SGM match failed!\n");
+        WLF_LOG("SGM match failed!\n");
         return;
     }
 
@@ -219,7 +250,7 @@ void SceneReconstructor::calcDepthMap(const cv::Mat &l_image,
             break;
         }
     }
-    printf("Valid depth range: [%d, %d]\n", _u_start, _u_end);
+    WLF_VERBOSE("Valid depth range: [%d, %d]\n", _u_start, _u_end);
 
 
 #if DEBUG
@@ -242,64 +273,55 @@ void SceneReconstructor::calcDepthMap(const cv::Mat &l_image,
 
 void SceneReconstructor::filterPointCloud()
 {
+    // Here, instead of using PCL to estimate the vertices' normals, I calculate
+    // the normals by depthmap
+    // NOTE, do this calculate before filter depthmap
+    cv::Mat normal_image;
+    util::estimateImageNormal(_depthmap, normal_image);
+
+
     // Remove the points in the gap
     int gap = 50;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr valid_points(
                 new pcl::PointCloud<pcl::PointXYZ>);
-    for (int32_t v = gap; v < _depthmap.rows - gap; v += _step) {
-        for (int32_t u = _u_start + gap; u < _u_end - gap; u += _step) {
+    for (int32_t v = 0; v < _depthmap.rows; v += _step) {
+        for (int32_t u = 0; u < _u_end; u += _step) {
+            if(v < gap || v >= _depthmap.rows - gap ||
+                    u < _u_start + gap || u >= _u_end - gap) {
+                _depthmap.at<float>(v, u) = 0;
+                continue;
+            }
+
             float d = _depthmap.at<float>(v, u);
             if(d < 30) continue;
 
-            Eigen::Vector3f pt = _cam_proj->cvt2Dto3D(u, v, d, mmath::cam::LEFT);
+            Eigen::Vector3f pt = _cam_proj->cvt2Dto3D(u, v, d, _cam_id);
             valid_points->push_back({pt[0], pt[1], pt[2]});
         }
     }
 
     _pc_handler->bindPointCloud(valid_points);
-    _pc_handler->bindTexture(_texture);
+    _pc_handler->bindTextureAndNormals(_texture, normal_image);
 
+#if !SHOW_BG
     _pc_handler->createVertices(_vertices_3d);
     _layer_texture3d[0]->updateVertex(_vertices_3d);
+#endif
 
-
-    _pc_handler->voxelDownSampling(VERTICES_DENSITY);
-    _pc_handler->rmOutliersByRadius(VERTICES_DENSITY*4, 37);
+    _pc_handler->voxelDownSampling(VERTEX_DENSITY);
+    _pc_handler->rmOutliersByRadius(VERTEX_DENSITY*4, 37);
     _pc_handler->statisticalOutliersRemoval(100, 1.0f);
 //    pthandler.rmOutliersByKNeighbors(20, 2);
 
-
+#if !SHOW_BG
     _pc_handler->createVertices(_vertices_3d);
     _layer_texture3d[1]->updateVertex(_vertices_3d);
 
-
-    _pc_handler->createMesh(MESH_SEARCH_RADIUS, MESH_MU,
-                            MESH_NEIGHBORS, _traingles_3d);
-    _layer_texture3d[2]->updateVertex3D(_traingles_3d);
-}
-
-
-cv::Mat SceneReconstructor::EDProjection()
-{
-    const Vertices& _vertices = _ed->getVertices();
-
-    std::vector<mlayer::Vertex3D> vertices3d;
-    vertices3d.resize(_vertices.coords->size());
-    for(size_t i = 0; i < _vertices.coords->size(); i++) {
-        const pcl::PointXYZ& p = _vertices.coords->at(i);
-        const Eigen::Vector3f& c = _vertices.colors[i];
-        vertices3d[i] = {glm::vec4(p.x, p.y, p.z, 1),
-                       glm::vec4(c[0], c[1], c[2], 1)};
-    }
-//    _layer_texture3d->updateVertex(vertices3d);
-    auto data = _layer_renderer->getWindowShot();
-    cv::Mat image(data.height, data.width, CV_32FC3, data.rgb_buffer);
-    printf("image size: %dx%d\n", data.width, data.height);
-    cv::cvtColor(image, image, cv::COLOR_RGB2BGR);
-    cv::flip(image, image, 0);
-
-    return image;
+//    _pc_handler->createMesh(MESH_SEARCH_RADIUS, MESH_MU,
+//                            MESH_NEIGHBORS, _traingles_3d);
+//    _layer_texture3d[2]->updateVertex3D(_traingles_3d);
+#endif
 }
 
 
@@ -319,7 +341,7 @@ SceneReconstructor::keyPointMatching(
     std::vector<cv::DMatch> matches;
     cv::BFMatcher bf_matcher(cv::NORM_HAMMING, true);
     bf_matcher.match(descriptors1, descriptors2, matches);
-    printf("Found matches size: %zu\n", matches.size());
+    WLF_VERBOSE("Found matches size: %zu\n", matches.size());
 
 //    cv::Mat matched_image;
 //    cv::drawMatches(prev_image, keypoints1, curr_image, keypoints2,
@@ -334,7 +356,7 @@ SceneReconstructor::keyPointMatching(
         if (dis < min_dis) min_dis = dis;
         if (dis > max_dis) max_dis = dis;
     }
-    printf("Match distance: [%f, %f]\n", min_dis, max_dis);
+    WLF_VERBOSE("Match distance: [%f, %f]\n", min_dis, max_dis);
 
     /* Filter the matched results by 2D -> 3D */
     pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr kd_tree(
@@ -364,15 +386,16 @@ SceneReconstructor::keyPointMatching(
         std::vector<float> squared_distances(1);
         kd_tree->nearestKSearch(query_point, 1, indices, squared_distances);
         // When no corresponding 3D point is found, reject the match
-        if(sqrt(squared_distances[0]) > VERTICES_DENSITY) continue;
+        if(sqrt(squared_distances[0]) > VERTEX_DENSITY) continue;
 
         good_matches.push_back(matches[i]);
     }
-    printf("Filtered matches size: %zu\n", good_matches.size());
+    WLF_VERBOSE("Filtered matches size: %zu\n", good_matches.size());
 
+//    cv::Mat final_matched_image;
 //    cv::drawMatches(prev_image, keypoints1, curr_image, keypoints2,
-//                    good_matches, matched_image);
-//    cv::imshow("Filtered BF Match", matched_image);
+//                    good_matches, final_matched_image);
+//    cv::imshow("Filtered Matches", final_matched_image);
 //    cv::waitKey(0);
 
 
