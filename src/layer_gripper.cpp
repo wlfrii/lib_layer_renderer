@@ -73,7 +73,7 @@ void LayerGripper::draw()
     glDrawArrays(GL_TRIANGLES, 0, _vert_num_active);
 
     if(gripper_type == GRIPPER_TISSUE_GRASPING_FORCEPS){
-        mat = _model;
+        mat = model;
         mat = glm::translate(mat, _active_part.p);
         mat = glm::rotate(mat, -_active_part.angle, _active_part.axis);
         mat = glm::translate(mat, -_active_part.p);
