@@ -1,5 +1,5 @@
-#ifndef CONE_GENERATOR_H_LF
-#define CONE_GENERATOR_H_LF
+#ifndef SPHERE_GENERATOR_H_LF
+#define SPHERE_GENERATOR_H_LF
 #include "generator_base.h"
 
 namespace mlayer{
@@ -20,4 +20,4 @@ public:
 };
 
 } // namespace::mlayer
-#endif // CONE_GENERATOR_H_LF
+#endif // SPHERE_GENERATOR_H_LF
