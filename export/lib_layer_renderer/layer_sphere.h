@@ -59,6 +59,15 @@ public:
     void setProperty(float radius, const glm::mat4& pose);
 
 
+    /**
+     * @brief Set scale factors
+     * @param xscale  For x direction
+     * @param yscale  For y direction
+     * @param zscale  For z direction
+     */
+    void setScaleFactors(float xscale, float yscale, float zscale) override;
+
+
 private:
     glm::mat4 _pose;        //!< The pose of the cone
     float     _radius;      //!< The radius of the cone
