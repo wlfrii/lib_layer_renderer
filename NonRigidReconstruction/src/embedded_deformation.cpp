@@ -7,9 +7,9 @@
 
 const float w_rot = 1000000.f;
 const float w_reg = 10000.f;
-const float w_data = 1.f;
+const float w_data = 1000.f;
 const float w_corr = 10.f;
-const int max_LM_iter = 10; // experimentally
+const int max_LM_iter = 15; // experimentally
 
 
 EmbeddedDeformation::EmbeddedDeformation(
@@ -28,8 +28,6 @@ EmbeddedDeformation::EmbeddedDeformation(
 //    , _t(Eigen::Vector3f::Zero())
     , _timestamp(0)
 {
-    _vertices.coords = nullptr;
-
     // The number of neighbor nodes
     int k = std::ceil(_node_connectivity / 4.f);
     _neighbor_dis_thresh = std::powf(sqrt(2), k) * _node_density;
@@ -51,6 +49,9 @@ void EmbeddedDeformation::addVertices(const Vertices& new_vertices)
 {
     _timestamp++;
     _vertices = new_vertices;
+    for(Vertex& vert : _vertices) {
+        vert.timestamp = _timestamp;
+    }
     regenerateNodes();
 }
 
@@ -66,8 +67,8 @@ void EmbeddedDeformation::addVertices(
     if(correspondences.size() < 5) return;
 
     // Transform the vertices w.r.t current camera pose
-    Eigen::Matrix3f global_R;
-    Eigen::Vector3f global_t;
+    Eigen::Matrix3f global_R = Eigen::Matrix3f::Identity();
+    Eigen::Vector3f global_t = Eigen::Vector3f::Zero();
     util::estimateTransform(correspondences, global_R, global_t);
 
     mmath::Pose pose(global_R, global_t);
@@ -219,9 +220,7 @@ void EmbeddedDeformation::addVertices(
     }
 
     // Deform the vertices
-    for(size_t i = 0; i < _vertices.size(); i++) {
-        const Vertex& vert = _vertices[i];
-
+    for(Vertex& vert : _vertices) {
         const pcl::PointXYZ& pt = vert.pclCoord();
         Eigen::Vector3d vi = vert.coord.cast<double>();
         Eigen::Vector3d ni = vert.normal.cast<double>();
@@ -244,8 +243,8 @@ void EmbeddedDeformation::addVertices(
         new_v = global_R.cast<double>() * new_v + global_t.cast<double>();
         new_n = global_R.cast<double>() * new_n;
 
-        _vertices.coords->at(i).getVector3fMap() = new_v.cast<float>();
-        _vertices.normals[i] = new_n.cast<float>();
+        vert.coord = new_v.cast<float>();
+        vert.normal = new_n.cast<float>();
 
 //        if(i % 2000 == 0){
 //            printf("[%.3f, %.3f, %.3f] -> [%.3f, %.3f, %.3f] \t"
@@ -276,12 +275,14 @@ void EmbeddedDeformation::projectPointCloud(
         float search_radius, float mu, int max_neighbors,
         std::vector<mlayer::Vertex3D> &vertices)
 {
-//    // Create search tree
+    auto pclpoints_with_normals = _vertices.pclPointCloudWithNormals();
+
+    // Create search tree
     pcl::search::KdTree<pcl::PointNormal>::Ptr tree2(
                 new pcl::search::KdTree<pcl::PointNormal>);
-    tree2->setInputCloud(_vertices.coordsWithNormals());
+    tree2->setInputCloud(pclpoints_with_normals);
 
-//    // ---- Create triangles ---
+    // ---- Create triangles ---
     pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
     gp3.setSearchRadius(search_radius);    // max edge length for every triangle
     gp3.setMu(mu); // maximum acceptable distance for a point to be considered as a neighbor
@@ -293,7 +294,7 @@ void EmbeddedDeformation::projectPointCloud(
 
     // Get result
     pcl::PolygonMesh mesh;
-    gp3.setInputCloud(_vertices.coordsWithNormals());
+    gp3.setInputCloud(pclpoints_with_normals);
     gp3.setSearchMethod(tree2);
     gp3.reconstruct(mesh);
 
@@ -306,10 +307,10 @@ void EmbeddedDeformation::projectPointCloud(
         for(size_t j = 0; j < vert.vertices.size(); j++) {
             size_t idx = vert.vertices[j];
 
-            const pcl::PointXYZ& pt = _vertices[idx].pclCoord();
-            const Eigen::Vector3f& rgb = _vertices.colors[idx];
+            const Eigen::Vector3f& pt = _vertices[idx].coord;
+            const Eigen::Vector3f& rgb = _vertices[idx].color;
             vertices[count++] = {
-                glm::vec4(pt.x, pt.y, pt.z, 1),
+                glm::vec4(pt[0], pt[1], pt[2], 1),
                 glm::vec4(rgb[0], rgb[1], rgb[2], 1)};
         }
     }
@@ -336,7 +337,7 @@ void EmbeddedDeformation::projectPointCloud(
 
 void EmbeddedDeformation::regenerateNodes()
 {
-    util::voxelDownSampling(_vertices.coords, _node_density, _nodes);
+    util::voxelDownSampling(_vertices, _node_density, _nodes);
     WLF_VERBOSE("Nodes size: %zu\n", _nodes->size());
     _kd_tree->setInputCloud(_nodes);
 }
@@ -403,10 +404,7 @@ void EmbeddedDeformation::fusionVertices(const Vertices& new_vertices,
     cv::Mat normal_image;
     util::estimateImageNormal(depthmap, normal_image);
 
-    cv::Mat used(depthmap.size(), CV_8UC1, cv::Scalar(0));
-
-    for(size_t i = 0; i < _vertices.size(); i++) {
-        const Vertex& vert = _vertices[i];
+    for(Vertex& vert : _vertices) {
         Eigen::Vector2f pt2d = _cam_proj->cvt3Dto2D(vert.coord, _cam_id);
         int u = round(pt2d[0]);
         int v = round(pt2d[1]);
@@ -426,58 +424,77 @@ void EmbeddedDeformation::fusionVertices(const Vertices& new_vertices,
 
             if((vert.coord - new_coord).norm() < epsilon_d &&
                     (vert.normal.dot(new_normal) < cosf(epsilon_n)) ) {
-                _vertices.coords->at(i).z =
-                        (_vertices.coords->at(i).z * vert.weight + d)
-                        / (vert.weight + 1);
-                _vertices.normals[i] = (_vertices.normals[i] * vert.weight +
-                                        new_normal) / (vert.weight + 1);
-                _vertices.colors[i] = (_vertices.colors[i] * vert.weight +
-                                        new_color) / (vert.weight + 1);
-                _vertices.weights[i] = fminf(_vertices.weights[i] + 1,
-                                           VERTEX_MAX_WEIGHT);
+                float w = vert.weight + 1;
+
+                vert.coord[2] = (vert.coord[2] * vert.weight + d) / w;
+                vert.normal = (vert.normal * vert.weight + new_normal) / w;
+                vert.normal.normalize();
+                vert.color = (vert.color * vert.weight + new_color) / w;
+                vert.weight = fminf(vert.weight + 1,VERTEX_MAX_WEIGHT);
             }
-            used.at<uchar>(v, u) = 255;
         }
     }
 
     // Fusion new observation
     pcl::KdTreeFLANN<pcl::PointXYZ> kd_tree;
-    kd_tree.setInputCloud(_vertices.coords);
+    kd_tree.setInputCloud(_vertices.pclPointCloud());
 
     size_t count = 0;
-    for(size_t i = 0; i < new_vertices.size(); i++) {
-        Vertex vert = new_vertices[i];
+    for(Vertex vert : new_vertices) {
         std::vector<int> indices(1);
         std::vector<float> squared_distances(1);
         kd_tree.nearestKSearch(vert.pclCoord(), 1,
                                indices, squared_distances);
         if(sqrt(squared_distances[0]) >= epsilon_d) {
             vert.weight = 1;
-            vert.timestamp = _timestamp + 1;
+            vert.timestamp = _timestamp;
             vert.stability = false;
-            _vertices.push_back(vert);
+            _vertices.emplace_back(vert);
             count++;
         }
     }
     WLF_VERBOSE("New added vertices size: %zu\n", count);
     WLF_VERBOSE("Point size after fusion: %zu\n", _vertices.size());
 
+
+//    if(_timestamp > 1) {
+//        for(size_t i = 0; i < _vertices.size(); i+=300) {
+//            Vertex& vert = _vertices[i];
+//            printf("%06zu  _timestamp:%zu,  vert.t: %zu | vert.weight: %f | "
+//                   "vert.stablility: %d\n", i, _timestamp, vert.timestamp,
+//                   vert.weight, vert.stability);
+//        }
+//        cv::waitKey(0);
+//    }
+
+
     // Filter out unstable points (refers to MIS-SLAM)
+
+    Vertices temp;
+    temp.resize(_vertices.size());
+    count = 0;
     for(size_t i = 0; i < _vertices.size(); i++) {
-        const Vertex& vert = _vertices[i];
-        if(vert.timestamp < (_timestamp - TAO_TIME) &&
+        Vertex& vert = _vertices[i];
+
+        if((1.f*_timestamp - vert.timestamp) > TAO_TIME &&
                 vert.weight < TAO_WEIGHT &&
                 vert.stability == false){
             // delete this vert
+            continue;
         }
         else{
-            _vertices.timestamps[i] += 1;
-            const Vertex& nvert = _vertices[i];
-            if(nvert.timestamp < (_timestamp - TAO_TIME) &&
-                    nvert.weight < TAO_WEIGHT){
-                nvert.stability = true;
+            if((1.f*_timestamp - vert.timestamp) < TAO_TIME &&
+                    vert.weight >= TAO_WEIGHT){
+                vert.stability = true;
             }
         }
+        temp[count++] = vert;
     }
+    WLF_VERBOSE("Point size to be removed: %zu\n", _vertices.size() - count);
+
+    Vertices::iterator it = temp.begin();
+    temp.erase(it + count, temp.end());
+    _vertices = temp;
+
     WLF_VERBOSE("Point size after filtering out noise: %zu\n", _vertices.size());
 }

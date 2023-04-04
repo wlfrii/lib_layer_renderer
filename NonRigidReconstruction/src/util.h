@@ -42,6 +42,10 @@ void voxelDownSampling(pcl::PointCloud<pcl::PointNormal>::Ptr in, float voxel_si
 void voxelDownSampling(const Vertices& in, float voxel_size, Vertices& out);
 
 
+void voxelDownSampling(const Vertices& in, float voxel_size,
+                       pcl::PointCloud<pcl::PointXYZ>::Ptr out);
+
+
 /**
  * @brief Estimate normal for the given point cloud
  * @param pt_cloud

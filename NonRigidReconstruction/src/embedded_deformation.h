@@ -55,7 +55,7 @@ private:
             const cv::Mat& depthmap, Vertices& visible_points);
 
 
-    void fusionVertices(const Vertices& new_vertices,
+    void fusionVertices(const Vertices &new_vertices,
                         const cv::Mat& depthmap, const cv::Mat& texture);
 
 

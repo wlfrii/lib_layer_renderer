@@ -95,3 +95,16 @@ target_link_libraries(${PROJECT_NAME}
     ${PCL_LIBRARIES}
     ${CERES_LIBRARIES}
 )
+
+
+# Temp file
+add_executable(viewresult
+    view_result.cpp
+)
+target_include_directories(viewresult
+    PUBLIC
+        $<BUILD_INTERFACE:${OpenCV_INCLUDE_DIRS}>
+)
+target_link_libraries(viewresult
+    ${OpenCV_LIBS}
+)

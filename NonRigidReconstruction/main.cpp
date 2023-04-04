@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
         }
     }
     else{
-        for (int i = 130; i < 200; i++) {
+        for (int i = 200; i < 330; i++) {
             char imname[64];
             sprintf(imname, "frame_%04d.png", i);
 

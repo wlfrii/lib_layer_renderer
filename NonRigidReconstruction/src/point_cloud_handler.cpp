@@ -355,13 +355,13 @@ Vertices PointCloudHandler::createVertices()
 
     float r, g, b;
     for(size_t i = 0; i < _coords->size(); i++) {
-        vertices.coords->at(i).getVector3fMap() =
-                point_cloud_with_normal->at(i).getVector3fMap();
-        vertices.normals[i] = point_cloud_with_normal->at(i).getNormalVector3fMap();
+        vertices[i].coord = point_cloud_with_normal->at(i).getVector3fMap();
+        vertices[i].normal = point_cloud_with_normal->at(i).getNormalVector3fMap();
 
-        auto& pt = vertices.coords->at(i);
+        auto& pt = vertices[i].pclCoord();
         readPointColor(pt, r, g, b);
-        vertices.colors[i] = {r, g, b};
+        vertices[i].color = {r, g, b};
+        vertices[i].weight = 1;
     }
 #else
     float r, g, b;
@@ -376,16 +376,14 @@ Vertices PointCloudHandler::createVertices()
         b = 1.f*pixel[2]/255.f;
         cv::Vec3f cvnormal = _normals.at<cv::Vec3f>(v, u);
 
-        vertices.coords->at(i) = pt;
-        vertices.normals[i] = {cvnormal[0], cvnormal[1], cvnormal[2]};
-        vertices.colors[i] = {r, g, b};
+        vertices[i].coord = pt.getVector3fMap();
+        vertices[i].normal = {cvnormal[0], cvnormal[1], cvnormal[2]};
+        vertices[i].color = {r, g, b};
+        vertices[i].weight = 1;
     }
 #endif
-    vertices.weights = std::vector<float>(vertices.colors.size(), 1);
-    // Below two terms will be initialized in fusion step in ED procudure.
-    vertices.timestamps = std::vector<size_t>(vertices.colors.size(), 0);
-    vertices.stabilitys = std::vector<bool>(vertices.colors.size(), 0);
-
+    // The last two terms in the vertex will be initialized in fusion step in
+    // ED procudure.
     return vertices;
 }
 

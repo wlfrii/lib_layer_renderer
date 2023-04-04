@@ -361,7 +361,7 @@ SceneReconstructor::keyPointMatching(
     /* Filter the matched results by 2D -> 3D */
     pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr kd_tree(
                 new pcl::KdTreeFLANN<pcl::PointXYZ>);
-    kd_tree->setInputCloud(_ed->getVertices().coords);
+    kd_tree->setInputCloud(_ed->getVertices().pclPointCloud());
     pcl::PointXYZ query_point;
 
     std::vector<cv::DMatch> good_matches;

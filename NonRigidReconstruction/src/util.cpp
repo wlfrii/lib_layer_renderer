@@ -184,24 +184,22 @@ void voxelDownSampling(pcl::PointCloud<pcl::PointNormal>::Ptr in, float voxel_si
 
 
 struct VertexWithOccurrences {
-    VertexWithOccurrences() : coord({0, 0, 0}), n(0) {}
-    Eigen::Vector3f coord;  // The position of the point
-    Eigen::Vector3f normal;  // The position of the point
-    Eigen::Vector3f color;  // The position of the point
-    size_t          n;  // The number of occurrences
+    VertexWithOccurrences() : n(0) {}
+    Vertex vert;
+    size_t n;  // The number of occurrences
 };
 void voxelDownSampling(const Vertices& in, float voxel_size, Vertices& out)
 {
     Eigen::Vector3f max_xyzf(0, 0, 0);
     Eigen::Vector3f min_xyzf(1000, 1000, 1000);
     for(size_t i = 0; i < in.size(); i++) {
-        const pcl::PointXYZ& pt = in.coords->at(i);
-        if(max_xyzf[0] < pt.x) max_xyzf[0] = pt.x;
-        if(max_xyzf[1] < pt.y) max_xyzf[1] = pt.y;
-        if(max_xyzf[2] < pt.z) max_xyzf[2] = pt.z;
-        if(min_xyzf[0] > pt.x) min_xyzf[0] = pt.x;
-        if(min_xyzf[1] > pt.y) min_xyzf[1] = pt.y;
-        if(min_xyzf[2] > pt.z) min_xyzf[2] = pt.z;
+        const Eigen::Vector3f& pt = in[i].coord;
+        if(max_xyzf[0] < pt[0]) max_xyzf[0] = pt[0];
+        if(max_xyzf[1] < pt[1]) max_xyzf[1] = pt[1];
+        if(max_xyzf[2] < pt[2]) max_xyzf[2] = pt[2];
+        if(min_xyzf[0] > pt[0]) min_xyzf[0] = pt[0];
+        if(min_xyzf[1] > pt[1]) min_xyzf[1] = pt[1];
+        if(min_xyzf[2] > pt[2]) min_xyzf[2] = pt[2];
     }
     size_t x_node_num = floor((max_xyzf[0] - min_xyzf[0]) / voxel_size) + 1;
     size_t y_node_num = floor((max_xyzf[1] - min_xyzf[1]) / voxel_size) + 1;
@@ -227,9 +225,9 @@ void voxelDownSampling(const Vertices& in, float voxel_size, Vertices& out)
 
         //printf("index: %dx%dx%d\n", x_idx, y_idx, z_idx);
 
-        voxels[x_idx][y_idx][z_idx].coord += vert.coord;
-        voxels[x_idx][y_idx][z_idx].normal += vert.normal;
-        voxels[x_idx][y_idx][z_idx].color += vert.color;
+        voxels[x_idx][y_idx][z_idx].vert.coord += vert.coord;
+        voxels[x_idx][y_idx][z_idx].vert.normal += vert.normal;
+        voxels[x_idx][y_idx][z_idx].vert.color += vert.color;
         voxels[x_idx][y_idx][z_idx].n++;
     }
 
@@ -240,10 +238,68 @@ void voxelDownSampling(const Vertices& in, float voxel_size, Vertices& out)
             for(size_t z_idx = 0; z_idx < z_node_num; z_idx++) {
                 VertexWithOccurrences& pt = voxels[x_idx][y_idx][z_idx];
                 if(pt.n > 0) {
-                    pt.coord /= pt.n;
-                    pt.normal /= pt.n;
-                    pt.color /= pt.n;
-                    out.push_back({pt.coord, pt.normal, pt.color});
+                    pt.vert.coord /= pt.n;
+                    pt.vert.normal /= pt.n;
+                    pt.vert.color /= pt.n;
+                    out.emplace_back(pt.vert);
+                }
+            }
+        }
+    }
+}
+
+
+void voxelDownSampling(const Vertices &in, float voxel_size,
+                       pcl::PointCloud<pcl::PointXYZ>::Ptr out)
+{
+    Eigen::Vector3f max_xyzf(0, 0, 0);
+    Eigen::Vector3f min_xyzf(1000, 1000, 1000);
+    for(size_t i = 0; i < in.size(); i++) {
+        const Eigen::Vector3f& pt = in[i].coord;
+        if(max_xyzf[0] < pt[0]) max_xyzf[0] = pt[0];
+        if(max_xyzf[1] < pt[1]) max_xyzf[1] = pt[1];
+        if(max_xyzf[2] < pt[2]) max_xyzf[2] = pt[2];
+        if(min_xyzf[0] > pt[0]) min_xyzf[0] = pt[0];
+        if(min_xyzf[1] > pt[1]) min_xyzf[1] = pt[1];
+        if(min_xyzf[2] > pt[2]) min_xyzf[2] = pt[2];
+    }
+    size_t x_node_num = floor((max_xyzf[0] - min_xyzf[0]) / voxel_size) + 1;
+    size_t y_node_num = floor((max_xyzf[1] - min_xyzf[1]) / voxel_size) + 1;
+    size_t z_node_num = floor((max_xyzf[2] - min_xyzf[2]) / voxel_size) + 1;
+#if VERBOSE_DOWNSAMPLING
+    printf("x_range:[%f, %f]\n", min_xyzf[0], max_xyzf[0]);
+    printf("y_range:[%f, %f]\n", min_xyzf[1], max_xyzf[1]);
+    printf("z_range:[%f, %f]\n", min_xyzf[2], max_xyzf[2]);
+    printf("voxel size: %zux%zux%zu\n", x_node_num, y_node_num, z_node_num);
+#endif
+
+    // Group vertices into voxels
+    std::vector<std::vector<std::vector<PointWithOccurrences>>> voxels(
+                x_node_num, std::vector<std::vector<PointWithOccurrences>>(
+                    y_node_num, std::vector<PointWithOccurrences>(
+                        z_node_num, PointWithOccurrences())));
+    for(size_t i = 0; i < in.size(); i++) {
+        const Vertex& vert = in[i];
+        const pcl::PointXYZ& pt = vert.pclCoord();
+        int x_idx = floor((pt.x - min_xyzf[0]) / voxel_size);
+        int y_idx = floor((pt.y - min_xyzf[1]) / voxel_size);
+        int z_idx = floor((pt.z - min_xyzf[2]) / voxel_size);
+
+        //printf("index: %dx%dx%d\n", x_idx, y_idx, z_idx);
+
+        voxels[x_idx][y_idx][z_idx].p += vert.coord;
+        voxels[x_idx][y_idx][z_idx].n++;
+    }
+
+    // Filter out the valid voxels
+    out->clear();
+    for(size_t x_idx = 0; x_idx < x_node_num; x_idx++) {
+        for(size_t y_idx = 0; y_idx < y_node_num; y_idx++) {
+            for(size_t z_idx = 0; z_idx < z_node_num; z_idx++) {
+                PointWithOccurrences& pt = voxels[x_idx][y_idx][z_idx];
+                if(pt.n > 0) {
+                    pt.p /= pt.n;
+                    out->push_back({pt.p[0], pt.p[1], pt.p[2]});
                 }
             }
         }
