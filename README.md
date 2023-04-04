@@ -16,37 +16,47 @@ Some other requirements can be found in the two required modules above.
 
 ## How to use
 
-### I. Configure the library in your project 
+### I. Use the library (Tested on Mac OS)
 
-#### I.1 For Linux / Mac OS (recommended)
+Download this repository to your project as a subdirectory, and configure your CMakelists as follows: 
 
+```cmake
+add_subdirectory(lib_layer_renderer)
+...
 
-### II. Use the library
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib_layer_renderer/export>
+    ...
+)
+target_link_libraries(${PROJECT_NAME}
+    PUBLIC    
+        lib_layer_renderer
+    ...
+)
 
-A breif useage of this library is given as follows.
+```
 
-__NOTE__: The LayerRenderer object should be constructed first to initilize GL context.
+A breif useage of this library is given as follows. __NOTE__: The `LayerRenderer` object should always be constructed first to initilize GL context.
 
 ```c++
 #include <lib_layer_renderer.h>
 
 int main()
 {
-    using namespace mlayer;
-
     // Set a rendering mode
-    LayerRenderMode mode = LAYER_RENDER_LEFT;
+    mlayer::LayerRenderMode mode = mlayer::LAYER_RENDER_LEFT;
     // Create a gl_util::Projection
     gl_util::Projection gl_proj(1120, 960, 540, 1920, 1080, 0.2, 150);
     // Create LayerRenderer object
-    LayerRenderer renderer(gl_proj, mode);
+    mlayer::LayerRenderer renderer(gl_proj, mode);
 
     // (Optional)
     renderer.setView(...);
     renderer.setModel(...);
 
     // Add a layer to the renderer
-    renderer.addLayers(std::make_shared<LayerCylinder>(
+    renderer.addLayers(std::make_shared<mlayer::LayerCylinder>(
                        20, 4, glm::vec3(1.0, 0.0, 1.0)));
 
     // Show the rendered results
@@ -56,6 +66,6 @@ int main()
 }
 ```
 
-__Detailed useage of this library__ could be found in [`test/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/test) folder.
+__More Detailed useage of this library__ could be found in [`test/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/test) folder.
 
 Note, there should be a `models` folder that stores some gripper STL model. However, these files will not be uploaded due to usage restriction.
