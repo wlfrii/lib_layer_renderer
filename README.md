@@ -1,8 +1,11 @@
 # lib_layer_renderer
 
-This module is splited from XXXX project (_which was designed as a static library mainly for rendering continuum-based surgical robot and gripper_).
+This module is splited from one of my project (_which was designed as a static library mainly for rendering continuum-based surgical robot and gripper_).
 
-Currently, this library is modularized for rendering shapes, model, vertices, and graph based on OpenGL.
+Currently, this library is modularized for rendering shapes, model, vertices, and graph based on OpenGL. A rendered example with 4-different viewport is shown below.
+
+<img src="./test/multiview_windowshot.png"/>
+
 
 ## Requirements
 
@@ -22,11 +25,15 @@ Some other requirements can be found in the two required modules above.
 
 A breif useage of this library is given as follows.
 
+__NOTE__: The LayerRenderer object should be constructed first to initilize GL context.
+
 ```c++
-#include <lib_layer_renderer/lib_layer_renderer>
+#include <lib_layer_renderer.h>
 
 int main()
 {
+    using namespace mlayer;
+
     // Set a rendering mode
     LayerRenderMode mode = LAYER_RENDER_LEFT;
     // Create a gl_util::Projection
@@ -49,6 +56,6 @@ int main()
 }
 ```
 
-More __useage details of this library__ could be found in [`test/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/test) folder.
+__Detailed useage of this library__ could be found in [`test/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/test) folder.
 
 Note, there should be a `models` folder that stores some gripper STL model. However, these files will not be uploaded due to usage restriction.
