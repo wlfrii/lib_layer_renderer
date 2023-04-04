@@ -1,0 +1,23 @@
+set(LIBLAYERRENDERER lib_layer_renderer)
+
+get_filename_component(${LIBLAYERRENDERER}_CONFIG_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+include(CMakeFindDependencyMacro)
+
+# Capturing values from configure (optional)
+
+
+# Same syntax ad find_package
+find_dependency(gl_util REQUIRED)
+find_dependency(lib_math REQUIRED)
+
+# Any extra setup
+
+
+# Add the targets file
+if(NOT TARGET ${LIBLAYERRENDERER})
+    include("${${LIBLAYERRENDERER}_CONFIG_DIR}/${LIBLAYERRENDERER}Targets.cmake")
+endif()
+
+set(${LIBLAYERRENDERER}_LIBRARIES ${LIBLAYERRENDERER})
+set(${LIBLAYERRENDERER}_INCLUDE_DIRS "${${LIBLAYERRENDERER}_CONFIG_DIR}/../../../include/${LIBLAYERRENDERER}")
