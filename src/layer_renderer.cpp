@@ -41,6 +41,7 @@ LayerRenderer::LayerRenderer(
     : _window(std::make_shared<gl_util::Window>(window_width, window_height,
                    getAutoWindowName(), is_window_visible))
     , _N(std::max(int(mode), 1))
+    , _keyboard_control(true)
     , _control_n_viewport(true)
 {
     _n_viewport = createViewPort( window_width, window_height, _N);
@@ -55,6 +56,7 @@ LayerRenderer::LayerRenderer(
     : _window(std::make_shared<gl_util::Window>(window_width, window_height,
                    getAutoWindowName(), is_window_visible))
     , _N(n_viewport.size())
+    , _keyboard_control(true)
     , _control_n_viewport(false)
     , _n_viewport(n_viewport)
 
@@ -149,6 +151,12 @@ void LayerRenderer::setBackgroundColor(uint8_t r, uint8_t g, uint8_t b, uint8_t 
 }
 
 
+void LayerRenderer::setEnableKeyboardControl(bool flag)
+{
+    _keyboard_control = flag;
+}
+
+
 void LayerRenderer::setKeyboardOnAllViewports(bool flag)
 {
     _control_n_viewport = flag;
@@ -204,7 +212,7 @@ const LayerRenderer::WindowShotData& LayerRenderer::getWindowShot()
 
 void LayerRenderer::keyboardControlModel(GLFWwindow* window)
 {
-    if(_N == 0) return;
+    if(_N == 0 || _keyboard_control == false) return;
 
     static size_t n = 0;
     float step = 1.f;

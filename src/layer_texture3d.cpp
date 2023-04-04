@@ -61,11 +61,11 @@ void LayerTexture3D::draw()
     auto &view = _view;
     _shader->setVec3f("view_pos", glm::vec3(view[3][0],view[3][1],view[3][2]));
     _vavbebo->bindVertexArray();
-    glPointSize(3);
     if(_draw_type == 1){
         glDrawArrays(GL_TRIANGLES, 0, _vert_num);
     }
     else{
+        glPointSize(2);
         glDrawArrays(GL_POINTS, 0, _vert_num);
     }
 }

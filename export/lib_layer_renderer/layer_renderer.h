@@ -153,6 +153,13 @@ public:
 
 
     /**
+     * @brief setEnableKeyboardControl
+     * @param flag  On/Off keyboard control;
+     */
+    void setEnableKeyboardControl(bool flag);
+
+
+    /**
      * @brief Set control all of the viewports at the same time
      * @param flag  True for keyboard control all the viewports at the same time
      */
@@ -179,6 +186,7 @@ private:
     std::shared_ptr<gl_util::Window> _window; // The window for rendering
 
     size_t _N;                       // The number of viewport
+    bool _keyboard_control;          // On/Off keyboard control
     bool _control_n_viewport;        // Keyboard control
 
     std::vector<LayerViewPort> _n_viewport; // N viewport
