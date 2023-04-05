@@ -4,8 +4,9 @@
  *																		
  * Description:													
  * This file is header file of lib_layer_renderer. You can redistribute it
- *  and or modify it to construct your own project. It is wellcome to use 
- * this library in your scientific research work.
+ * and/or modify it to construct your own project, but WITHOUT ANY WARRANTY; 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * PARTICULAR PURPOSE. See the GNU General Public License for more details.
  * 
  * @file 		lib_layer_renderer.h 
  * 
@@ -15,9 +16,12 @@
  * 
  * @date		2022/04/01
  * 
- * @license		
+ * @license		GPLv3
  * 
  * Copyright (C) 2021-Now Longfei Wang.
+ * 
+ * You should have received a copy of the GNU General Public License along 
+ * with lib_layer_renderer. If not, see <http://www.gnu.org/licenses/>
  * 
  * --------------------------------------------------------------------
  * Change History:                        
