@@ -76,4 +76,9 @@ int main()
 
 __More Detailed useage of this library__ could be found in [`examples/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/examples) folder.
 
+The renderer window support keyboard control defaultly. The supported keys include 
++ Quit: `ESC` 
++ Model Translation: `W S A D Q E`
++ Model Rotation: `I O K J , .`
+
 Note, there should be a `models` folder that stores some gripper STL model. However, these files will not be uploaded due to usage restriction.
