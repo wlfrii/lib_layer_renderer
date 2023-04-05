@@ -66,6 +66,6 @@ int main()
 }
 ```
 
-__More Detailed useage of this library__ could be found in [`test/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/test) folder.
+__More Detailed useage of this library__ could be found in [`examples/`](https://github.com/wlfrii/lib_layer_renderer/tree/main/examples) folder.
 
 Note, there should be a `models` folder that stores some gripper STL model. However, these files will not be uploaded due to usage restriction.

@@ -85,9 +85,11 @@ file(COPY
     DESTINATION ${CMAKE_BINARY_DIR}/shaders/
 )
 
+# Build the example
+add_subdirectory(examples)
 
 # Build the test
-option(BUILD_TEST "select to build the test case" ON)
+option(BUILD_TEST "select to build the test case" OFF)
 if(BUILD_TEST)
     add_subdirectory(test)
 endif()
