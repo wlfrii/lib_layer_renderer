@@ -4,6 +4,13 @@ This module is splited from one of my project (_which was designed as a static l
 
 Currently, this library is modularized for rendering shapes, model, vertices, and graph based on OpenGL. 
 
+## Requirements
+
++ [lib_math](https://github.com/wlfrii/lib_math) - which can be found in my git repository and includes some useful calculation utilities.
++ [gl_util](https://github.com/wlfrii/learn_OpenGL/tree/main/gl_util) - which can be found in my git repository and includes some rearranged interfaces for rendering on GLFW window.
+
+Some other requirements can be found in the two required modules above.
+
 ## Brief Introduction
 
 The currently supported layer type include 
@@ -35,14 +42,6 @@ Two single-view example is shown below
 Another multiview example with awesome rendered results is shown below.
 
 <img src="./examples/awesome_example.png" width=600/>
-
-
-## Requirements
-
-+ [lib_math](https://github.com/wlfrii/lib_math) - which can be found in my git repository and includes some useful calculation utilities.
-+ [gl_util](https://github.com/wlfrii/learn_OpenGL/tree/main/gl_util) - which can be found in my git repository and includes some rearranged interfaces for rendering on GLFW window.
-
-Some other requirements can be found in the two required modules above.
 
 ## How to use
 
