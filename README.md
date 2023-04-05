@@ -2,9 +2,17 @@
 
 This module is splited from one of my project (_which was designed as a static library mainly for rendering continuum-based surgical robot and gripper_).
 
-Currently, this library is modularized for rendering shapes, model, vertices, and graph based on OpenGL. A rendered example with 4-different viewport is shown below.
+Currently, this library is modularized for rendering shapes, model, vertices, and graph based on OpenGL. 
 
-<img src="./test/multiview_windowshot.png"/>
+## Examples based on this library
+
+A multiview example with 4-different object (_yellow segment, orange cone, blue circle, and magenta cylinder_) is shown below.
+
+<img src="./examples/multiview_example.png" width=600/>
+
+Another multiview example with awesome rendered results is shown below.
+
+<img src="./examples/awesome_example.png" width=600/>
 
 
 ## Requirements
