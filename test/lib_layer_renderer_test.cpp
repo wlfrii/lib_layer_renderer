@@ -9,6 +9,7 @@ glm::mat4 model = glm::mat4(
 
 int main(int argc, char* argv[])
 {
+    printf("Run lib_layer_renderer example.\n");
     // --------------------------- Check inputs -----------------------------
     if(argc < 3)
     {

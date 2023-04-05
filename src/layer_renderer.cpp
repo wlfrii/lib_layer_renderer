@@ -66,7 +66,13 @@ LayerRenderer::LayerRenderer(
 
 
 void LayerRenderer::init(const glm::mat4& projection)
-{
+{   
+    printf("lib_layer_renderer "
+           "Copyright (C) 2021-Now Longfei Wang, Shanghai Jiao Tong University.\n"
+           "This program comes with ABSOLUTELY NO WARRANTY.\n"
+           "This is free software, and you are welcome to redistribute it\n"
+           "under certain conditions, see LICENSE.\n\n");
+
     _window->enableDepthTest();
 
     _n_global.resize(_N);

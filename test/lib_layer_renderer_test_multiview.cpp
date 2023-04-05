@@ -9,6 +9,8 @@ glm::mat4 model = glm::mat4(
 
 int main()
 {
+    printf("Run lib_layer_renderer multiview example.\n");
+
     using namespace mlayer;
 
     gl_util::Projection gl_proj(1120, 960, 540, 1920, 1080, 0.2, 150);
