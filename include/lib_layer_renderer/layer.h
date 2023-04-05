@@ -53,7 +53,7 @@ enum LayerType
     LAYER_SEGMENT,        //!< For rendering continuum segment
     LAYER_CONE,           //!< For rendering cone model
     LAYER_COORDINATE,     //!< For rendering coordinate
-    LAYER_GRIPPER,        //!< For surigcal gripper
+    LAYER_END_EFFECTOR,   //!< For surigcal end-effector
     LAYER_TEXTURE3D,      //!< For rendering 3D texture / (colored) point cloud
     LAYER_UNKNOWN
 };

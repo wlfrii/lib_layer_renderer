@@ -26,9 +26,9 @@ int main(int argc, char* argv[])
                "\n\t3 - Render segment with coordinate"
                "\n\t4 - Render cone with coordinate"
                "\n\t5 - Render sphere with coordinate"
-               "\n\t10 - Render gripper - needle holder"
-               "\n\t11 - Render gripper - tissue grasping forceps"
-               "\n\t12 - Render gripper - bipolar grasping forceps"
+               "\n\t10 - Render end-effector - needle holder"
+               "\n\t11 - Render end-effector - tissue grasping forceps"
+               "\n\t12 - Render end-effector - bipolar grasping forceps"
                "\n\tOtherValue - Render coordinate system"
                "\n");
         return 0;
@@ -86,19 +86,19 @@ int main(int argc, char* argv[])
                     5, glm::vec3(0.0, 0.3, 8.0), pose);
         break;
     case 10:
-        printf("Example - Render gripper - needle holder\n");
-        layer_obj = std::make_shared<LayerGripper>(
-                    glm::vec3(0.1, 0.8, 1.0), GRIPPER_NEEDLE_HOLDER);
+        printf("Example - Render end-effector - needle holder\n");
+        layer_obj = std::make_shared<LayerEndEffector>(
+                    glm::vec3(0.1, 0.8, 1.0), END_EFFECTOR_NEEDLE_HOLDER);
         break;
     case 11:
-        printf("Example - Render gripper - tissue grasping forceps\n");
-        layer_obj = std::make_shared<LayerGripper>(
-                    glm::vec3(0.1, 0.8, 1.0), GRIPPER_TISSUE_GRASPING_FORCEPS);
+        printf("Example - Render end-effector - tissue grasping forceps\n");
+        layer_obj = std::make_shared<LayerEndEffector>(
+                    glm::vec3(0.1, 0.8, 1.0), END_EFFECTOR_TISSUE_GRASPING_FORCEPS);
         break;
     case 12:
-        printf("Example - Render gripper - bipolar grasping forceps\n");
-        layer_obj = std::make_shared<LayerGripper>(
-                    glm::vec3(0.1, 0.8, 1.0), GRIPPER_BIPOLAR_GRASPING_FORCEPS);
+        printf("Example - Render end-effector - bipolar grasping forceps\n");
+        layer_obj = std::make_shared<LayerEndEffector>(
+                    glm::vec3(0.1, 0.8, 1.0), END_EFFECTOR_BIPOLAR_GRASPING_FORCEPS);
         break;
     default:
         printf("Example - Render LayerCoordinate\n");

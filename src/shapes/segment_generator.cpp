@@ -1,7 +1,7 @@
 #include "segment_generator.h"
 #include "circle_generator.h"
 #include "generator_util.h"
-#include "../../export/lib_layer_renderer/layer_util.h"
+#include "../../include/lib_layer_renderer/layer_util.h"
 #include <lib_math/lib_math.h>
 
 namespace mlayer{

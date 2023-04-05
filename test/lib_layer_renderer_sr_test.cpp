@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
         printf("Please select a gripper.\n");
         std::exit(EXIT_FAILURE);
     }
-    else if(argc >= 3) {
+    else if(argc == 3) {
         model[3][2] = std::stof(argv[2]);
     }
 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     renderer.addLayers(layer_obj, 3);
 
     // Add background
-    std::string path = "../data/bg_025.bmp";
+    std::string path = "./bg_025.bmp";
     cv::Mat I = cv::imread(path);
     cv::cvtColor(I, I, cv::COLOR_BGR2RGB);
     cv::flip(I, I, 0);
@@ -250,7 +250,7 @@ int main(int argc, char* argv[])
     layer_bg_ar->updateData(&rdata);
     renderer.addLayers(layer_bg_ar, 1);
 
-#if 1
+#if 0
     data = renderer.getWindowShot();
     bg = cv::Mat(data.height, data.width, CV_32FC3, data.rgb_buffer);
     cv::flip(bg, bg, 0);

@@ -1,4 +1,4 @@
-#include "../export/lib_layer_renderer/layer_model.h"
+#include "../include/lib_layer_renderer/layer_model.h"
 #include <gl_util.h>
 
 namespace mlayer{

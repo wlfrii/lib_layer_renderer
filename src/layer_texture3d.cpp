@@ -1,4 +1,4 @@
-#include "../export/lib_layer_renderer/layer_texture3d.h"
+#include "../include/lib_layer_renderer/layer_texture3d.h"
 #include <lib_math/lib_math.h>
 #include <gl_util.h>
 #include "layer_define.h"

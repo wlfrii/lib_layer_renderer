@@ -1,4 +1,4 @@
-#include "../export/lib_layer_renderer/layer_sphere.h"
+#include "../include/lib_layer_renderer/layer_sphere.h"
 #include "./shapes/sphere_generator.h"
 #include <gl_util.h>
 

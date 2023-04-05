@@ -41,7 +41,7 @@
 #include "lib_layer_renderer/layer_cone.h"
 #include "lib_layer_renderer/layer_coordinate.h"
 #include "lib_layer_renderer/layer_cylinder.h"
-#include "lib_layer_renderer/layer_gripper.h"
+#include "lib_layer_renderer/layer_endeffector.h"
 #include "lib_layer_renderer/layer_segment.h"
 #include "lib_layer_renderer/layer_sphere.h"
 

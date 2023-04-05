@@ -1,14 +1,14 @@
-#include "../export/lib_layer_renderer/layer_gripper.h"
-#include "../export/lib_layer_renderer/layer_cylinder.h"
+#include "../include/lib_layer_renderer/layer_endeffector.h"
+#include "../include/lib_layer_renderer/layer_cylinder.h"
 #include "stl_reader.h"
 #include "./shapes/cylinder_generator.h"
 #include <gl_util.h>
 
 namespace mlayer{
 
-LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
-    : LayerModel(LAYER_GRIPPER, color)
-    , gripper_type(gtype)
+LayerEndEffector::LayerEndEffector(glm::vec3 color, EndEffectorType gtype)
+    : LayerModel(LAYER_END_EFFECTOR, color)
+    , end_effector_type(gtype)
     , _vavbo_active(nullptr)
     , _vert_num_active(0)
     , _vavbo_active2(nullptr)
@@ -19,14 +19,14 @@ LayerGripper::LayerGripper(glm::vec3 color, GripperType gtype)
     _shader_ignore = new gl_util::Shader();
     bool flag = _shader_ignore->load("./shaders/model_ignore.vs",
                                 "./shaders/model_ignore.fs");
-    if(!flag) printf("LayerGripper read shader ignored: %d\n", flag);
+    if(!flag) printf("LayerEndEffector read shader ignored: %d\n", flag);
 
     flag = loadModel();
-    if(!flag) printf("LayerGripper read gripper model: %d\n", flag);
+    if(!flag) printf("LayerEndEffector read gripper model: %d\n", flag);
 }
 
 
-LayerGripper::~LayerGripper()
+LayerEndEffector::~LayerEndEffector()
 {
     if(_vavbo_active){
         _vavbo_active->release();
@@ -51,7 +51,7 @@ LayerGripper::~LayerGripper()
 }
 
 
-void LayerGripper::draw()
+void LayerEndEffector::draw()
 {
     glm::mat4 model = _global * _model;
 
@@ -72,7 +72,7 @@ void LayerGripper::draw()
     _vavbo_active->bindVertexArray();
     glDrawArrays(GL_TRIANGLES, 0, _vert_num_active);
 
-    if(gripper_type == GRIPPER_TISSUE_GRASPING_FORCEPS){
+    if(end_effector_type == END_EFFECTOR_TISSUE_GRASPING_FORCEPS){
         mat = model;
         mat = glm::translate(mat, _active_part.p);
         mat = glm::rotate(mat, -_active_part.angle, _active_part.axis);
@@ -92,24 +92,24 @@ void LayerGripper::draw()
 }
 
 
-void LayerGripper::setAngle(float angle)
+void LayerEndEffector::setAngle(float angle)
 {
-    if(gripper_type == GRIPPER_BIPOLAR_GRASPING_FORCEPS){
+    if(end_effector_type == END_EFFECTOR_BIPOLAR_GRASPING_FORCEPS){
         angle = -angle;
     }
     _active_part.angle = angle;
 }
 
 
-bool LayerGripper::loadModel()
+bool LayerEndEffector::loadModel()
 {
     Vertices data[3];
     uint8_t part_num = 0;
     glm::vec3 origin(0.f);
     float length(0), radius(0);
 
-    switch (gripper_type) {
-    case GRIPPER_NEEDLE_HOLDER_SIMPLIFIED:
+    switch (end_effector_type) {
+    case END_EFFECTOR_NEEDLE_HOLDER_SIMPLIFIED:
         if(!STLReader::getInstance()->read(STL_NH_0_SIMPLIFIED, data[0]))
             return false;
         if(!STLReader::getInstance()->read(STL_NH_1_SIMPLIFIED, data[1]))
@@ -123,7 +123,7 @@ bool LayerGripper::loadModel()
         length = 8;
         radius = 3.7;
         break;
-    case GRIPPER_NEEDLE_HOLDER:
+    case END_EFFECTOR_NEEDLE_HOLDER:
         if(!STLReader::getInstance()->read(STL_NH_0, data[0]))
             return false;
         if(!STLReader::getInstance()->read(STL_NH_1, data[1]))
@@ -136,7 +136,7 @@ bool LayerGripper::loadModel()
         length = 3.05 + 0.36;
         radius = 3.0 + 0.2;
         break;
-    case GRIPPER_BIPOLAR_GRASPING_FORCEPS:
+    case END_EFFECTOR_BIPOLAR_GRASPING_FORCEPS:
         if(!STLReader::getInstance()->read(STL_BGF_0, data[0]))
             return false;
         if(!STLReader::getInstance()->read(STL_BGF_1, data[1]))
@@ -149,7 +149,7 @@ bool LayerGripper::loadModel()
         length = 3.05 + 0.1;
         radius = 3.55;
         break;
-    case GRIPPER_TISSUE_GRASPING_FORCEPS:
+    case END_EFFECTOR_TISSUE_GRASPING_FORCEPS:
         if(!STLReader::getInstance()->read(STL_TGF_0, data[0]))
             return false;
         if(!STLReader::getInstance()->read(STL_TGF_1, data[1]))
