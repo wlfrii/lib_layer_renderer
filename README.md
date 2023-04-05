@@ -4,11 +4,33 @@ This module is splited from one of my project (_which was designed as a static l
 
 Currently, this library is modularized for rendering shapes, model, vertices, and graph based on OpenGL. 
 
-## Examples based on this library
+## Brief Introduction
+
+The currently supported layer type include 
+```C++
+LAYER_BACKGROUND,     //!< For rendering 2D texture/image in 2D/3D way
+LAYER_CIRCLE,         //!< For rendering circle shape
+LAYER_CYLINDER,       //!< For rendering cylinder model
+LAYER_SEGMENT,        //!< For rendering continuum segment
+LAYER_CONE,           //!< For rendering cone model
+LAYER_COORDINATE,     //!< For rendering coordinate
+LAYER_END_EFFECTOR,   //!< For surigcal end-effector
+LAYER_TEXTURE3D,      //!< For rendering 3D colored point cloud
+```
 
 A multiview example with 4-different object (_yellow segment, orange cone, blue circle, and magenta cylinder_) is shown below.
 
 <img src="./examples/multiview_example.png" width=600/>
+
+Two single-view example is shown below
+<table>
+    <tr><th> Segment + Cylinder </th> <th> Segment + Cylinder </th>
+    </tr>
+    <tr><td> <img src="./examples/segment_example1.png" width=290> </td>
+    <td> <img src="./examples/segment_example2.png" width=290> </td>
+    </tr>
+</table>
+
 
 Another multiview example with awesome rendered results is shown below.
 
