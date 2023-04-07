@@ -60,7 +60,7 @@ list(APPEND GL_UTIL_PATH ${PATH_3RDPARTY}/glad/include)
 list(APPEND GL_UTIL_PATH ${PATH_3RDPARTY}/stb_image)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/export>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${GL_UTIL_PATH}>
         $<BUILD_INTERFACE:${lib_math_INCLUDE_DIRS}>
         $<BUILD_INTERFACE:${gl_util_INCLUDE_DIRS}>
@@ -74,15 +74,17 @@ target_link_libraries(${PROJECT_NAME}
         ${lib_math_LIBRARIES}
 )
 
-file(GLOB MODEL_STL ${CMAKE_CURRENT_SOURCE_DIR}/models/*.STL)
-file(COPY
-    ${MODEL_STL}
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/models/
     DESTINATION ${CMAKE_BINARY_DIR}/models/
 )
-file(GLOB SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.*s)
-file(COPY
-    ${SHADERS}
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/
     DESTINATION ${CMAKE_BINARY_DIR}/shaders/
+)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/include/lib_layer_renderer.h
+    DESTINATION ${CMAKE_BINARY_DIR}
+)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/include/lib_layer_renderer
+    DESTINATION ${CMAKE_BINARY_DIR}
 )
 
 # Build the example

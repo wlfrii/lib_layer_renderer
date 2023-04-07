@@ -29,23 +29,23 @@ int main()
     glm::mat4 pose(1.f);
     layer_coord = std::make_shared<LayerCoordinate>(20, 0.2, pose);
     for(size_t i = 0; i < vps.size(); i++) {
-        renderer.addLayers(layer_coord, i);
+        renderer.addLayer(layer_coord, i);
     }
 
-    renderer.addLayers(std::make_shared<LayerCircle>(
+    renderer.addLayer(std::make_shared<LayerCircle>(
                     10, glm::vec3(0.3, 0.0, 1.0), pose), 0);
-    renderer.addLayers(std::make_shared<LayerCylinder>(
+    renderer.addLayer(std::make_shared<LayerCylinder>(
                     20, 4, glm::vec3(1.0, 0.0, 1.0), pose), 1);
-    renderer.addLayers(std::make_shared<LayerSegment>(
+    renderer.addLayer(std::make_shared<LayerSegment>(
                     30, 2, 0.2, 3, glm::vec3(1.0, 1.0, 0.0)), 2);
-    renderer.addLayers(std::make_shared<LayerCone>(
+    renderer.addLayer(std::make_shared<LayerCone>(
                     20, 5, glm::vec3(1.0, 0.3, 0.0), pose), 3);
     renderer.render();
 
 
     LayerRenderer renderer2(gl_proj, mlayer::LAYER_RENDER_LEFT, w, h, true);
 //    renderer2.setModel(model);
-//    renderer2.addLayers(std::make_shared<LayerCylinder>(
+//    renderer2.addLayer(std::make_shared<LayerCylinder>(
 //                    20, 4, glm::vec3(1.0, 0.0, 1.0), pose));
 //    renderer2.render();
 

@@ -67,7 +67,7 @@ LayerRenderer::LayerRenderer(
 
 void LayerRenderer::init(const glm::mat4& projection)
 {   
-    printf("lib_layer_renderer "
+    printf("\nlib_layer_renderer "
            "Copyright (C) 2021-Now Longfei Wang, Shanghai Jiao Tong University.\n"
            "This program comes with ABSOLUTELY NO WARRANTY.\n"
            "This is free software, and you are welcome to redistribute it\n"
@@ -137,13 +137,13 @@ void LayerRenderer::setProjection(const glm::mat4& projection, uint8_t viewport_
 }
 
 
-void LayerRenderer::addLayers(std::shared_ptr<Layer> layer)
+void LayerRenderer::addLayer(std::shared_ptr<Layer> layer)
 {
     for(auto& layers : _n_layers) layers.push_back(layer);
 }
 
 
-void LayerRenderer::addLayers(std::shared_ptr<Layer> layer, uint8_t viewport_idx)
+void LayerRenderer::addLayer(std::shared_ptr<Layer> layer, uint8_t viewport_idx)
 {
     ASSERTM(viewport_idx < _N,
             "The input index of viewport is out of range [0, %zu]\n", _N - 1)
@@ -171,24 +171,42 @@ void LayerRenderer::setKeyboardOnAllViewports(bool flag)
 
 void LayerRenderer::render()
 {
-    while (!_window->shouldClose()) {
-        _window->activate();
-        _window->clear();
-
-        keyboardControlModel(_window->ptr());
-
-        for(size_t i = 0; i < _N; i++) {
-            auto& layers = _n_layers[i];
-            for(auto& layer : layers) {
-                layer->setProjection(_n_projection[i]);
-                layer->setView(_n_view[i]);
-                layer->setGlobal(_n_global[i]);
-                layer->render(_n_viewport[i]);
-            }
-        }
-
-        _window->refresh();
+    while (!shouldClose()) {
+        refresh();
     }
+}
+
+
+void LayerRenderer::refresh()
+{
+    _window->activate();
+    _window->clear();
+
+    keyboardControlModel(_window->ptr());
+
+    for(size_t i = 0; i < _N; i++) {
+        auto& layers = _n_layers[i];
+        for(auto& layer : layers) {
+            layer->setProjection(_n_projection[i]);
+            layer->setView(_n_view[i]);
+            layer->setGlobal(_n_global[i]);
+            layer->render(_n_viewport[i]);
+        }
+    }
+
+    _window->refresh();
+}
+
+
+bool LayerRenderer::shouldClose() const
+{
+    return _window->shouldClose();
+}
+
+
+const std::shared_ptr<gl_util::Window> LayerRenderer::getWindowPtr() const
+{
+    return _window;
 }
 
 

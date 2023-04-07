@@ -135,7 +135,7 @@ public:
      * @brief Add the save layer for each viewport
      * @param layer
      */
-    void addLayers(std::shared_ptr<Layer> layer);
+    void addLayer(std::shared_ptr<Layer> layer);
 
 
     /**
@@ -143,7 +143,7 @@ public:
      * @param layer
      * @param viewport_idx  The index of viewport, ranged in [0, N_VIEWPORT-1]
      */
-    void addLayers(std::shared_ptr<Layer> layer, uint8_t viewport_idx);
+    void addLayer(std::shared_ptr<Layer> layer, uint8_t viewport_idx);
 
 
     /**
@@ -177,6 +177,27 @@ public:
 
 
     /**
+     * @brief Refresh the buffer for the renderer
+     * @return
+     */
+    void refresh();
+
+
+    /**
+     * @brief Should GLFW window close
+     * @return
+     */
+    bool shouldClose() const;
+
+
+    /**
+     * @brief Get window ptr
+     * @return
+     */
+    const std::shared_ptr<gl_util::Window> getWindowPtr() const;
+
+
+    /**
      * @brief Get window shot
      */
     const WindowShotData& getWindowShot();
@@ -185,7 +206,6 @@ public:
 private:
     void init(const glm::mat4& projection);
     void keyboardControlModel(GLFWwindow* window);
-
 
     std::shared_ptr<gl_util::Window> _window; // The window for rendering
 

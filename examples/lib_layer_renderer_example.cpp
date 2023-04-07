@@ -105,8 +105,8 @@ int main(int argc, char* argv[])
         break;
     }
 
-    renderer.addLayers(layer_coord);
-    renderer.addLayers(layer_obj);
+    renderer.addLayer(layer_coord);
+    renderer.addLayer(layer_obj);
     renderer.render();
 
     return 0;
