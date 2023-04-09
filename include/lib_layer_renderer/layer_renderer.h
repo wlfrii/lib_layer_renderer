@@ -147,6 +147,13 @@ public:
 
 
     /**
+     * @brief Clear all layers in the specified viewport
+     * @param viewport_idx
+     */
+    void clearLayers(uint8_t viewport_idx);
+
+
+    /**
      * @brief Set background color of the renderer object
      * @param r
      * @param g
