@@ -64,13 +64,13 @@ enum LayerType
  */
 struct LayerViewPort
 {
-    explicit LayerViewPort(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+    explicit LayerViewPort(int x, int y, uint16_t width, uint16_t height)
         : x(x), y(y), width(width), height(height) {}
     explicit LayerViewPort(uint16_t width, uint16_t height)
         : x(0), y(0), width(width), height(height) {}
 
-    uint16_t x;         //!< Viewport x
-    uint16_t y;         //!< Viewport y
+    int x;         //!< Viewport x
+    int y;         //!< Viewport y
     uint16_t width;     //!< Viewport width
     uint16_t height;    //!< Viewport height
 };
