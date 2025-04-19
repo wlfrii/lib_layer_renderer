@@ -52,12 +52,8 @@ cv::Mat im2uchar(const cv::Mat &image)
 
 int main(int argc, char* argv[])
 {
-    if(argc < 2) {
-        printf("Please select a gripper.\n");
-        std::exit(EXIT_FAILURE);
-    }
-    else if(argc == 3) {
-        model[3][2] = std::stof(argv[2]);
+    if(argc == 2) {
+        model[3][2] = std::stof(argv[1]);
     }
 
     using namespace mlayer;
@@ -112,18 +108,18 @@ int main(int argc, char* argv[])
     // Create coordinate
     LayerCoordinate::Ptr layer_coord(new LayerCoordinate(10, 0.2));
     layer_coord->setModel(model);
-    renderer.addLayers(layer_coord, 2);
-    renderer.addLayers(layer_coord, 3);
+    renderer.addLayer(layer_coord, 2);
+    renderer.addLayer(layer_coord, 3);
 
     // Add LayerModel
     float sphere_radius = 3;
     LayerModel::Ptr layer_obj(new LayerSphere(sphere_radius, glm::vec3(0.1,0.8,1.0)));
     layer_obj->setModel(model);
-    renderer.addLayers(layer_obj, 2);
-    renderer.addLayers(layer_obj, 3);
+    renderer.addLayer(layer_obj, 2);
+    renderer.addLayer(layer_obj, 3);
 
     // Add background
-    std::string path = "./bg_025.bmp";
+    std::string path = "../test/bg_025.bmp";
     cv::Mat I = cv::imread(path);
     cv::cvtColor(I, I, cv::COLOR_BGR2RGB);
     cv::flip(I, I, 0);
@@ -141,8 +137,10 @@ int main(int argc, char* argv[])
     layer_bg_l->updateData(&ldata);
     layer_bg_r->updateData(&rdata);
 
-    renderer.addLayers(layer_bg_l, 2);
-    renderer.addLayers(layer_bg_r, 3);
+    
+
+    renderer.addLayer(layer_bg_l, 2);
+    renderer.addLayer(layer_bg_r, 3);
 
 
     // ------------------------------------------------------------------------
@@ -195,7 +193,7 @@ int main(int argc, char* argv[])
     LayerBackground3D::Ptr layer_ar_r(new LayerBackground3D(w_sceen, h_sceen, z_sceen));
     layer_ar_r->updateData(&rdata);
     layer_ar_r->setModel(global);
-    renderer.addLayers(layer_ar_l, 0);
+    renderer.addLayer(layer_ar_l, 0);
     //renderer.addLayers(layer_ar_r, 1);
 
     // Add model in AR view
@@ -217,38 +215,38 @@ int main(int argc, char* argv[])
     LayerModel::Ptr layer_obj2(new LayerSphere(sphere_radius, glm::vec3(0.1,0.8,1.0)));
     layer_obj2->setScaleFactors(m_xyz, m_xyz, m_xyz);
     layer_obj2->setModel(global * model);
-    renderer.addLayers(layer_obj2, 0);
+    renderer.addLayer(layer_obj2, 0);
     //renderer.addLayers(layer_obj2, 1);
 
     // Add model coordinate in AR view
     LayerCoordinate::Ptr layer_coord2(new LayerCoordinate(10*m_xyz, 0.2*m_xyz));
     layer_coord2->setModel(global * model);
-    renderer.addLayers(layer_coord2, 0);
+    renderer.addLayer(layer_coord2, 0);
 
 
     // Add global coordinate in AR view
     LayerCoordinate::Ptr layer_coord0(new LayerCoordinate(12*m_xyz, 0.5*m_xyz));
     layer_coord0->setModel(global);
-    renderer.addLayers(layer_coord0, 0);
+    renderer.addLayer(layer_coord0, 0);
     //renderer.addLayers(layer_coord0, 1);
 
 
     // ----------------------------------------------------------------------
     LayerCoordinate::Ptr layer_coord22(new LayerCoordinate(10*m_xyz, 0.2*m_xyz));
     layer_coord22->setModel(model);
-    renderer.addLayers(layer_coord22, 1);
+    renderer.addLayer(layer_coord22, 1);
 
     LayerModel::Ptr layer_obj22(new LayerSphere(sphere_radius, glm::vec3(0.1,0.8,1.0)));
     layer_obj22->setScaleFactors(m_xyz, m_xyz, m_xyz);
     layer_obj22->setModel(model);
-    renderer.addLayers(layer_obj22, 1);
+    renderer.addLayer(layer_obj22, 1);
 
     cv::Mat blackbg(r_image.size(), CV_8UC3, cv::Scalar(50, 100, 20));
     rdata = LayerBackgroundData(blackbg.data, blackbg.cols, blackbg.rows,
                                 blackbg.channels());
     LayerBackground::Ptr layer_bg_ar(new LayerBackground);
     layer_bg_ar->updateData(&rdata);
-    renderer.addLayers(layer_bg_ar, 1);
+    renderer.addLayer(layer_bg_ar, 1);
 
 #if 0
     data = renderer.getWindowShot();

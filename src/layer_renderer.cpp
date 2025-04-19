@@ -306,6 +306,9 @@ void LayerRenderer::keyboardControlModel(GLFWwindow* window)
     else if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS){
         gl_util::print("Model", pose);
     }
+    else if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS){
+        gl_util::print("Model", gl_util::transpose(pose));
+    }
 
     if(_control_n_viewport) {
         setGlobal(pose);
